@@ -1,0 +1,47 @@
+<resources>
+    <!-- Application info -->
+    <string name="app_name">Sleep Monitoring</string>
+
+    <!-- Description string -->
+    <string name="nav_header_desc">Navigation Header</string>
+
+    <!-- User information -->
+    <string name="nav_header_name">Android Studio</string>
+    <string name="nav_header_email">android.studio@android.com</string>
+
+    <!-- Labels for sidebar's items -->
+    <string name="menu_home">Home</string>
+    <string name="menu_report">Report</string>
+    <string name="menu_account">Account</string>
+    <string name="menu_settings">Settings</string>
+    <string name="menu_exit">Exit</string>
+
+    <!-- Labels for fragments -->
+    <!-- Account fragment -->
+    <string name="account_first_name_label">First Name:</string>
+    <string name="account_last_name_label">Last Name:</string>
+    <string name="account_email_label">Email:</string>
+    <string name="account_delete_label">Delete Account</string>
+
+    <!-- Home fragment -->
+    <string name="home_welcome_label">Welcome back </string>
+    <string name="home_status_label">Status: </string>
+    <string name="home_last_report_button">See last report</string>
+
+    <!-- Report fragment -->
+    <string name="report_label">Select one day: </string>
+    <string name="editText_date_hint">Enter Date</string>
+    <string name="report_plot_title">Sleep Evaluation</string>
+    <string name="report_range_title">Quality</string>
+
+    <!-- Settings fragment -->
+    <string name="settings_font_size_label">Font Size:</string>
+    <string name="big_font_size">Big</string>
+    <string name="medium_font_size">Medium</string>
+    <string name="small_font_size">Small</string>
+    <string name="settings_theme">Theme:</string>
+    <string name="dark_theme">Dark</string>
+    <string name="light_theme">Light</string>
+    <string name="delete_report_history_button">Delete report history</string>
+
+</resources>

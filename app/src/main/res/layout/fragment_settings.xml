@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.settings.SettingsFragment">
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/settings_font_size_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="44dp"
+            android:layout_marginTop="16dp"
+            android:text="@string/settings_font_size_label"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <RadioGroup
+            android:id="@+id/radioGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="76dp"
+            android:layout_marginTop="16dp"
+            android:checkedButton="@id/medium_font_size"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/settings_font_size_label">
+
+            <RadioButton
+                android:id="@+id/big_font_size"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/big_font_size"
+                android:textSize="25sp"
+                tools:layout_editor_absoluteX="36dp"
+                tools:layout_editor_absoluteY="205dp" />
+
+            <RadioButton
+                android:id="@+id/medium_font_size"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/medium_font_size"
+                android:textSize="20sp"
+                tools:layout_editor_absoluteX="36dp"
+                tools:layout_editor_absoluteY="260dp" />
+
+            <RadioButton
+                android:id="@+id/small_font_size"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/small_font_size"
+                android:textSize="15sp"
+                tools:layout_editor_absoluteX="36dp"
+                tools:layout_editor_absoluteY="316dp" />
+
+        </RadioGroup>
+
+        <TextView
+            android:id="@+id/settings_theme"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="44dp"
+            android:layout_marginTop="44dp"
+            android:text="@string/settings_theme"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/radioGroup" />
+
+
+        <RadioGroup
+            android:id="@+id/radioGroup2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="76dp"
+            android:layout_marginTop="16dp"
+            android:checkedButton="@id/light_theme"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/settings_theme">
+
+            <RadioButton
+                android:id="@+id/dark_theme"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/dark_theme"
+                android:textSize="20sp"
+                tools:layout_editor_absoluteX="39dp"
+                tools:layout_editor_absoluteY="438dp" />
+
+            <RadioButton
+                android:id="@+id/light_theme"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/light_theme"
+                android:textSize="20sp"
+                tools:layout_editor_absoluteX="36dp"
+                tools:layout_editor_absoluteY="509dp" />
+
+        </RadioGroup>
+
+        <Button
+            android:id="@+id/delete_report_history_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/delete_report_history_button"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.508"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/radioGroup2"
+            app:layout_constraintVertical_bias="0.652" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
