@@ -14,21 +14,30 @@ public class SensorsManager implements SensorEventListener {
     final private Context context;
     final private Map<String,Sensor> sensors=new HashMap<String, Sensor>();
     final private SensorManager sm;
+
     public SensorsManager(Context context) throws Exception {
         this.context=context;
         sm = (SensorManager) context.getSystemService(this.context.SENSOR_SERVICE);
         Sensor gyroscope = sm.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+
         sensors.put("gyroscope", gyroscope);
-        if(!sm.registerListener(this, gyroscope, SensorManager.SENSOR_DELAY_GAME))
-            throw new Exception("Unable to register to Sensor: " + gyroscope.getName());
+        // ...
+        // add other sensors
+
+        for (Sensor s : sensors.values()) { // register this class as listener
+            if(!sm.registerListener(this, s, SensorManager.SENSOR_DELAY_GAME))
+                throw new Exception("Unable to register to Sensor: " + s.getName());
+        }
+
     }
 
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         if (sensors.get("gyroscope").equals(sensorEvent.sensor)){
             Log.i("SENSORS", "received values "+sensorEvent.values.toString());
-            return;
         }
+
+        // same for every sensor
     }
 
     @Override
