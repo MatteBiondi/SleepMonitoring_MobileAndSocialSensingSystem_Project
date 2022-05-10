@@ -20,7 +20,7 @@ public class MainActivity extends Activity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        mTextView = binding.text;
+
         try {
             SensorsManager =new SensorsManager(this.getApplicationContext());
         } catch (Exception e) {
