@@ -14,3 +14,5 @@ dependencyResolutionManagement {
 }
 rootProject.name = "SleepMonitoring_Smartphone"
 include ':app'
+include ':wearapp'
+include ':wearapp'

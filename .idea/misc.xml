@@ -29,6 +29,10 @@
         <entry key="..\:/Users/matte/AndroidStudioProjects/progetti_di_prova/SleepMonitoring_Smartphone/app/src/main/res/layout/nav_header_main.xml" value="0.209375" />
         <entry key="..\:/Users/matte/AndroidStudioProjects/progetti_di_prova/SleepMonitoring_Smartphone/app/src/main/res/menu/activity_main_drawer.xml" value="0.5" />
         <entry key="..\:/Users/matte/AndroidStudioProjects/progetti_di_prova/SleepMonitoring_Smartphone/app/src/main/res/menu/main.xml" value="0.209375" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.18229166666666666" />
+        <entry key="app/src/main/res/menu/activity_main_drawer.xml" value="0.18229166666666666" />
+        <entry key="wearapp/src/main/res/layout/activity_main.xml" value="0.7415254237288136" />
+        <entry key="wearapp2/src/main/res/layout/activity_main.xml" value="1.25" />
       </map>
     </option>
   </component>
