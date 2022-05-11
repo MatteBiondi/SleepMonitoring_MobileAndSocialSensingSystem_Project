@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SleepMonitoring_smartwatch</string>
+    <string name="app_name">Sleep Monitoring</string>
     <!-- Layout -->
     <string name="sleep_monitoring_label">Sleep Monitoring</string>
     <string name="status_label">Status:</string>

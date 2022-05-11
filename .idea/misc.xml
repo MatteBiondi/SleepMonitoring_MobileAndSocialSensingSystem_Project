@@ -3,6 +3,8 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/matte/AndroidStudioProjects/SleepMonitoring_MobileAndSocialSensingSystem_Project/app/src/main/res/layout/fragment_home.xml" value="0.25" />
+        <entry key="..\:/Users/matte/AndroidStudioProjects/SleepMonitoring_MobileAndSocialSensingSystem_Project/app/src/main/res/layout/fragment_report.xml" value="0.16844805472424113" />
         <entry key="..\:/Users/matte/AndroidStudioProjects/SleepMonitoring_MobileAndSocialSensingSystem_Project/app/src/main/res/layout/fragment_settings.xml" value="0.20520833333333333" />
         <entry key="..\:/Users/matte/AndroidStudioProjects/SleepMonitoring_MobileAndSocialSensingSystem_Project/wearapp/src/main/res/layout/activity_main.xml" value="0.9769736842105263" />
         <entry key="..\:/Users/matte/AndroidStudioProjects/progetti_di_prova/SleepMonitoring_Smartphone - Copia/app/src/main/res/drawable/ic_menu_account.xml" value="0.2085" />
