@@ -2,6 +2,7 @@ package it.unipi.ing.mobile.sleepmonitoring_watch;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 
 import it.unipi.ing.mobile.sleepmonitoring_watch.databinding.ActivityMainBinding;
@@ -11,7 +12,7 @@ public class MainActivity extends Activity {
 
     private TextView mTextView;
     private ActivityMainBinding binding;
-    private Object SensorsManager;
+    private SensorsManager sensorsManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,11 +21,17 @@ public class MainActivity extends Activity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        sensorsManager =new SensorsManager(this.getApplicationContext());
 
+    }
+
+    public void start_recording(View view){
         try {
-            SensorsManager =new SensorsManager(this.getApplicationContext());
+            sensorsManager.registerListeners();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
+
 }
