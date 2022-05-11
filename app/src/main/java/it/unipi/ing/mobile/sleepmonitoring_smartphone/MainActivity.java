@@ -1,10 +1,7 @@
 package it.unipi.ing.mobile.sleepmonitoring_smartphone;
 
 import android.os.Bundle;
-import android.view.View;
-import android.view.Menu;
-
-import com.google.android.material.snackbar.Snackbar;
+import android.util.Log;
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.navigation.NavController;
@@ -21,12 +18,17 @@ public class MainActivity extends AppCompatActivity {
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
 
+    private final String TAG = "SleepMonitoring_smartphone";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+
+        //todo mPreferences=getSharedPreferences(sharedPrefFile, MODE_PRIVATE);
 
         setSupportActionBar(binding.appBarMain.toolbar);
 
@@ -49,4 +51,35 @@ public class MainActivity extends AppCompatActivity {
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
     }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        Log.i(TAG,"onDestroy");
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        Log.i(TAG,"onResume");
+    }
+
+    @Override
+    public void onStart(){
+        super.onStart();
+        Log.i(TAG,"onStart");
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        Log.i(TAG,"onPause");
+    }
+
+    @Override
+    public void onStop(){
+        super.onStop();
+        Log.i(TAG,"onStop");
+    }
+
 }

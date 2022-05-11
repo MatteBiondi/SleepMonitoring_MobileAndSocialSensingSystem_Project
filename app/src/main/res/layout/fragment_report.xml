@@ -9,8 +9,10 @@
     tools:context=".ui.report.ReportFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_height="match_parent"
-        android:layout_width="match_parent">
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:focusableInTouchMode="true"
+        android:focusable="true">
 
         <TextView
             android:id="@+id/report_label"
@@ -39,7 +41,8 @@
             android:textColorHint="#757575"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/report_label" />
+            app:layout_constraintTop_toBottomOf="@+id/report_label"
+            android:autofillHints="" />
 
         <com.androidplot.xy.XYPlot
             android:id="@+id/report_plot"
