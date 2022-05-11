@@ -31,6 +31,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="28dp"
         android:contentDescription="@string/button_description"
+        android:onClick="start_recording"
         android:src="@android:drawable/ic_media_play"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

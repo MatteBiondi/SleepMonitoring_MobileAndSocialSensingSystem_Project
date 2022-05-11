@@ -7,44 +7,64 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.json.JSONArray;
+
+import java.util.Arrays;
+
 
 public class SensorsManager implements SensorEventListener {
     final private Context context;
-    final private Map<String,Sensor> sensors=new HashMap<String, Sensor>();
+    final private Sensor rotation_vector;
+    final private Sensor accelerometer;
     final private SensorManager sm;
 
-    public SensorsManager(Context context) throws Exception {
+    public SensorsManager(Context context){
         this.context=context;
         sm = (SensorManager) context.getSystemService(this.context.SENSOR_SERVICE);
-        Sensor rotation_vector = sm.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-        Sensor accelerometer = sm.getDefaultSensor((Sensor.TYPE_ACCELEROMETER));
-
-        sensors.put("rotation_vector", rotation_vector);
-        sensors.put("accelerometer", accelerometer);
-        // ...
-        // add other sensors
-
-        for (Sensor s : sensors.values()) { // register this class as listener
-            if(!sm.registerListener(this, s, 1000000))
-                throw new Exception("Unable to register to Sensor: " + s.getName());
-        }
+        rotation_vector = sm.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+        accelerometer = sm.getDefaultSensor((Sensor.TYPE_ACCELEROMETER));
 
     }
 
+    public void registerListeners() throws Exception {
+        if(!sm.registerListener(this, rotation_vector, SensorManager.SENSOR_DELAY_NORMAL))
+            throw new Exception("Unable to register to rotation vector sensor");
+        if(!sm.registerListener(this, accelerometer,SensorManager.SENSOR_DELAY_NORMAL))
+            throw new Exception("Unable to register to accelerometer sensor");
+    }
+
+    public void unregisterListeners(){
+        sm.unregisterListener(this);
+    }
+
+
+    //private int delay=10;
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (sensors.get("accelerometer").equals(event.sensor)){
-            Log.d("accelerometer", String.format("received values %.2f %.2f %.2f",
-                    event.values[0], event.values[1], event.values[2]));
+        /**if(delay>0) {
+            delay--;
+            return;
+        }**/
+        if (accelerometer.equals(event.sensor)){
+            Log.d("accelerometer", "received values "+
+                    new JSONArray(Arrays.asList(event.values)));
         }
 
-        if (sensors.get("rotation_vector").equals(event.sensor)){
-            Log.d("rotation_vector", String.format("received values %.2f %.2f %.2f",
-                    event.values[0], event.values[1], event.values[2]));
+        if (rotation_vector.equals(event.sensor)){
+            final float[] rotationMatrix = new float[9];
+            SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values);
+            float[] orientationAngle = new float[3];
+            SensorManager.getOrientation(rotationMatrix, orientationAngle);
+            /**
+            Log.d("rotation_vector","received values "+
+                    new JSONArray(Arrays.asList(event.values)));
+            Log.d("rotation_matrix","received values "+
+                    //new JSONArray(Arrays.asList(rotationMatrix)));
+             **/
+            Log.d("orientationAngle","received values "+
+                    new JSONArray(Arrays.asList(orientationAngle)));
         }
-
+        //delay=10;
         // same for every sensor
     }
 
