@@ -45,4 +45,12 @@
     <string name="light_theme">Light</string>
     <string name="delete_report_history_button">Delete report history</string>
 
+    <!-- Bluetooth -->
+    <string name="bluetooth_alert_title">Bluetooth Low Energy</string>
+    <string name="bluetooth_alert_message">Application need Bluetooth Low Energy to communicate with your smartwatch, enable to monitor sleeping !</string>
+    <string name="bluetooth_enable">Enable</string>
+    <string name="bluetooth_ignore">Ignore</string>
+    <string name="bluetooth_neutral">Later</string>
+    <string name="bluetooth_notification_title">Bluetooth Low Energy disabled</string>
+    <string name="bluetooth_notification_text">"Turn on bluetooth for connection to smartwatch"</string>
 </resources>
