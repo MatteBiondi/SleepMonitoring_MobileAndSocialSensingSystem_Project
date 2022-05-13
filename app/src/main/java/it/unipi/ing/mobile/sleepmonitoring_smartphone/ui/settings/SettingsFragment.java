@@ -23,9 +23,9 @@ import it.unipi.ing.mobile.sleepmonitoring_smartphone.R;
 public class SettingsFragment extends Fragment {
 
     private SettingsViewModel mViewModel;
-    private final String sharedPrefFile = "it.unipi.ing.mobile.sleepmonitoring_smartphone";
-    private final String font_preferences_label = "FontSize";
-    private final String theme_preferences_label = "Theme";
+    private String sharedPrefFile;
+    private String font_preferences_label;
+    private String theme_preferences_label;
 
 
     private SharedPreferences mPreferences;
@@ -36,20 +36,20 @@ public class SettingsFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+        mViewModel = new ViewModelProvider(this).get(SettingsViewModel.class);
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
+
+        sharedPrefFile = getString(R.string.shared_preferences_file);
         mPreferences=inflater.getContext().getSharedPreferences(sharedPrefFile, MODE_PRIVATE);
+        font_preferences_label = getString(R.string.font_preferences_key);
+        theme_preferences_label = getString(R.string.theme_preferences_key);
 
         reloadValuesFromSharedPref(view);
         defineListeners(view);
 
-        return view;
-    }
+        //todo onClickListener for button in setting fragment
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        mViewModel = new ViewModelProvider(this).get(SettingsViewModel.class);
-        // TODO: Use the ViewModel
+        return view;
     }
 
     private void reloadValuesFromSharedPref(View view){
@@ -74,6 +74,7 @@ public class SettingsFragment extends Fragment {
             RadioButton checkedRadioButton = view.findViewById(checkedId);
             String text = checkedRadioButton.getText().toString();
             mPreferences.edit().putString(font_preferences_label, text).apply();
+
             //todo applica le modifiche
 
         });
