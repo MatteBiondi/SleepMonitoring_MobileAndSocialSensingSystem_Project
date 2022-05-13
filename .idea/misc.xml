@@ -3,12 +3,18 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="..\:/Users/Federico/AndroidStudioProjects/SleepMonitoring_MobileAndSocialSensingSystem_Project/app/src/main/res/drawable/ic_baseline_bluetooth_24.xml" value="0.176" />
+        <entry key="..\:/Users/matte/AndroidStudioProjects/SleepMonitoring_MobileAndSocialSensingSystem_Project/app/src/main/res/layout/activity_main.xml" value="0.1718683197947841" />
+        <entry key="..\:/Users/matte/AndroidStudioProjects/SleepMonitoring_MobileAndSocialSensingSystem_Project/app/src/main/res/layout/app_bar_main.xml" value="0.1" />
+        <entry key="..\:/Users/matte/AndroidStudioProjects/SleepMonitoring_MobileAndSocialSensingSystem_Project/app/src/main/res/layout/content_main.xml" value="0.1718683197947841" />
+        <entry key="..\:/Users/matte/AndroidStudioProjects/SleepMonitoring_MobileAndSocialSensingSystem_Project/app/src/main/res/layout/fragment_account.xml" value="0.5" />
         <entry key="..\:/Users/matte/AndroidStudioProjects/SleepMonitoring_MobileAndSocialSensingSystem_Project/app/src/main/res/layout/fragment_home.xml" value="0.25" />
         <entry key="..\:/Users/matte/AndroidStudioProjects/SleepMonitoring_MobileAndSocialSensingSystem_Project/app/src/main/res/layout/fragment_report.xml" value="0.16844805472424113" />
         <entry key="..\:/Users/matte/AndroidStudioProjects/SleepMonitoring_MobileAndSocialSensingSystem_Project/app/src/main/res/layout/fragment_settings.xml" value="0.20520833333333333" />
+        <entry key="..\:/Users/matte/AndroidStudioProjects/SleepMonitoring_MobileAndSocialSensingSystem_Project/app/src/main/res/layout/nav_header_main.xml" value="0.25" />
+        <entry key="..\:/Users/matte/AndroidStudioProjects/SleepMonitoring_MobileAndSocialSensingSystem_Project/app/src/main/res/menu/activity_main_drawer.xml" value="0.33" />
+        <entry key="..\:/Users/matte/AndroidStudioProjects/SleepMonitoring_MobileAndSocialSensingSystem_Project/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.1" />
         <entry key="..\:/Users/matte/AndroidStudioProjects/SleepMonitoring_MobileAndSocialSensingSystem_Project/wearapp/src/main/res/drawable/ic_baseline_play_circle_filled_24.xml" value="0.1905" />
-        <entry key="..\:/Users/matte/AndroidStudioProjects/SleepMonitoring_MobileAndSocialSensingSystem_Project/wearapp/src/main/res/layout/activity_main.xml" value="0.22" />
+        <entry key="..\:/Users/matte/AndroidStudioProjects/SleepMonitoring_MobileAndSocialSensingSystem_Project/wearapp/src/main/res/layout/activity_main.xml" value="1.0" />
         <entry key="..\:/Users/matte/AndroidStudioProjects/progetti_di_prova/SleepMonitoring_Smartphone - Copia/app/src/main/res/drawable/ic_menu_account.xml" value="0.2085" />
         <entry key="..\:/Users/matte/AndroidStudioProjects/progetti_di_prova/SleepMonitoring_Smartphone - Copia/app/src/main/res/drawable/ic_menu_camera.xml" value="0.2085" />
         <entry key="..\:/Users/matte/AndroidStudioProjects/progetti_di_prova/SleepMonitoring_Smartphone - Copia/app/src/main/res/drawable/ic_menu_home.xml" value="0.2085" />

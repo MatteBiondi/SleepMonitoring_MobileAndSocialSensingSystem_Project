@@ -12,12 +12,21 @@
         android:id="@+id/nav_home"
         android:name="it.unipi.ing.mobile.sleepmonitoring_smartphone.ui.home.HomeFragment"
         android:label="@string/menu_home"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/action_nav_home_to_nav_report"
+            app:destination="@id/nav_report" />
+    </fragment>
     <fragment
         android:id="@+id/nav_report"
         android:name="it.unipi.ing.mobile.sleepmonitoring_smartphone.ui.report.ReportFragment"
         android:label="@string/menu_report"
-        tools:layout="@layout/fragment_report" />
+        tools:layout="@layout/fragment_report" >
+        <argument
+            android:name="last_report"
+            app:argType="boolean"
+            android:defaultValue="false" />
+    </fragment>
     <fragment
         android:id="@+id/nav_settings"
         android:name="it.unipi.ing.mobile.sleepmonitoring_smartphone.ui.settings.SettingsFragment"
