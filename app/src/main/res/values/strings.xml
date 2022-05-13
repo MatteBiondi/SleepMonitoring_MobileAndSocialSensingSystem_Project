@@ -2,10 +2,28 @@
     <!-- Application info -->
     <string name="app_name">Sleep Monitoring</string>
 
+    <!-- Shared Preferences -->
+    <string name="shared_preferences_file">it.unipi.ing.mobile.sleepmonitoring_smartphone</string>
+    <string name="font_preferences_key">FontSize</string>
+    <string name="theme_preferences_key">Theme</string>
+    <string name="user_first_name_preferences_key">Firstname</string>
+    <string name="user_last_name_preferences_key">Lastname</string>
+    <string name="user_email_preferences_key">Email</string>
+
+    <!-- Google SignIn, SignOut and Disconnection -->
+    <string name="signIn">SignIn completed</string>
+    <string name="signOut">SignOut completed</string>
+    <string name="disconnection">Disconnection completed</string>
+
+    <!-- Error messages -->
+    <string name="failed_google_login">There are some problems with Google Play services in your device. The Sleep Monitoring application will be closed</string>
+    <string name="rejected_login_or_permissions">The Sleep Monitoring application will be closed. The user\'s account information and permissions are needed.</string>
+
     <!-- Description string -->
     <string name="nav_header_desc">Navigation Header</string>
 
-    <!-- User information -->
+    <!-- todo utili? -->
+    <!-- Default user information -->
     <string name="nav_header_name">Android Studio</string>
     <string name="nav_header_email">android.studio@android.com</string>
 
@@ -24,7 +42,7 @@
     <string name="account_delete_label">Delete Account</string>
 
     <!-- Home fragment -->
-    <string name="home_welcome_label">Welcome back </string>
+    <string name="home_welcome_label">Welcome </string>
     <string name="home_status_label">Status: </string>
     <string name="home_last_report_button">See last report</string>
 
@@ -33,7 +51,7 @@
     <string name="editText_date_hint">Enter Date</string>
     <string name="report_plot_title">Sleep Evaluation</string>
     <string name="report_range_title">Quality</string>
-    <string name="report_date_format">%1$d/%2$d/%3$d</string>
+    <string name="report_date_format">dd/MM/yyyy</string>
 
     <!-- Settings fragment -->
     <string name="settings_font_size_label">Font Size:</string>
