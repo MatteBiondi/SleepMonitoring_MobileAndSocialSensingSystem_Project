@@ -2,9 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="it.unipi.ing.mobile.sleepmonitoring_smartphone">
 
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-
-    <!-- Required from Android 12 -->
+    <uses-permission android:name="android.permission.BLUETOOTH" /> <!-- Required from Android 12 -->
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
 
     <uses-feature
@@ -18,6 +16,19 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.SleepMonitoring_Smartphone">
+        <service
+            android:name=".WearableListener"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <!-- listeners receive events that match the action and data filters -->
+                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+                <action android:name="com.google.android.gms.wearable.CAPABILITY_CHANGED" />
+                <action android:name="com.google.android.gms.wearable.CHANNEL_EVENT" />
+                <data android:scheme="wear" android:host="*" android:path="/start" />
+            </intent-filter>
+        </service>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
