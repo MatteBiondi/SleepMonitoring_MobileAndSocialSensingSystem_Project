@@ -6,7 +6,8 @@ android {
     compileSdk 32
 
     defaultConfig {
-        applicationId "it.unipi.ing.mobile.sleepmonitoring_watch"
+        // Application id MUST be the same for both mobile and wearable application
+        applicationId "it.unipi.ing.mobile.sleepmonitoring"
         minSdk 28
         targetSdk 32
         versionCode 1

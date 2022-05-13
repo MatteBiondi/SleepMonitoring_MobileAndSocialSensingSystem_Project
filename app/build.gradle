@@ -6,7 +6,8 @@ android {
     compileSdk 31
 
     defaultConfig {
-        applicationId "it.unipi.ing.mobile.sleepmonitoring_smartphone"
+        // Application id MUST be the same for both mobile and wearable application
+        applicationId "it.unipi.ing.mobile.sleepmonitoring"
         minSdk 24
         targetSdk 31
         versionCode 1
@@ -33,6 +34,7 @@ android {
 dependencies {
 
     //for report plot
+    implementation 'com.google.android.gms:play-services-wearable:17.1.0'
     implementation "com.androidplot:androidplot-core:1.5.9"
 
     implementation 'androidx.appcompat:appcompat:1.4.1'
