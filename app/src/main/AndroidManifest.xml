@@ -3,6 +3,8 @@
     package="it.unipi.ing.mobile.sleepmonitoring_smartphone">
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
+    <!-- Required for Google Login -->
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <!-- Required from Android 12 -->
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
