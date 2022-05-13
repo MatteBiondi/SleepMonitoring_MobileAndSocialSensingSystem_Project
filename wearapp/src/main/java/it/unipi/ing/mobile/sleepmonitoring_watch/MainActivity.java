@@ -46,8 +46,8 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
     }
 
     @Override
-    protected void onStart(){
-        super.onStart();
+    protected void onResume(){
+        super.onResume();
 
         // Check if status changed
         getPairedDeviceNodeId();
@@ -60,14 +60,16 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
     @Override
     protected void onStop(){
         super.onStop();
+
         // Paired device listener remove
-        Wearable.getCapabilityClient(getApplicationContext()).removeListener(this);
+        Wearable.getCapabilityClient(getApplicationContext()).removeListener(this, MOBILE_CAPABILITY);
     }
 
     private void setStatusLabel(int nodes){
-        String status = nodes > 0 ? " connected":" disconnected";
+        String status = (nodes > 0) ? " connected":" disconnected";
         status_label.setText(getString(R.string.status_label) + status);
     }
+
     public void start_recording(View view){
         try {
             if(paired_node_id == null){
@@ -105,7 +107,7 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
         capability_task.addOnCompleteListener(task -> {
             Log.i(TAG, "Searching nodes ...");
             Set<Node> nodes = capability_task.getResult().getNodes();
-            assert nodes.size() <= 1;
+
             setStatusLabel(nodes.size());
             // Is possible to pair only one smartphone to the watch,
             //      the nodes should contain one node or zero
@@ -115,6 +117,7 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
             }
         });
     }
+
     @Override
     public void onCapabilityChanged(@NonNull CapabilityInfo capabilityInfo) {
         Set<Node> nodes = capabilityInfo.getNodes();
