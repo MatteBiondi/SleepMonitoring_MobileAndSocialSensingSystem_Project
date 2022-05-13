@@ -24,9 +24,13 @@ public class Bluetooth {
     private final BluetoothAdapter bluetoothAdapter;
 
     private final Context context;
+    private static Bluetooth instance = null;
 
     public static Bluetooth build(Activity activity){
-        return new Bluetooth(activity);
+        if(instance == null)
+            instance =  new Bluetooth(activity);
+
+        return instance;
     }
 
     private Bluetooth(Context context){
