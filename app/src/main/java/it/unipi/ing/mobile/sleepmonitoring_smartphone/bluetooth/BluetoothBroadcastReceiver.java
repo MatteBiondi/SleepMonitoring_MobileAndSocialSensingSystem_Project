@@ -29,15 +29,14 @@ public class BluetoothBroadcastReceiver extends BroadcastReceiver {
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         // Create notification channel
-        // TODO: notification channel
-        /*NotificationChannel notificationChannel = new NotificationChannel(
+        NotificationChannel notificationChannel = new NotificationChannel(
                 NOTIFICATION_CHANNEL_ID,
                 "SleepMonitor",
                 NotificationManager.IMPORTANCE_HIGH
         );
 
         // Configure the notification channel.
-        notificationChannel.setDescription("SleepMonitor BLE status");
+        notificationChannel.setDescription("SleepMonitor");
         notificationChannel.enableLights(true);
         notificationChannel.setLightColor(Color.RED);
         notificationChannel.setVibrationPattern(new long[]{100, 500});
@@ -69,11 +68,11 @@ public class BluetoothBroadcastReceiver extends BroadcastReceiver {
         notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         PendingIntent intent = PendingIntent.getActivity(context, 0,
-                notificationIntent, 0);
+                notificationIntent, PendingIntent.FLAG_IMMUTABLE);
         notificationBuilder.setContentIntent(intent);
 
         Notification notification = notificationBuilder.build();
-        notificationManager.notify(NOTIFICATION_TAG, NOTIFICATION_ID, notification);*/
+        notificationManager.notify(NOTIFICATION_TAG, NOTIFICATION_ID, notification);
     }
 
     public void destroyNotification(Context context){
@@ -85,6 +84,7 @@ public class BluetoothBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
+
         if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
             final int state = intent.getIntExtra(
                     BluetoothAdapter.EXTRA_STATE,

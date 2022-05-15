@@ -10,7 +10,7 @@ android {
     defaultConfig {
         // Application id MUST be the same for both mobile and wearable application
         applicationId "it.unipi.ing.mobile.sleepmonitoring"
-        minSdk 24
+        minSdk 26
         targetSdk 31
         versionCode 1
         versionName "1.0"

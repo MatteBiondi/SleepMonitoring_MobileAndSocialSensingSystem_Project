@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
         mPreferences=getSharedPreferences(sharedPrefFile, MODE_PRIVATE);
 
         // Signin with Google credentials
-        signInWithGoogle();
+        //signInWithGoogle();
 
         // Bluetooth pop-up alert
         bluetooth = Bluetooth.build(this);
