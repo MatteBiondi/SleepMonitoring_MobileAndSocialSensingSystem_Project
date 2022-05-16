@@ -24,7 +24,6 @@ public class SettingsFragment extends Fragment {
 
     private SettingsViewModel mViewModel;
     private String sharedPrefFile;
-    private String font_preferences_label;
     private String theme_preferences_label;
 
 
@@ -41,7 +40,6 @@ public class SettingsFragment extends Fragment {
 
         sharedPrefFile = getString(R.string.shared_preferences_file);
         mPreferences=inflater.getContext().getSharedPreferences(sharedPrefFile, MODE_PRIVATE);
-        font_preferences_label = getString(R.string.font_preferences_key);
         theme_preferences_label = getString(R.string.theme_preferences_key);
 
         reloadValuesFromSharedPref(view);
@@ -54,12 +52,7 @@ public class SettingsFragment extends Fragment {
 
     private void reloadValuesFromSharedPref(View view){
         RadioButton radioButton;
-        RadioGroup fontRadioGroup = view.findViewById(R.id.font_radio_group);
         RadioGroup themeRadioGroup = view.findViewById(R.id.theme_radio_group);
-        //Font size
-        String saved_font_size = mPreferences.getString(font_preferences_label, getString(R.string.medium_font_size));
-        radioButton=fontRadioGroup.findViewWithTag(saved_font_size);
-        radioButton.setChecked(true);
         //Theme
         String saved_theme = mPreferences.getString(theme_preferences_label, getString(R.string.light_theme));
         radioButton=themeRadioGroup.findViewWithTag(saved_theme);
@@ -67,18 +60,6 @@ public class SettingsFragment extends Fragment {
     }
 
     private void defineListeners(View view){
-        //Font size change
-        RadioGroup fontRadioGroup = view.findViewById(R.id.font_radio_group);
-        fontRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
-            // checkedId is the RadioButton selected
-            RadioButton checkedRadioButton = view.findViewById(checkedId);
-            String text = checkedRadioButton.getText().toString();
-            mPreferences.edit().putString(font_preferences_label, text).apply();
-
-            //todo applica le modifiche
-
-        });
-
         //Theme change
         RadioGroup themeRadioGroup = view.findViewById(R.id.theme_radio_group);
         themeRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {

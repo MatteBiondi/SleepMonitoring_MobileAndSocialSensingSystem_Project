@@ -47,22 +47,37 @@
         <com.androidplot.xy.XYPlot
             android:id="@+id/report_plot"
             style="@style/APDefacto.Light"
-            android:layout_width="324dp"
+
+            android:layout_width="match_parent"
             android:layout_height="385dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="32dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="24dp"
-            app:domainTitle="Legend:"
+
+            app:domainTitle="@string/domainTitle"
+            app:graphMarginBottom="50dp"
+            app:graphMarginLeft="25dp"
+            app:graphMarginRight="15dp"
+            app:graphMarginTop="50dp"
+
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.49"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/editText_date"
+
+            app:legendTextSize="15dp"
+            app:domainTitleTextSize="15dp"
+
             app:lineLabelRotationBottom="-45"
             app:lineLabels="left|bottom"
+
             app:rangeTitle="@string/report_range_title"
-            app:title="@string/report_plot_title" />
+            app:rangeTitleTextSize="20sp"
+
+            app:title="@string/report_plot_title"
+            app:titleTextSize="30sp" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
 
