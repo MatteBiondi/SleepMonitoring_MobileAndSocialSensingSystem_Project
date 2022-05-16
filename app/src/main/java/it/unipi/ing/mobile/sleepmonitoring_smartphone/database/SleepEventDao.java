@@ -19,5 +19,5 @@ public interface SleepEventDao {
     void insert(SleepEvent sleep_event);
 
     @Delete
-    void deleteAll(SleepEvent sleep_event);
+    void delete(SleepEvent sleep_event);
 }
