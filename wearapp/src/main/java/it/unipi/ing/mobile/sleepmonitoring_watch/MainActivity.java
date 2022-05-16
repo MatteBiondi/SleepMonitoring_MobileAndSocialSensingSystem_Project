@@ -106,7 +106,9 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
                     .addOnSuccessListener(integer -> Log.i(TAG, "Stop message sent"))
                     .addOnFailureListener(integer -> Log.i(TAG, "Stop message failed"));
 
-            running = false;
+            if (view != null){
+                running = false;
+            }
             play_stop_button.setImageResource(R.drawable.ic_baseline_play_circle_filled);
             play_stop_button.setOnClickListener(this::start_recording);
         } catch (Exception e) {
