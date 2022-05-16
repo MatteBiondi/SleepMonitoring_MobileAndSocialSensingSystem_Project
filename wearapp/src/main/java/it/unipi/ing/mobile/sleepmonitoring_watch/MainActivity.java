@@ -1,7 +1,6 @@
 package it.unipi.ing.mobile.sleepmonitoring_watch;
 
 import android.app.Activity;
-import android.hardware.biometrics.BiometricManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -17,7 +16,7 @@ import com.google.android.gms.wearable.CapabilityInfo;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
 
-import java.util.HashSet;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 import it.unipi.ing.mobile.sleepmonitoring_watch.databinding.ActivityMainBinding;
@@ -32,7 +31,7 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
     private ImageButton play_stop_button;
     private String paired_node_id = null;
     private final String TAG = "MainActivity_LogTag";
-
+    private boolean running = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +61,8 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
         super.onStop();
 
         // Paired device listener remove
-        Wearable.getCapabilityClient(getApplicationContext()).removeListener(this, MOBILE_CAPABILITY);
+        Wearable.getCapabilityClient(getApplicationContext())
+                .removeListener(this, MOBILE_CAPABILITY);
     }
 
     private void setStatusLabel(int nodes){
@@ -77,8 +77,18 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
                 return;
             }
             Log.i(TAG,"startRecording");
-            //todo register
+            //todo register, send message to mobile app
             //sensorsManager.registerListeners();
+            Wearable.getMessageClient(this)
+                    .sendMessage(paired_node_id, "/start-service", "".getBytes())
+                    .addOnSuccessListener(integer -> {
+                        Log.i(TAG, "Start message sent");
+                        running = true;
+                    })
+                    .addOnFailureListener(integer -> {
+                        Log.i(TAG, "Start message failed");
+                        stop_recording(null);
+                    });
             play_stop_button.setImageResource(R.drawable.ic_baseline_stop_circle);
             play_stop_button.setOnClickListener(this::stop_recording);
         } catch (Exception e) {
@@ -89,8 +99,16 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
     public void stop_recording(View view){
         try {
             Log.i(TAG,"stopRecording");
-            //todo Unregister
+            //todo Unregister, send message to mobile app
             //sensorsManager.unregisterListeners();
+            Wearable.getMessageClient(this)
+                    .sendMessage(paired_node_id, "/stop-service", "".getBytes())
+                    .addOnSuccessListener(integer -> Log.i(TAG, "Stop message sent"))
+                    .addOnFailureListener(integer -> Log.i(TAG, "Stop message failed"));
+
+            if (view != null){
+                running = false;
+            }
             play_stop_button.setImageResource(R.drawable.ic_baseline_play_circle_filled);
             play_stop_button.setOnClickListener(this::start_recording);
         } catch (Exception e) {
@@ -124,12 +142,26 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
         Log.i(TAG, "Available nodes: " + nodes.size());
         // Is possible to pair only one smartphone to the watch,
         //      the nodes should contain one node or zero
-        if (nodes.size() == 0)
+
+        if (nodes.size() == 0){
             paired_node_id = null;
+
+            // Stop sensing data
+            if (running){
+                stop_recording(null);
+            }
+        }
+
         for (Node node : nodes) {
             Log.i(TAG, node.getDisplayName());
             paired_node_id = node.getId();
         }
+
+        // Auto-restart
+         if(running && paired_node_id != null){
+            start_recording(null);
+         }
+
         setStatusLabel(nodes.size());
     }
 }

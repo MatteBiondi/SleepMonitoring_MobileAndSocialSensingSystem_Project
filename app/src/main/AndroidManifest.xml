@@ -3,11 +3,9 @@
     package="it.unipi.ing.mobile.sleepmonitoring_smartphone">
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
-    <!-- Required for Google Login -->
-    <uses-permission android:name="android.permission.INTERNET" />
-
-    <!-- Required from Android 12 -->
-    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.INTERNET" /><!-- Required for Google Login -->
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" /><!-- Required from Android 12 -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
     <uses-feature
         android:name="android.hardware.bluetooth_le"
@@ -20,16 +18,25 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.SleepMonitoring_Smartphone">
+
+        <service
+            android:name=".WorkerService"
+            android:enabled="true"
+            android:exported="true">
+        </service>
+
         <service
             android:name=".WearableListener"
             android:enabled="true"
             android:exported="true">
+
             <intent-filter>
                 <!-- listeners receive events that match the action and data filters -->
                 <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
                 <action android:name="com.google.android.gms.wearable.CAPABILITY_CHANGED" />
                 <action android:name="com.google.android.gms.wearable.CHANNEL_EVENT" />
-                <data android:scheme="wear" android:host="*" android:path="/start" />
+                <data android:host="*" android:path="/start-service" android:scheme="wear" />
+                <data android:host="*" android:path="/stop-service" android:scheme="wear" />
             </intent-filter>
         </service>
 
@@ -40,7 +47,6 @@
             android:theme="@style/Theme.SleepMonitoring_Smartphone.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
