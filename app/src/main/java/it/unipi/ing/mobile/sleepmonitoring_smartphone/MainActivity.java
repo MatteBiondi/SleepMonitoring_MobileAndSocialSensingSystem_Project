@@ -213,6 +213,7 @@ public class MainActivity extends AppCompatActivity {
                         if (result.getResultCode() == Activity.RESULT_OK) {
                             Intent data = result.getData();
                             account = GoogleSignIn.getSignedInAccountFromIntent(data).getResult();
+                            Toast.makeText(getApplicationContext(), R.string.signIn, Toast.LENGTH_SHORT).show();
                             readUserInfo();
                         }
                         else{
@@ -225,8 +226,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void readUserInfo(){
-
-        Toast.makeText(getApplicationContext(), R.string.signIn, Toast.LENGTH_SHORT).show();
 
         //todo è necessario farlo dalle info in account o posso prendere quelle in shared pref?
 

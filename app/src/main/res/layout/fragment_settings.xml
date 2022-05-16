@@ -13,60 +13,6 @@
         android:layout_height="wrap_content">
 
         <TextView
-            android:id="@+id/settings_font_size_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="44dp"
-            android:layout_marginTop="16dp"
-            android:text="@string/settings_font_size_label"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <RadioGroup
-            android:id="@+id/font_radio_group"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="76dp"
-            android:layout_marginTop="16dp"
-            android:checkedButton="@id/medium_font_size"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/settings_font_size_label">
-
-            <RadioButton
-                android:id="@+id/big_font_size"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:tag="@string/big_font_size"
-                android:text="@string/big_font_size"
-                android:textSize="25sp"
-                tools:layout_editor_absoluteX="36dp"
-                tools:layout_editor_absoluteY="205dp" />
-
-            <RadioButton
-                android:id="@+id/medium_font_size"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:tag="@string/medium_font_size"
-                android:text="@string/medium_font_size"
-                android:textSize="20sp"
-                tools:layout_editor_absoluteX="36dp"
-                tools:layout_editor_absoluteY="260dp" />
-
-            <RadioButton
-                android:id="@+id/small_font_size"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:tag="@string/small_font_size"
-                android:text="@string/small_font_size"
-                android:textSize="15sp"
-                tools:layout_editor_absoluteX="36dp"
-                tools:layout_editor_absoluteY="316dp" />
-
-        </RadioGroup>
-
-        <TextView
             android:id="@+id/settings_theme"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -76,7 +22,7 @@
             android:textSize="20sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/font_radio_group" />
+            app:layout_constraintTop_toTopOf="parent" />
 
 
         <RadioGroup
@@ -117,7 +63,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="@string/delete_report_history_button"
-            android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.508"
