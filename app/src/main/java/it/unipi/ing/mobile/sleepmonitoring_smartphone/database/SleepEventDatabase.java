@@ -35,8 +35,4 @@ public class SleepEventDatabase {
         database.sleep_event_dao().deleteBefore(date);
     }
 
-    public void truncate(){
-        database.sleep_event_dao().truncate();
-    }
-
 }
