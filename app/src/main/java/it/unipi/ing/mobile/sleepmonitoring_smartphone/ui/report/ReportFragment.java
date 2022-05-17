@@ -20,6 +20,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
+import com.androidplot.xy.XYPlot;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -31,6 +33,7 @@ public class ReportFragment extends Fragment {
     private ReportViewModel mViewModel;
     private final String TAG = "ReportFragment";
     private EditText date;
+    private XYPlot plot;
     private String sharedPrefFile;
     private SharedPreferences mPreferences;
 
@@ -49,6 +52,7 @@ public class ReportFragment extends Fragment {
         mPreferences=inflater.getContext().getSharedPreferences(sharedPrefFile, MODE_PRIVATE);
 
 
+        plot=view.findViewById(R.id.report_plot);
         date=view.findViewById(R.id.editText_date);
         date.setOnFocusChangeListener((v, hasFocus) -> {
             if(!hasFocus)

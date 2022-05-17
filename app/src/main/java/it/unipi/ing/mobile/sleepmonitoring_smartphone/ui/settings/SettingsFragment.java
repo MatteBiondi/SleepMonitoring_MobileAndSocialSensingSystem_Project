@@ -12,11 +12,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 
 import it.unipi.ing.mobile.sleepmonitoring_smartphone.R;
 
@@ -67,9 +69,12 @@ public class SettingsFragment extends Fragment {
             RadioButton checkedRadioButton = view.findViewById(checkedId);
             String text = checkedRadioButton.getText().toString();
             mPreferences.edit().putString(theme_preferences_label, text).apply();
-            //todo applica le modifiche
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-            //todo in report il grafico va dark
+            if(text.equals("Light") || text.equals("light")) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+            }
+            else {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+            }
         });
     }
 }
