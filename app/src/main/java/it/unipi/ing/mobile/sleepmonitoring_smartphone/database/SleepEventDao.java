@@ -1,7 +1,6 @@
 package it.unipi.ing.mobile.sleepmonitoring_smartphone.database;
 
 import androidx.room.Dao;
-import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 
@@ -16,8 +15,11 @@ public interface SleepEventDao {
     List<SleepEvent> getByDate(String date);
 
     @Insert
-    void insert(SleepEvent sleep_event);
+    void insertSleepEvents(SleepEvent... sleep_events);
 
-    @Delete
-    void delete(SleepEvent sleep_event);
+    @Query("DELETE FROM sleep_event where timestamp < :date")
+    void deleteBefore(String date);
+
+    @Query("DELETE FROM sleep_event")
+    void truncate();
 }
