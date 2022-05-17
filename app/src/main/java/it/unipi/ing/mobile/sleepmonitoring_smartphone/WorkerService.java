@@ -35,7 +35,7 @@ public class WorkerService extends Service {
 
         // create new worker thread
         worker = new Thread(() -> {
-            // TODO: read/process data on separate thread
+           // TODO: read data from wearable, process if necessary, store into db
         });
     }
 
