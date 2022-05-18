@@ -20,6 +20,4 @@ public interface SleepEventDao {
     @Query("DELETE FROM sleep_event where timestamp < :date")
     void deleteBefore(String date);
 
-    @Query("DELETE FROM sleep_event")
-    void truncate();
 }
