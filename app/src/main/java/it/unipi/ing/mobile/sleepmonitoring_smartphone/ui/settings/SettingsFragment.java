@@ -159,14 +159,20 @@ public class SettingsFragment extends Fragment {
                         }
 
                         // Delete reports
-                        SleepEventDatabase db = SleepEventDatabase.build(getContext());
-                        db.deleteBefore(date);
+                        new Thread(){
+                            @Override
+                            public void run() {
+                                super.run();
+                                SleepEventDatabase db = SleepEventDatabase.build(getContext());
+                                db.deleteBefore(date);
+                            }
+                        }.start();
 
                         // Close the popup window
                         popupWindow.dismiss();
 
                         // Toast message for user as confirmation
-                        Toast.makeText(getContext(),R.string.deleted_report_confirmation, Toast.LENGTH_SHORT);
+                        Toast.makeText(getActivity().getApplicationContext(), R.string.deleted_report_confirmation, Toast.LENGTH_SHORT).show();
                     }
                 });
             }
