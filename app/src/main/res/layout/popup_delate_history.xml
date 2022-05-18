@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/popup_window"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/colorOnPrimary">
+
+    <TextView
+        android:id="@+id/delete_history_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/delete_history_label"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.279"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <RadioGroup
+        android:id="@+id/history_radio_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="16dp"
+        android:checkedButton="@id/all_report_radio_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.214"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/delete_history_label"
+        app:layout_constraintVertical_bias="0.15">
+
+        <RadioButton
+            android:id="@+id/all_report_radio_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:tag="@string/all_report_label"
+            android:text="@string/all_report_label"
+            android:textSize="20sp" />
+
+        <RadioButton
+            android:id="@+id/last_month_radio_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:tag="@string/last_month_label"
+            android:text="@string/last_month_label"
+            android:textSize="20sp" />
+
+        <RadioButton
+            android:id="@+id/last_six_months_radio_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:tag="@string/last_six_months_label"
+            android:text="@string/last_six_months_label"
+            android:textSize="20sp" />
+
+        <RadioButton
+            android:id="@+id/last_year_radio_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:tag="@string/last_year_label"
+            android:text="@string/last_year_label"
+            android:textSize="20sp" />
+
+    </RadioGroup>
+
+    <Button
+        android:id="@+id/start_delete_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:text="@string/start_delete_button"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/history_radio_group" />
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
