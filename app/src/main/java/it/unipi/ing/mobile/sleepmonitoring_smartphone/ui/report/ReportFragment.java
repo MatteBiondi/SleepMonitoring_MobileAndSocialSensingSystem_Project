@@ -65,7 +65,7 @@ public class ReportFragment extends Fragment {
             // date picker dialog
             DatePickerDialog datepicker = new DatePickerDialog(getActivity(),
                     (dp, year, monthOfYear, dayOfMonth) -> date.setText(
-                            DateFormat.format("dd/MM/yyyy",
+                            DateFormat.format(getString(R.string.report_date_format),
                                     new GregorianCalendar(year,monthOfYear,dayOfMonth))),
                     currentYear, currentMonth, currentDay);
             datepicker.show();
