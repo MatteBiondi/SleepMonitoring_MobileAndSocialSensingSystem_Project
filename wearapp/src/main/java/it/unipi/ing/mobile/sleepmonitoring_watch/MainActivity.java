@@ -1,22 +1,19 @@
 package it.unipi.ing.mobile.sleepmonitoring_watch;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageButton;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.google.android.gms.tasks.Task;
 import com.google.android.gms.wearable.CapabilityClient;
 import com.google.android.gms.wearable.CapabilityInfo;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 import it.unipi.ing.mobile.sleepmonitoring_watch.communication.StreamChannel;
@@ -25,12 +22,9 @@ import it.unipi.ing.mobile.sleepmonitoring_watch.sensors.SensorsManager;
 
 public class MainActivity extends Activity implements CapabilityClient.OnCapabilityChangedListener {
     public final String MOBILE_CAPABILITY = "it.unipi.ing.mobile.sleepmonitoring.mobile";
-    private TextView mTextView;
-    private TextView status_label;
     private ActivityMainBinding binding;
     private SensorsManager sensorsManager;
     private StreamChannel stream_channel = null;
-    private ImageButton play_stop_button;
     private String paired_node_id = null;
     private final String TAG = "MainActivity_LogTag";
     private boolean running = false;
@@ -41,8 +35,7 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        play_stop_button = findViewById(R.id.play_stop_button);
-        status_label = findViewById(R.id.status_label);
+
         sensorsManager =new SensorsManager(this.getApplicationContext());
     }
 
@@ -50,8 +43,12 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
     protected void onResume(){
         super.onResume();
 
-        // Check if status changed
-        getPairedDeviceNodeId();
+        //Get capabilities node
+        Log.i(TAG, "Searching nodes ...");
+        Wearable.getCapabilityClient(this).getCapability(
+                MOBILE_CAPABILITY,
+                CapabilityClient.FILTER_REACHABLE
+        ).addOnSuccessListener(task -> setPairedDeviceNodeId(task.getNodes()));
 
         // Paired device listener add
         Wearable.getCapabilityClient(getApplicationContext()).addListener(
@@ -67,9 +64,16 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
                 .removeListener(this, MOBILE_CAPABILITY);
     }
 
-    private void setStatusLabel(int nodes){
-        String status = (nodes > 0) ? " connected":" disconnected";
-        status_label.setText(getString(R.string.status_label) + status);
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        //stop_recording(null); TODO: error on mobile app if not stop
+    }
+
+    private void updateUIStatus(Status status){
+        binding.statusLabel.setText(status.toString());
+        binding.statusLabel.setTextColor(status.getColor());
+        binding.playStopButton.setImageResource(status.getButtonImage());
     }
 
     public void start_recording(View view){
@@ -78,8 +82,8 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
                 Toast.makeText(this, "No devices connected", Toast.LENGTH_SHORT).show();
                 return;
             }
-            Log.i(TAG,"startRecording");
 
+            Log.i(TAG,"startRecording");
 
             // Open channel
             stream_channel = new StreamChannel(
@@ -87,12 +91,11 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
                     "start-service",
                     Wearable.getChannelClient(getApplicationContext())
             );
-
             //todo register
             //sensorsManager.registerListeners();
             running = true;
-            play_stop_button.setImageResource(R.drawable.ic_baseline_stop_circle);
-            play_stop_button.setOnClickListener(this::stop_recording);
+            binding.playStopButton.setOnClickListener(this::stop_recording);
+            updateUIStatus(Status.RUNNING);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -110,62 +113,86 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
                 stream_channel.close();
             stream_channel = null;
 
+            // Reset running only when the function is invoked by user
             if (view != null){
                 running = false;
             }
-            play_stop_button.setImageResource(R.drawable.ic_baseline_play_circle_filled);
-            play_stop_button.setOnClickListener(this::start_recording);
+
+            // Update button listener
+            binding.playStopButton.setOnClickListener(this::start_recording);
+
+            //Update UI
+            updateUIStatus(Status.CONNECTED);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void getPairedDeviceNodeId(){
-        //Get capabilities node
-        Task<CapabilityInfo> capability_task = (
-                Wearable.getCapabilityClient(this).getCapability(
-                        MOBILE_CAPABILITY, CapabilityClient.FILTER_REACHABLE));
+    private void setPairedDeviceNodeId(Set<Node> nodes){
+        Log.i(TAG, "Available nodes: " + nodes.size());
 
-        capability_task.addOnCompleteListener(task -> {
-            Log.i(TAG, "Searching nodes ...");
-            Set<Node> nodes = capability_task.getResult().getNodes();
-
-            setStatusLabel(nodes.size());
-            // Is possible to pair only one smartphone to the watch,
-            //      the nodes should contain one node or zero
-            for (Node node : nodes){
-                Log.i(TAG, node.toString());
-                paired_node_id = node.getId();
+        // Is possible to pair only one smartphone to the watch,
+        //      the nodes should contain one node or zero
+        if (nodes.size() == 0){// No nodes connected to watch
+            paired_node_id = null;
+            if (running){  // Stop sensing data
+                stop_recording(null);
             }
-        });
+            updateUIStatus(Status.DISCONNECTED);
+            return;
+        }
+
+        for (Node node : nodes) { // Should be just one
+            Log.i(TAG, node.getDisplayName());
+            if (node.isNearby()){ // There is a node connected to watch
+                paired_node_id = node.getId();
+
+                if(running){ // Auto-restart
+                    start_recording(null);
+                    updateUIStatus(Status.RUNNING);
+                }
+                else {
+                    updateUIStatus(Status.CONNECTED);
+                }
+            }
+            else { // No nodes connected to watch
+                updateUIStatus(Status.DISCONNECTED);
+            }
+        }
     }
 
     @Override
     public void onCapabilityChanged(@NonNull CapabilityInfo capabilityInfo) {
-        Set<Node> nodes = capabilityInfo.getNodes();
-        Log.i(TAG, "Available nodes: " + nodes.size());
-        // Is possible to pair only one smartphone to the watch,
-        //      the nodes should contain one node or zero
+        setPairedDeviceNodeId(capabilityInfo.getNodes());
+    }
 
-        if (nodes.size() == 0){
-            paired_node_id = null;
+    enum Status{
+        CONNECTED("Connected", Color.GREEN, R.drawable.ic_baseline_play_circle_filled),
+        DISCONNECTED("Disconnected", Color.RED, R.drawable.ic_baseline_play_circle_filled),
+        RUNNING("Running", Color.BLUE, R.drawable.ic_baseline_stop_circle);
 
-            // Stop sensing data
-            if (running){
-                stop_recording(null);
-            }
+        private final String status;
+        private final int color;
+        private final int button;
+
+        Status(String status, int color, int button) {
+            this.status = status;
+            this.color = color;
+            this.button = button;
         }
 
-        for (Node node : nodes) {
-            Log.i(TAG, node.getDisplayName());
-            paired_node_id = node.getId();
+        @NonNull
+        @Override
+        public String toString(){
+            return this.status.toUpperCase();
         }
 
-        // Auto-restart
-         if(running && paired_node_id != null){
-            start_recording(null);
-         }
+        public int getColor(){
+            return this.color;
+        }
 
-        setStatusLabel(nodes.size());
+        public int getButtonImage(){
+            return button;
+        }
     }
 }
