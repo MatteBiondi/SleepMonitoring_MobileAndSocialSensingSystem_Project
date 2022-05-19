@@ -16,12 +16,20 @@ import com.google.android.gms.wearable.WearableListenerService;
  */
 
 public class WearableListener extends WearableListenerService {
+    public static boolean running = false;
+    public static boolean isRunning(){
+        return running;
+    }
+
     public void onMessageReceived (MessageEvent messageEvent) {
         /* The message path can be '/start' or '/stop', it is used to control the lifecycle of
          * foreground service that implements the data receiver for wearable app
          */
         Intent serviceIntent = new Intent(this, WorkerService.class);
         serviceIntent.setAction(messageEvent.getPath());
+        Intent startIntent = new Intent("it.unipi.ing.mobile.sleepmonitoring_smartphone.RUNNING");
+        running = messageEvent.getPath().equals("/start-service");
+        sendBroadcast(startIntent);
         startForegroundService(serviceIntent);
     }
 
@@ -30,7 +38,11 @@ public class WearableListener extends WearableListenerService {
         Wearable.getChannelClient(getApplicationContext()).getInputStream(channel).addOnCompleteListener(task -> {
             Intent serviceIntent = new Intent(getApplicationContext(), WorkerService.class);
             serviceIntent.setAction("/start-service");
+            Intent startIntent = new Intent("it.unipi.ing.mobile.sleepmonitoring_smartphone.RUNNING");
+            startIntent.setAction("/start-service");
+            sendBroadcast(startIntent);
             //stream = task.getResult();
+            running = true;
             startForegroundService(serviceIntent);
         });
     }
@@ -39,6 +51,10 @@ public class WearableListener extends WearableListenerService {
     public void onChannelClosed(@NonNull ChannelClient.Channel channel, int i, int i1) {
         Intent serviceIntent = new Intent(this, WorkerService.class);
         serviceIntent.setAction("/stop-service");
+        Intent startIntent = new Intent("it.unipi.ing.mobile.sleepmonitoring_smartphone.RUNNING");
+        startIntent.setAction("/stop-service");
+        sendBroadcast(startIntent);
+        running = false;
         startForegroundService(serviceIntent);
 
     }
