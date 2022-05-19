@@ -43,6 +43,7 @@
     <!-- Home fragment -->
     <string name="home_welcome_label">Welcome </string>
     <string name="home_status_label">Status: </string>
+    <string name="home_status_init">DETECTING</string>
     <string name="home_last_report_button">See last report</string>
 
     <!-- Report fragment -->

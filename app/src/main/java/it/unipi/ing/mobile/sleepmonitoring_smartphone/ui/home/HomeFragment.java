@@ -48,6 +48,7 @@ public class HomeFragment extends Fragment {
     private SharedPreferences mPreferences;
     private StatusReceiver status_receiver;
     private final String WATCH_CAPABILITY = "it.unipi.ing.mobile.sleepmonitoring.watch";
+    private final String RUNNING_INTENT = "it.unipi.ing.mobile.sleepmonitoring_smartphone.RUNNING";
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -82,39 +83,24 @@ public class HomeFragment extends Fragment {
         // Define status receiver to update UI
         status_receiver = new StatusReceiver();
         Activity activity = getActivity();
+
         if(activity != null){
             activity.registerReceiver(
                     status_receiver,
-                    new IntentFilter("it.unipi.ing.mobile.sleepmonitoring_smartphone.RUNNING")
+                    new IntentFilter(RUNNING_INTENT)
             );
 
-            Wearable.getCapabilityClient(activity.getApplicationContext())
-                    .addListener(status_receiver, WATCH_CAPABILITY);
-
-            // Init status label
-            // Get capabilities node
+            // Check capabilities node
+            Log.i(TAG, "Searching nodes ...");
             Task<CapabilityInfo> capability_task = (
                     Wearable.getCapabilityClient(activity.getApplicationContext()).getCapability(
                             WATCH_CAPABILITY, CapabilityClient.FILTER_REACHABLE));
+            capability_task.addOnCompleteListener(task -> checkNearbyNodes(task.getResult().getNodes()));
 
-            capability_task.addOnCompleteListener(task -> {
-                Log.i(TAG, "Searching nodes ...");
-                Set<Node> nodes = capability_task.getResult().getNodes();
+            // Register capabilities listener
+            Wearable.getCapabilityClient(activity.getApplicationContext())
+                    .addListener(status_receiver, WATCH_CAPABILITY);
 
-                // Is possible to pair only one smartphone to the watch,
-                //      the nodes should contain one node or zero
-                if (nodes.size() == 0){
-                    updateStatus(Status.DISCONNECTED);
-                }
-                else {
-                    for (Node node : nodes) { // Usually there is just one node
-                        Log.i(TAG, node.toString());
-                        if (node.isNearby()){
-                            updateStatus( WearableListener.isRunning() ? Status.RUNNING : Status.CONNECTED );
-                        }
-                    }
-                }
-            });
         }
         return root;
     }
@@ -124,7 +110,7 @@ public class HomeFragment extends Fragment {
         super.onDestroyView();
         Activity activity = getActivity();
 
-        // Remove status receiver
+        // Remove status receiver and capabilities listener
         if(activity != null){
             activity.unregisterReceiver(status_receiver);
             Wearable.getCapabilityClient(activity.getApplicationContext())
@@ -133,33 +119,34 @@ public class HomeFragment extends Fragment {
         binding = null;
     }
 
-    private void updateStatus(Status status){
+    private void updateUIStatus(Status status){
         binding.homeStatusValue.setText(status.toString());
         binding.homeStatusValue.setTextColor(status.getColor());
+    }
+
+    private void checkNearbyNodes(Set<Node> nodes){
+        if (nodes.size() == 0){
+            updateUIStatus(Status.DISCONNECTED);
+        }
+        else {
+            for (Node node : nodes) { // Usually there is just one node
+                Log.i(TAG, node.toString());
+                if (node.isNearby()){
+                    updateUIStatus( WearableListener.isRunning() ? Status.RUNNING : Status.CONNECTED );
+                }
+            }
+        }
     }
 
     class StatusReceiver extends BroadcastReceiver implements CapabilityClient.OnCapabilityChangedListener{
         @Override
         public void onCapabilityChanged(@NonNull CapabilityInfo capabilityInfo) {
-            Set<Node> nodes = capabilityInfo.getNodes();
-            Log.i(TAG, "Available nodes: " + nodes.size());
-            if (nodes.size() == 0){
-                updateStatus(Status.DISCONNECTED);
-            }
-            else {
-                for (Node node : nodes) { // Usually there is just one node
-                    Log.i(TAG, node.toString());
-                    if (node.isNearby()){
-                        updateStatus( WearableListener.isRunning() ? Status.RUNNING:Status.CONNECTED );
-                    }
-                }
-            }
+            checkNearbyNodes(capabilityInfo.getNodes());
         }
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.i(TAG, "BRD RECEIVER");
-            updateStatus( WearableListener.isRunning() ? Status.RUNNING : Status.CONNECTED );
+            updateUIStatus( WearableListener.isRunning() ? Status.RUNNING : Status.CONNECTED );
         }
     }
 
