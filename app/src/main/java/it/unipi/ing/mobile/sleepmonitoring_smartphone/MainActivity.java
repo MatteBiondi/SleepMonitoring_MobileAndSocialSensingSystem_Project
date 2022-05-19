@@ -248,7 +248,7 @@ public class MainActivity extends AppCompatActivity {
             //Download and set user image. Download any time, so that we can find any update of it
             ImageView userImage = navHeaderView.findViewById(R.id.user_image);
             // Image link from internet
-            new DownloadImageFromInternet(userImage).execute(account.getPhotoUrl().toString());
+            downloadImageFromInternet(userImage,account.getPhotoUrl().toString());
         }
 
         // User name
@@ -306,30 +306,28 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    // Inner class for async task that is used to download user image from Internet
-    private class DownloadImageFromInternet extends AsyncTask<String, Void, Bitmap> {
-
-        private final ImageView imageView;
-
-        public DownloadImageFromInternet(ImageView imageView) {
-            this.imageView=imageView;
-        }
-
-        protected Bitmap doInBackground(String... urls) {
-            Bitmap userImageBitmap = null;
-            try {
-                String imageURL=urls[0];
-                InputStream in=new java.net.URL(imageURL).openStream();
-                userImageBitmap=BitmapFactory.decodeStream(in);
-            } catch (Exception e) {
-                Log.e("Error Message", e.getMessage());
-                e.printStackTrace();
+    // Download user image from Internet
+    private void downloadImageFromInternet(ImageView userImage, String imageURL){
+        new Thread(){
+            @Override
+            public void run() {
+                super.run();
+                try {
+                    Bitmap userImageBitmap;
+                    InputStream in=new java.net.URL(imageURL).openStream();
+                    userImageBitmap=BitmapFactory.decodeStream(in);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(userImageBitmap != null)
+                                userImage.setImageBitmap(Bitmap.createScaledBitmap(userImageBitmap, 200, 200, false));
+                        }
+                    });
+                } catch (Exception e) {
+                    Log.e("Error Message", e.getMessage());
+                    e.printStackTrace();
+                }
             }
-            return userImageBitmap;
-        }
-        protected void onPostExecute(Bitmap result) {
-            if(result != null)
-                imageView.setImageBitmap(Bitmap.createScaledBitmap(result, 200, 200, false));
-        }
+        }.start();
     }
 }
