@@ -5,36 +5,33 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.bluetooth.BluetoothAdapter;
+import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
+import android.graphics.Color;
 import android.os.IBinder;
+import android.provider.Settings;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
+
+import com.google.android.gms.wearable.CapabilityClient;
+import com.google.android.gms.wearable.CapabilityInfo;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
-import it.unipi.ing.mobile.sleepmonitoring_smartphone.bluetooth.BluetoothBroadcastReceiver;
-
 public class WorkerService extends Service {
     public final String TAG = "WorkerService";
     public final String CHANNEL_ID = "WorkerServiceChannel";
     public final int NOTIFICATION_ID = 2000;
-
-    private BluetoothBroadcastReceiver bluetooth_receiver = null;
     private Thread worker = null;
 
     @Override
     public void onCreate() {
         super.onCreate();
         Log.i(TAG, "onCreate");
-
-        // register broadcast listener for bluetooth status
-        bluetooth_receiver = new BluetoothBroadcastReceiver();
-        registerReceiver(bluetooth_receiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
 
         // create new worker thread
         worker = new Thread(() -> {
@@ -67,11 +64,6 @@ public class WorkerService extends Service {
 
         Log.i(TAG, "onDestroy");
 
-        // unregister broadcast listener for bluetooth status
-        if (bluetooth_receiver != null){
-            unregisterReceiver(bluetooth_receiver);
-        }
-
         // stop worker thread
         if (worker != null){
             worker.interrupt();
@@ -94,6 +86,7 @@ public class WorkerService extends Service {
 
             // Define pending intent
             Intent notificationIntent = new Intent(getApplicationContext(), MainActivity.class);
+            notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             PendingIntent pendingIntent = PendingIntent.getActivity(
                     getApplicationContext(),
                     0, notificationIntent,
@@ -127,4 +120,5 @@ public class WorkerService extends Service {
     public IBinder onBind(Intent intent) {
         return null;
     }
+
 }

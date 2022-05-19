@@ -69,14 +69,14 @@
     <string name="start_delete_button">Delete</string>
     <string name="deleted_report_confirmation">Reports deleted</string>
 
-
-
     <!-- Bluetooth -->
     <string name="bluetooth_alert_title">Bluetooth Low Energy</string>
     <string name="bluetooth_alert_message">Application need Bluetooth Low Energy to communicate with your smartwatch, enable to monitor sleeping !</string>
     <string name="bluetooth_enable">Enable</string>
     <string name="bluetooth_ignore">Ignore</string>
     <string name="bluetooth_neutral">Later</string>
-    <string name="bluetooth_notification_title">Bluetooth Low Energy disabled</string>
-    <string name="bluetooth_notification_text">"Turn on bluetooth for connection to smartwatch"</string>
+
+    <!-- Disconnection notification -->
+    <string name="notification_title">Sleep Monitor Disconnection</string>
+    <string name="notification_text">Smartwatch disconnected, the application will not be able to monitor your sleep</string>
 </resources>
