@@ -92,10 +92,10 @@ public class HomeFragment extends Fragment {
 
             // Check capabilities node
             Log.i(TAG, "Searching nodes ...");
-            Task<CapabilityInfo> capability_task = (
-                    Wearable.getCapabilityClient(activity.getApplicationContext()).getCapability(
-                            WATCH_CAPABILITY, CapabilityClient.FILTER_REACHABLE));
-            capability_task.addOnCompleteListener(task -> checkNearbyNodes(task.getResult().getNodes()));
+            Wearable.getCapabilityClient(activity.getApplicationContext()).getCapability(
+                    WATCH_CAPABILITY,
+                    CapabilityClient.FILTER_REACHABLE
+            ).addOnCompleteListener(task -> checkNearbyNodes(task.getResult().getNodes()));
 
             // Register capabilities listener
             Wearable.getCapabilityClient(activity.getApplicationContext())
@@ -133,6 +133,9 @@ public class HomeFragment extends Fragment {
                 Log.i(TAG, node.toString());
                 if (node.isNearby()){
                     updateUIStatus( WearableListener.isRunning() ? Status.RUNNING : Status.CONNECTED );
+                }
+                else{
+                    updateUIStatus(Status.DISCONNECTED);
                 }
             }
         }

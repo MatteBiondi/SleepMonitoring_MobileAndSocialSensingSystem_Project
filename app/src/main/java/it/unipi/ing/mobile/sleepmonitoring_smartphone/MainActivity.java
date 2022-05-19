@@ -276,7 +276,7 @@ public class MainActivity extends AppCompatActivity {
                 .setTitle(R.string.bluetooth_alert_title)
                 .setMessage(R.string.bluetooth_alert_message)
                 .setPositiveButton(
-                        R.string.bluetooth_enable, (dialog, which) -> bluetooth.enableInterface())
+                        R.string.bluetooth_enable, (dialog, which) -> bluetooth.enableInterface(getApplicationContext()))
                 .setNegativeButton(R.string.bluetooth_ignore, (dialogInterface, i) -> {
                     SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
                     editor.putBoolean("bluetooth_alert", false);
@@ -296,7 +296,7 @@ public class MainActivity extends AppCompatActivity {
             // Checking whether user granted the permission or not
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Log.i(TAG, "Bluetooth permission granted");
-                bluetooth.enableInterface();
+                bluetooth.enableInterface(getApplicationContext());
             }
             else {
                 Log.i(TAG,"BLE permission denied");
