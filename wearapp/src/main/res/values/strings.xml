@@ -2,7 +2,6 @@
     <string name="app_name">Sleep Monitoring</string>
     <!-- Layout -->
     <string name="sleep_monitoring_label">Sleep Monitoring</string>
-    <string name="status_label">Status:</string>
     <string name="button_description">Play button service</string>
 
 </resources>
