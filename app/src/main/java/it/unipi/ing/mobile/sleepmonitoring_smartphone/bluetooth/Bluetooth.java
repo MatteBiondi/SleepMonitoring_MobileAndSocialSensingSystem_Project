@@ -22,8 +22,6 @@ public class Bluetooth {
 
     private final ActivityResultLauncher<Intent> bluetooth_launcher;
     private final BluetoothAdapter bluetoothAdapter;
-
-    private final Context context;
     private static Bluetooth instance = null;
 
     public static Bluetooth build(Activity activity){
@@ -34,8 +32,6 @@ public class Bluetooth {
     }
 
     private Bluetooth(Context context){
-        // Get application context
-        this.context = context;
 
         // Get bluetooth adapter, if supported
         bluetoothAdapter = context.getSystemService(BluetoothManager.class).getAdapter();
@@ -49,13 +45,15 @@ public class Bluetooth {
     }
 
     public boolean checkInterface() {
+        if (bluetoothAdapter == null)
+            return false;
         return bluetoothAdapter.isEnabled();
     }
 
-    public void enableInterface(){
+    public void enableInterface(Context context){
         // Enable bluetooth adapter
         if (!bluetoothAdapter.isEnabled()) { // Bluetooth off
-            if (permissionGranted()) { // Request run-time permissions
+            if (permissionGranted(context)) { // Request run-time permissions
                 bluetooth_launcher.launch(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE));
             }
             else {
@@ -69,7 +67,7 @@ public class Bluetooth {
         }
     }
 
-    private boolean permissionGranted(){
+    private boolean permissionGranted(Context context){
         // BLUETOOTH_CONNECT run-time permission request for Android >= 12
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             return context.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT)
@@ -81,8 +79,7 @@ public class Bluetooth {
 
     public void bluetoothRequestCallback(int resultCode){
         if (resultCode != Activity.RESULT_OK){
-            Toast.makeText(context, "Bluetooth low energy disabled",
-                    Toast.LENGTH_SHORT).show();
+            Log.i(TAG, "Bluetooth disabled");
         }
     }
 }
