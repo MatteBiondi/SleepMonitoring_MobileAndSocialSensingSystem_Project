@@ -29,6 +29,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -62,6 +63,19 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Initialize the shared preferences
+        sharedPrefFile = getString(R.string.shared_preferences_file);
+        mPreferences=getSharedPreferences(sharedPrefFile, MODE_PRIVATE);
+
+        //Restore Theme preferences
+        String selectedTheme = mPreferences.getString(getString(R.string.theme_preferences_key),"Light");
+        if(selectedTheme.equals("Light") || selectedTheme.equals("light")) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
+        else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        }
+
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -79,10 +93,6 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
-
-        // Initialize the shared preferences
-        sharedPrefFile = getString(R.string.shared_preferences_file);
-        mPreferences=getSharedPreferences(sharedPrefFile, MODE_PRIVATE);
 
         // Signin with Google credentials
         signInWithGoogle();
