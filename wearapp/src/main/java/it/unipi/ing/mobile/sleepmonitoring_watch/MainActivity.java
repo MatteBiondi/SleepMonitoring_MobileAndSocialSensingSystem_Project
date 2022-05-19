@@ -23,7 +23,7 @@ import it.unipi.ing.mobile.sleepmonitoring_watch.databinding.ActivityMainBinding
 import it.unipi.ing.mobile.sleepmonitoring_watch.sensors.SensorsManager;
 
 public class MainActivity extends Activity implements CapabilityClient.OnCapabilityChangedListener {
-    public final String MOBILE_CAPABILITY = "sleep_monitor_mobile";
+    public final String MOBILE_CAPABILITY = "it.unipi.ing.mobile.sleepmonitoring.mobile";
     private TextView mTextView;
     private TextView status_label;
     private ActivityMainBinding binding;
