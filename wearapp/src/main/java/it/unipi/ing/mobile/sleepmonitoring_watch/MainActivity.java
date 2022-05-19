@@ -19,6 +19,7 @@ import com.google.android.gms.wearable.Wearable;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
+import it.unipi.ing.mobile.sleepmonitoring_watch.communication.StreamChannel;
 import it.unipi.ing.mobile.sleepmonitoring_watch.databinding.ActivityMainBinding;
 import it.unipi.ing.mobile.sleepmonitoring_watch.sensors.SensorsManager;
 
@@ -28,6 +29,7 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
     private TextView status_label;
     private ActivityMainBinding binding;
     private SensorsManager sensorsManager;
+    private StreamChannel stream_channel = null;
     private ImageButton play_stop_button;
     private String paired_node_id = null;
     private final String TAG = "MainActivity_LogTag";
@@ -77,18 +79,18 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
                 return;
             }
             Log.i(TAG,"startRecording");
-            //todo register, send message to mobile app
+
+
+            // Open channel
+            stream_channel = new StreamChannel(
+                    paired_node_id,
+                    "start-service",
+                    Wearable.getChannelClient(getApplicationContext())
+            );
+
+            //todo register
             //sensorsManager.registerListeners();
-            Wearable.getMessageClient(this)
-                    .sendMessage(paired_node_id, "/start-service", "".getBytes())
-                    .addOnSuccessListener(integer -> {
-                        Log.i(TAG, "Start message sent");
-                        running = true;
-                    })
-                    .addOnFailureListener(integer -> {
-                        Log.i(TAG, "Start message failed");
-                        stop_recording(null);
-                    });
+            running = true;
             play_stop_button.setImageResource(R.drawable.ic_baseline_stop_circle);
             play_stop_button.setOnClickListener(this::stop_recording);
         } catch (Exception e) {
@@ -99,12 +101,14 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
     public void stop_recording(View view){
         try {
             Log.i(TAG,"stopRecording");
-            //todo Unregister, send message to mobile app
-            //sensorsManager.unregisterListeners();
-            Wearable.getMessageClient(this)
-                    .sendMessage(paired_node_id, "/stop-service", "".getBytes())
-                    .addOnSuccessListener(integer -> Log.i(TAG, "Stop message sent"))
-                    .addOnFailureListener(integer -> Log.i(TAG, "Stop message failed"));
+
+            //todo Unregister
+            sensorsManager.unregisterListeners();
+
+            // Close channel
+            if (stream_channel != null)
+                stream_channel.close();
+            stream_channel = null;
 
             if (view != null){
                 running = false;

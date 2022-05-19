@@ -13,6 +13,10 @@ import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+
 import it.unipi.ing.mobile.sleepmonitoring_smartphone.bluetooth.BluetoothBroadcastReceiver;
 
 public class WorkerService extends Service {
@@ -26,7 +30,6 @@ public class WorkerService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-
         Log.i(TAG, "onCreate");
 
         // register broadcast listener for bluetooth status
@@ -35,7 +38,26 @@ public class WorkerService extends Service {
 
         // create new worker thread
         worker = new Thread(() -> {
-           // TODO: read data from wearable, process if necessary, store into db
+            try {
+                // TODO: this is just a test
+                byte[] buffer = new byte[100];
+                int read;
+
+                // Get stream
+                InputStream data_stream = WearableListener.getDataStream();
+
+                while(!worker.isInterrupted()){
+                    read = data_stream.read(buffer);
+                    if (read != -1)
+                        Log.i(TAG, new String(Arrays.copyOfRange(buffer, 0, read)));
+                }
+                // Close stream
+                data_stream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            // TODO: read data from wearable, process if necessary, store into db
         });
     }
 

@@ -10,52 +10,57 @@ import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
  * The event from paired wearable app trigger the execution of the correspondent method defined in
  * in this class. The method is invoked only for those events thar are defined in the manifest file
  */
 
 public class WearableListener extends WearableListenerService {
-    public static boolean running = false;
+    private static boolean running = false;
+    private static InputStream data_stream = null;
+
     public static boolean isRunning(){
         return running;
     }
 
-    public void onMessageReceived (MessageEvent messageEvent) {
-        /* The message path can be '/start' or '/stop', it is used to control the lifecycle of
-         * foreground service that implements the data receiver for wearable app
-         */
-        Intent serviceIntent = new Intent(this, WorkerService.class);
-        serviceIntent.setAction(messageEvent.getPath());
-        Intent startIntent = new Intent("it.unipi.ing.mobile.sleepmonitoring_smartphone.RUNNING");
-        running = messageEvent.getPath().equals("/start-service");
-        sendBroadcast(startIntent);
-        startForegroundService(serviceIntent);
+    public static InputStream getDataStream() throws IOException {
+        if (data_stream == null)
+            throw new IOException("Stream is null");
+        return data_stream;
     }
 
     @Override
     public void onChannelOpened(@NonNull ChannelClient.Channel channel) {
         Wearable.getChannelClient(getApplicationContext()).getInputStream(channel).addOnCompleteListener(task -> {
+
+            // Update UI, if activity is started
+            Intent statusIntent = new Intent("it.unipi.ing.mobile.sleepmonitoring_smartphone.RUNNING");
+            sendBroadcast(statusIntent);
+            running = true;
+
+            // Start foreground service
             Intent serviceIntent = new Intent(getApplicationContext(), WorkerService.class);
             serviceIntent.setAction("/start-service");
-            Intent startIntent = new Intent("it.unipi.ing.mobile.sleepmonitoring_smartphone.RUNNING");
-            startIntent.setAction("/start-service");
-            sendBroadcast(startIntent);
-            //stream = task.getResult();
-            running = true;
+            data_stream = task.getResult();
             startForegroundService(serviceIntent);
         });
     }
 
     @Override
     public void onChannelClosed(@NonNull ChannelClient.Channel channel, int i, int i1) {
-        Intent serviceIntent = new Intent(this, WorkerService.class);
-        serviceIntent.setAction("/stop-service");
+
+        // Update UI, if activity is started
         Intent startIntent = new Intent("it.unipi.ing.mobile.sleepmonitoring_smartphone.RUNNING");
-        startIntent.setAction("/stop-service");
         sendBroadcast(startIntent);
         running = false;
-        startForegroundService(serviceIntent);
 
+        // Stop foreground service
+        Intent serviceIntent = new Intent(this, WorkerService.class);
+        serviceIntent.setAction("/stop-service");
+        startForegroundService(serviceIntent);
+        data_stream = null;
     }
 }
