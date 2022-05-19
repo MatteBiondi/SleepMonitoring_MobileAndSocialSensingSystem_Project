@@ -8,21 +8,24 @@ import android.hardware.SensorManager;
 import android.util.Log;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import java.io.PrintWriter;
 import java.util.Collections;
+import java.util.List;
+import java.util.Scanner;
 
 
-public class SensorsManager implements SensorEventListener {
+public class SensorsManager implements SensorEventListener  {
     final private Context context;
     final private Sensor rotation_vector;
     final private Sensor accelerometer;
     final private SensorManager sm;
+    final private long batchWindowSize;
     String directory;
 
     public PipedOutputStream getOutputStream() {
@@ -30,14 +33,28 @@ public class SensorsManager implements SensorEventListener {
     }
 
     final protected PipedOutputStream outputStream=new PipedOutputStream();
-
+    final protected PrintWriter writer = new PrintWriter(outputStream);
     public SensorsManager(Context context){
         this.context=context;
         sm = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
-        rotation_vector = sm.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-        accelerometer = sm.getDefaultSensor((Sensor.TYPE_ACCELEROMETER));
+        List<Sensor> list = sm.getSensorList(Sensor.TYPE_ALL);
+        for(Sensor x: list)
+            Log.i("SM", "Type: " + x.getStringType() +
+                    ", name: " + x.getName() +
+                    ", vendor: " + x.getVendor() +
+                    ", current (mA): " + x.getPower() +
+                    ", is wakeup: " + x.isWakeUpSensor() +
+                    ", FIFO: " + x.getFifoMaxEventCount()
+            );
+        rotation_vector = sm.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
+        accelerometer = sm.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         directory = context.getFilesDir().getPath();
-
+        batchWindowSize= 5_000;
+        try {
+            testPipe();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -46,14 +63,13 @@ public class SensorsManager implements SensorEventListener {
         Thread testConsumer = new Thread(new Runnable() {
             @Override
             public void run() {
-                byte[] buffer = new byte[100];
+                Scanner r = new Scanner(inputStream);
                 while (true) {
                     try {
-                        int len=inputStream.read(buffer, 0, 100);
-                        String data = new String(
-                                buffer);
+                        JSONObject data= new JSONObject(r.nextLine());
                         Log.i("consumer", "received values " + data);
-                    } catch (IOException e) {
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
                 }
             }
@@ -62,11 +78,15 @@ public class SensorsManager implements SensorEventListener {
     }
 
     public void registerListeners() throws Exception {
+        acc_batch[0]=new DataBatch("acc",0);
+        acc_batch[1]=new DataBatch("acc",0);
+        rot_batch[0]=new DataBatch("rot",0);
+        rot_batch[1]=new DataBatch("rot",0);
         if(!sm.registerListener(this, rotation_vector, SensorManager.SENSOR_DELAY_NORMAL))
             throw new Exception("Unable to register to rotation vector sensor");
         if(!sm.registerListener(this, accelerometer,SensorManager.SENSOR_DELAY_NORMAL))
             throw new Exception("Unable to register to accelerometer sensor");
-        //testPipe();
+
     }
 
     public void unregisterListeners(){
@@ -74,6 +94,9 @@ public class SensorsManager implements SensorEventListener {
     }
 
 
+    private final DataBatch [] acc_batch= new DataBatch[2];
+
+    private final DataBatch [] rot_batch= new DataBatch[2];
     //private int delay=10;
     @Override
     public void onSensorChanged(SensorEvent event) {
@@ -81,37 +104,71 @@ public class SensorsManager implements SensorEventListener {
             delay--;
             return;
         }*/
-        JSONArray data;
-        JSONObject json = new JSONObject();
-
-        if (accelerometer.equals(event.sensor)){
-            data=new JSONArray(Collections.singletonList(event.values));
-            Log.d("accelerometer", "received values "+data);
+        if (accelerometer.equals(event.sensor)) {
             try {
-                outputStream.write(data.toString().getBytes(StandardCharsets.UTF_8));
-            } catch (IOException e) {
+                JSONArray data = new JSONArray(event.values);
+                Log.d("accelerometer", "received values " + data);
+                long ms_time=event.timestamp/1000_000;
+                for (int i=0;i<acc_batch.length;i++) {
+                    if (acc_batch[i].getStartTime() == 0) {
+                        Log.i("acc sender", "initialized");
+                        acc_batch[0] = new DataBatch("acc", ms_time );
+                        acc_batch[1] = new DataBatch("acc", ms_time + (batchWindowSize/2));
+                        acc_batch[0].getData().put(data);
+                        break;
+                    }
+                    if(ms_time <acc_batch[i].getStartTime() )
+                        break;
+                    if (ms_time - acc_batch[i].getStartTime() > batchWindowSize) {
+
+                        Log.i("acc sender",String.format("sent out %d samples",acc_batch[i].getData().length()));
+                        writer.println(acc_batch[i].getJson());
+                        acc_batch[i] = new DataBatch("acc", ms_time);
+
+                    }
+                    acc_batch[i].getData().put(data);
+                }
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        if (rotation_vector.equals(event.sensor)){
+        if (rotation_vector.equals(event.sensor)) {
             final float[] rotationMatrix = new float[9];
             SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values);
             float[] orientationAngle = new float[3];
             SensorManager.getOrientation(rotationMatrix, orientationAngle);
-            Log.d("rotation_vector","received values "+
-                    new JSONArray(Arrays.asList(event.values)));
-            Log.v("rotation_matrix","received values "+
-                    new JSONArray(Arrays.asList(rotationMatrix)));
-            data=new JSONArray(Arrays.asList(orientationAngle));
-            Log.v("orientationAngle","received values "+data);
+            Log.d("rotation_vector", "received values " +
+                    new JSONArray(Collections.singletonList(event.values)));
+            Log.v("rotation_matrix", "received values " +
+                    new JSONArray(Collections.singletonList(rotationMatrix)));
             try {
-                outputStream.write(data.toString().getBytes(StandardCharsets.UTF_8));
-            } catch (IOException e) {
+                JSONArray data = new JSONArray(orientationAngle);
+                long ms_time=event.timestamp/1000_000;
+                for (int i=0;i<rot_batch.length;i++) {
+                    if (rot_batch[i].getStartTime() == 0) {
+                        Log.i("rot sender", "initialized");
+                        rot_batch[0] = new DataBatch("rot", ms_time);
+                        rot_batch[1] = new DataBatch("rot", ms_time + (batchWindowSize/2));
+                        rot_batch[0].getData().put(data);
+                        break;
+                    }
+                    //Log.i("rot sender",String.format("%d %d",rot_batch[0].getStartTime(), rot_batch[1].getStartTime()));
+                    if(ms_time <rot_batch[i].getStartTime() )
+                        break;
+                    if (ms_time - rot_batch[i].getStartTime() >batchWindowSize ) {
+                        writer.println(rot_batch[i].getJson());
+                        Log.i("rot sender",String.format("sent out %d samples",rot_batch[i].getData().length()));
+                        rot_batch[i] = new DataBatch("rot", ms_time);
+
+                    }
+                    rot_batch[i].getData().put(data);
+                }
+            } catch (Exception e) {
                 e.printStackTrace();
             }
+            //delay=10;
+            // same for every sensor
         }
-        //delay=10;
-        // same for every sensor
     }
 
     @Override
