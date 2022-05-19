@@ -36,4 +36,9 @@ public class SleepEvent {
     public void setEvent(@NonNull String event) {
         this.event = event;
     }
+
+    @NonNull @Override
+    public String toString(){
+        return String.format("<%s,%s>", timestamp, event);
+    }
 }
