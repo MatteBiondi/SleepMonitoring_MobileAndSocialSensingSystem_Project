@@ -18,12 +18,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.wearable.CapabilityClient;
 import com.google.android.gms.wearable.CapabilityInfo;
@@ -95,7 +97,18 @@ public class HomeFragment extends Fragment {
             Wearable.getCapabilityClient(activity.getApplicationContext()).getCapability(
                     WATCH_CAPABILITY,
                     CapabilityClient.FILTER_REACHABLE
-            ).addOnCompleteListener(task -> checkNearbyNodes(task.getResult().getNodes()));
+            ).addOnCompleteListener(task -> {
+                try {
+                    Set<Node> nodes = task.getResult().getNodes();
+                    HomeFragment.this.checkNearbyNodes(nodes);
+                }
+                catch (Exception e){
+                    Toast.makeText(getContext(),R.string.no_wearable_api,Toast.LENGTH_LONG).show();
+                    Activity thisActivity = getActivity();
+                    if(thisActivity != null) thisActivity.finishAndRemoveTask();
+                }
+
+            });
 
             // Register capabilities listener
             Wearable.getCapabilityClient(activity.getApplicationContext())
