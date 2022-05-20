@@ -17,7 +17,7 @@
     <!-- Error messages -->
     <string name="failed_google_login">There are problems with Google Play services in your device</string>
     <string name="rejected_login_or_permissions">The user\'s account information and permissions are needed.</string>
-
+    <string name="no_wearable_api">Wearable APIs are not available on this device. Download WearOS and retry.</string>
     <!-- Description string -->
     <string name="nav_header_desc">Navigation Header</string>
 
@@ -53,8 +53,14 @@
     <string name="report_range_title">Quality</string>
     <string name="domainTitle">Legend: </string>
     <string name="report_date_format">dd/MM/yyyy</string>
+    <string name="report_time_format">hh:mm:ss</string>
     <string name="timestamp_format">dd/MM/yyyy hh:mm:ss</string>
-
+    <string name="micro_movements_title">Micro-Movements</string>
+    <string name="macro_movements_title">Macro-Movements</string>
+    <string name="roll_movements_title">Rollover</string>
+    <string name="micro_movements_label">micro</string>
+    <string name="macro_movements_label">macro</string>
+    <string name="roll_movements_label">roll</string>
 
     <!-- Settings fragment -->
     <string name="settings_theme">Theme:</string>
