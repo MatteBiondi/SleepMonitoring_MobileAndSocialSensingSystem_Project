@@ -50,16 +50,16 @@ public class Bluetooth {
         return bluetoothAdapter.isEnabled();
     }
 
-    public void enableInterface(Context context){
+    public void enableInterface(Activity activity){
         // Enable bluetooth adapter
         if (!bluetoothAdapter.isEnabled()) { // Bluetooth off
-            if (permissionGranted(context)) { // Request run-time permissions
+            if (permissionGranted(activity)) { // Request run-time permissions
                 bluetooth_launcher.launch(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE));
             }
             else {
                 Log.i(TAG, "Missing BLE permissions");
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-                    ActivityCompat.requestPermissions((Activity) context,
+                    ActivityCompat.requestPermissions(activity,
                             new String[]{Manifest.permission.BLUETOOTH_CONNECT},
                             BLUETOOTH_REQUEST_CODE
                     );
