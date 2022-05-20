@@ -61,13 +61,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
         // Initialize the shared preferences
         sharedPrefFile = getString(R.string.shared_preferences_file);
         mPreferences=getSharedPreferences(sharedPrefFile, MODE_PRIVATE);
 
         //Restore Theme preferences
+        // MUST be before super.onCreate() because of a bug that otherwise makes the app crash
         String selectedTheme = mPreferences.getString(getString(R.string.theme_preferences_key),"Light");
         if(selectedTheme.equals("Light") || selectedTheme.equals("light")) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
@@ -75,6 +74,10 @@ public class MainActivity extends AppCompatActivity {
         else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         }
+
+
+        super.onCreate(savedInstanceState);
+
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
