@@ -18,7 +18,7 @@ public class StreamChannel extends ChannelClient.ChannelCallback {
     private OutputStream out_stream;
     private InputStream in_stream;
 
-    public StreamChannel(String node, String endpoint, ChannelClient channel_client)  {
+    public StreamChannel(String node, String endpoint, ChannelClient channel_client, StreamHandler stream_handler)  {
         this.channel_client = channel_client;
 
         // Open channel
@@ -30,12 +30,18 @@ public class StreamChannel extends ChannelClient.ChannelCallback {
 
             // Get output stream
             Task<OutputStream> out_stream_task = channel_client.getOutputStream(channel);
-            out_stream_task.addOnSuccessListener(outputStream -> out_stream = outputStream);
+            out_stream_task.addOnSuccessListener(outputStream -> {
+                out_stream = outputStream;
+                stream_handler.setOutputStream(out_stream);
+            });
 
 
             // Get input stream
             Task<InputStream> in_stream_task = channel_client.getInputStream(channel);
-            in_stream_task.addOnSuccessListener(stream -> in_stream = stream);
+            in_stream_task.addOnSuccessListener(input_stream -> {
+                in_stream = input_stream;
+                stream_handler.setInputStream(input_stream);
+            });
 
             channel_client.registerChannelCallback(stream_channel, this);
         });

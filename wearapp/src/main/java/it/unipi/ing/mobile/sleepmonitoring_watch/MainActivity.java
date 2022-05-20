@@ -1,7 +1,5 @@
 package it.unipi.ing.mobile.sleepmonitoring_watch;
 
-import static android.os.SystemClock.sleep;
-
 import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -20,10 +18,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 import it.unipi.ing.mobile.sleepmonitoring_watch.communication.StreamChannel;
+import it.unipi.ing.mobile.sleepmonitoring_watch.communication.StreamHandler;
 import it.unipi.ing.mobile.sleepmonitoring_watch.databinding.ActivityMainBinding;
 import it.unipi.ing.mobile.sleepmonitoring_watch.sensors.SensorsManager;
 
@@ -98,16 +96,26 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
             stream_channel = new StreamChannel(
                     paired_node_id,
                     "start-service",
-                    Wearable.getChannelClient(getApplicationContext())
+                    Wearable.getChannelClient(getApplicationContext()),
+                    new StreamHandler() {
+                        @Override
+                        public void setInputStream(InputStream input_stream) {
+                            Log.i(TAG, "Input stream handler not defined");
+                        }
+
+                        @Override
+                        public void setOutputStream(OutputStream output_stream) {
+                            try {
+                                sensorsManager.registerListeners(output_stream);
+                                running = true;
+                                binding.playStopButton.setOnClickListener(view -> stop_recording(view));
+                                updateUIStatus(Status.RUNNING);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
             );
-            sleep(10000);
-            //todo register
-
-            sensorsManager.registerListeners(stream_channel.getOutStream());
-            running = true;
-            binding.playStopButton.setOnClickListener(this::stop_recording);
-            updateUIStatus(Status.RUNNING);
-
             //TODO testing
             //testThread=new Test(inS);
             //testThread.start();
@@ -119,7 +127,7 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
     public void stop_recording(View view){
         try {
             Log.i(TAG,"stopRecording");
-            testThread.interrupt();
+            //testThread.interrupt();
             //todo Unregister
             sensorsManager.unregisterListeners();
 
