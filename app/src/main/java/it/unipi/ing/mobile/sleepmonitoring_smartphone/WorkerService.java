@@ -18,9 +18,13 @@ import androidx.core.app.NotificationCompat;
 import com.google.android.gms.wearable.CapabilityClient;
 import com.google.android.gms.wearable.CapabilityInfo;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Scanner;
 
 public class WorkerService extends Service {
     public final String TAG = "WorkerService";
@@ -37,20 +41,17 @@ public class WorkerService extends Service {
         worker = new Thread(() -> {
             try {
                 // TODO: this is just a test
-                byte[] buffer = new byte[100];
-                int read;
 
                 // Get stream
                 InputStream data_stream = WearableListener.getDataStream();
-
+                Scanner inputScanner = new Scanner(data_stream);
                 while(!worker.isInterrupted()){
-                    read = data_stream.read(buffer);
-                    if (read != -1)
-                        Log.i(TAG, new String(Arrays.copyOfRange(buffer, 0, read)));
+                    JSONObject data = new JSONObject(inputScanner.nextLine());
+                    Log.i("consumer", "received values " + data);
                 }
                 // Close stream
                 data_stream.close();
-            } catch (IOException e) {
+            } catch (IOException | JSONException e) {
                 e.printStackTrace();
             }
 

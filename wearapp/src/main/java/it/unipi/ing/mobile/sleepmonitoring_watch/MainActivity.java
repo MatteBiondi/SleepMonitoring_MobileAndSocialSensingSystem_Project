@@ -1,5 +1,7 @@
 package it.unipi.ing.mobile.sleepmonitoring_watch;
 
+import static android.os.SystemClock.sleep;
+
 import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -14,6 +16,11 @@ import com.google.android.gms.wearable.CapabilityInfo;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
 
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 import it.unipi.ing.mobile.sleepmonitoring_watch.communication.StreamChannel;
@@ -35,6 +42,7 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        // Open channel
 
         sensorsManager =new SensorsManager(this.getApplicationContext());
     }
@@ -76,6 +84,7 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
         binding.playStopButton.setImageResource(status.getButtonImage());
     }
 
+    Test testThread;
     public void start_recording(View view){
         try {
             if(paired_node_id == null){
@@ -84,18 +93,24 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
             }
 
             Log.i(TAG,"startRecording");
-
-            // Open channel
+            PipedOutputStream outS= new PipedOutputStream();
+            InputStream inS=new PipedInputStream(outS);
             stream_channel = new StreamChannel(
                     paired_node_id,
                     "start-service",
                     Wearable.getChannelClient(getApplicationContext())
             );
+            sleep(10000);
             //todo register
-            //sensorsManager.registerListeners();
+
+            sensorsManager.registerListeners(stream_channel.getOutStream());
             running = true;
             binding.playStopButton.setOnClickListener(this::stop_recording);
             updateUIStatus(Status.RUNNING);
+
+            //TODO testing
+            //testThread=new Test(inS);
+            //testThread.start();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -104,7 +119,7 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
     public void stop_recording(View view){
         try {
             Log.i(TAG,"stopRecording");
-
+            testThread.interrupt();
             //todo Unregister
             sensorsManager.unregisterListeners();
 
