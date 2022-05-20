@@ -9,11 +9,14 @@ import java.util.List;
 
 @Dao
 public interface SleepEventDao {
-    @Query("SELECT * FROM sleep_event")
+    @Query("SELECT * FROM sleep_event ORDER BY date(timestamp) ASC")
     List<SleepEvent> getAll();
 
-    @Query("SELECT * FROM sleep_event WHERE date(timestamp) == :date")
+    @Query("SELECT * FROM sleep_event WHERE date(timestamp) == :date ORDER BY date(timestamp) ASC")
     List<SleepEvent> getByDate(String date);
+
+    @Query("SELECT * FROM sleep_event where date(timestamp) ==  (SELECT MAX(date(timestamp)) FROM sleep_event) ORDER BY date(timestamp) ASC")
+    List<SleepEvent> getLastReport();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertSleepEvents(SleepEvent... sleep_events);

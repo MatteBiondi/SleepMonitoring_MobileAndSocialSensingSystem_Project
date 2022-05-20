@@ -27,6 +27,10 @@ public class SleepEventDatabase {
         return database.sleep_event_dao().getByDate(date);
     }
 
+    public List<SleepEvent> getLastReport(){
+        return database.sleep_event_dao().getLastReport();
+    }
+
     public void insertSleepEvents(SleepEvent... sleep_events){
         database.sleep_event_dao().insertSleepEvents(sleep_events);
     }
