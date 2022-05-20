@@ -52,9 +52,9 @@
     <string name="report_plot_title">Sleep Evaluation</string>
     <string name="report_range_title">Quality</string>
     <string name="domainTitle">Legend: </string>
-    <string name="report_date_format">dd/MM/yyyy</string>
+    <string name="report_date_format">yyyy-MM-dd</string>
     <string name="report_time_format">hh:mm:ss</string>
-    <string name="timestamp_format">dd/MM/yyyy hh:mm:ss</string>
+    <string name="timestamp_format">yyyy-MM-dd hh:mm:ss</string>
     <string name="micro_movements_title">Micro-Movements</string>
     <string name="macro_movements_title">Macro-Movements</string>
     <string name="roll_movements_title">Rollover</string>
