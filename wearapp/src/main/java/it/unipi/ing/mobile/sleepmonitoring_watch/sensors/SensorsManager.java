@@ -8,34 +8,26 @@ import android.hardware.SensorManager;
 import android.util.Log;
 
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.io.IOException;
-import java.io.PipedInputStream;
+import java.io.OutputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
-import java.util.Scanner;
 
 
 public class SensorsManager implements SensorEventListener  {
-    final private Context context;
+
     final private Sensor rotation_vector;
     final private Sensor accelerometer;
     final private SensorManager sm;
     final private long batchWindowSize;
     String directory;
 
-    public PipedOutputStream getOutputStream() {
-        return outputStream;
-    }
 
-    final protected PipedOutputStream outputStream=new PipedOutputStream();
-    final protected PrintWriter writer = new PrintWriter(outputStream);
+    final private OutputStream outputStream=new PipedOutputStream();
+    protected PrintWriter writer;
     public SensorsManager(Context context){
-        this.context=context;
         sm = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         List<Sensor> list = sm.getSensorList(Sensor.TYPE_ALL);
         for(Sensor x: list)
@@ -50,34 +42,13 @@ public class SensorsManager implements SensorEventListener  {
         accelerometer = sm.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         directory = context.getFilesDir().getPath();
         batchWindowSize= 5_000;
-        try {
-            testPipe();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
 
     }
 
-    private void testPipe() throws IOException {
-        final PipedInputStream inputStream  = new PipedInputStream(outputStream);
-        Thread testConsumer = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Scanner r = new Scanner(inputStream);
-                while (true) {
-                    try {
-                        JSONObject data= new JSONObject(r.nextLine());
-                        Log.i("consumer", "received values " + data);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
-        testConsumer.start();
-    }
 
-    public void registerListeners() throws Exception {
+
+    public void registerListeners(OutputStream outStream) throws Exception {
         acc_batch[0]=new DataBatch("acc",0);
         acc_batch[1]=new DataBatch("acc",0);
         rot_batch[0]=new DataBatch("rot",0);
@@ -86,7 +57,7 @@ public class SensorsManager implements SensorEventListener  {
             throw new Exception("Unable to register to rotation vector sensor");
         if(!sm.registerListener(this, accelerometer,SensorManager.SENSOR_DELAY_NORMAL))
             throw new Exception("Unable to register to accelerometer sensor");
-
+        writer = new PrintWriter(outStream);
     }
 
     public void unregisterListeners(){
