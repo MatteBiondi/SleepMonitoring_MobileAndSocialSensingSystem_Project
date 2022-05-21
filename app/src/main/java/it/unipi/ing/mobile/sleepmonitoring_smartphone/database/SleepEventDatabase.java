@@ -10,13 +10,28 @@ public class SleepEventDatabase {
 
     public static SleepEventDatabase build(Context context){
         if (instance == null){
-            instance = new SleepEventDatabase(context);
+            instance = new SleepEventDatabase(context, null);
         }
         return instance;
     }
 
-    private SleepEventDatabase(Context context){
-        database = Room.databaseBuilder(context, SleepEventDB.class, "sleep_event_db").build();
+    public static SleepEventDatabase buildExample(Context context, String asset){
+        if (instance == null){
+            instance = new SleepEventDatabase(context, asset);
+        }
+        return instance;
+    }
+
+    private SleepEventDatabase(Context context, String asset){
+        if (asset != null){
+            database =  Room.databaseBuilder(context, SleepEventDB.class, "sleep_event_db")
+                    .createFromAsset(asset)
+                    .build();
+        }
+        else {
+            database = Room.databaseBuilder(context, SleepEventDB.class, "sleep_event_db")
+                    .build();
+        }
     }
 
     public List<SleepEvent> getAll(){
