@@ -10,7 +10,7 @@
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/purple_500</item>
         <item name="colorSecondaryVariant">@color/white</item>
-        <item name="colorOnSecondary">@color/grey</item>
+        <item name="colorOnSecondary">@color/cardview_dark_background</item>
 
         <!-- Status bar color. -->
         <item name="android:statusBarColor" >?attr/colorPrimaryVariant</item>
