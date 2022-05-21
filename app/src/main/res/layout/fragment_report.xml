@@ -46,8 +46,7 @@
 
         <com.androidplot.xy.XYPlot
             android:id="@+id/report_plot"
-            style="@style/APDefacto.Light"
-
+            style="@style/APDefacto"
             android:layout_width="match_parent"
             android:layout_height="385dp"
             android:layout_marginStart="8dp"
@@ -55,9 +54,19 @@
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="24dp"
 
-            app:domainTitle="@string/domainTitle"
-            app:graphMarginBottom="50dp"
-            app:graphMarginLeft="25dp"
+            android:visibility="invisible"
+
+            app:graphBackgroundColor="@color/ap_transparent"
+            app:gridBackgroundColor="@color/ap_transparent"
+            app:backgroundColor="@color/ap_transparent"
+            app:borderColor="@color/ap_transparent"
+
+            app:domainTitle="@string/domain_title"
+            app:domainTitleTextColor="?attr/colorSecondaryVariant"
+            app:domainTitleTextSize="20sp"
+
+            app:graphMarginBottom="70dp"
+            app:graphMarginLeft="10dp"
             app:graphMarginRight="15dp"
             app:graphMarginTop="50dp"
 
@@ -67,16 +76,23 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/editText_date"
 
-            app:legendTextSize="15dp"
-            app:domainTitleTextSize="15dp"
+            app:legendTextColor="?attr/colorSecondaryVariant"
+            app:legendTextSize="15sp"
+            app:legendHeight="50dp"
 
             app:lineLabelRotationBottom="-45"
-            app:lineLabels="left|bottom"
+            app:lineLabelTextColorBottom="?attr/colorSecondaryVariant"
+            app:lineLabels="none|bottom"
+
+            app:paddingLeft="10dp"
+            app:paddingTop="20dp"
 
             app:rangeTitle="@string/report_range_title"
+            app:rangeTitleTextColor="?attr/colorSecondaryVariant"
             app:rangeTitleTextSize="20sp"
 
             app:title="@string/report_plot_title"
+            app:titleTextColor="?attr/colorSecondaryVariant"
             app:titleTextSize="30sp" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

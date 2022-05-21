@@ -50,17 +50,18 @@
     <string name="report_label">Select one day: </string>
     <string name="editText_date_hint">Enter Date</string>
     <string name="report_plot_title">Sleep Evaluation</string>
-    <string name="report_range_title">Quality</string>
-    <string name="domainTitle">Legend: </string>
+    <string name="report_range_title">Type of movement</string>
+    <string name="domain_title">Time</string>
     <string name="report_date_format">yyyy-MM-dd</string>
-    <string name="report_time_format">hh:mm:ss</string>
-    <string name="timestamp_format">yyyy-MM-dd hh:mm:ss</string>
+    <string name="report_time_format">HH:mm</string>
+    <string name="timestamp_format">yyyy-MM-dd HH:mm:ss</string>
     <string name="micro_movements_title">Micro-Movements</string>
     <string name="macro_movements_title">Macro-Movements</string>
     <string name="roll_movements_title">Rollover</string>
     <string name="micro_movements_label">micro</string>
     <string name="macro_movements_label">macro</string>
     <string name="roll_movements_label">roll</string>
+    <string name="no_report_to_plot">There are no data to plot</string>
 
     <!-- Settings fragment -->
     <string name="settings_theme">Theme:</string>
