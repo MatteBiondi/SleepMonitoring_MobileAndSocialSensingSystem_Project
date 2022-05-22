@@ -33,6 +33,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:autofillHints=""
             android:ems="10"
             android:hint="@string/editText_date_hint"
             android:inputType="date"
@@ -41,8 +42,7 @@
             android:textColorHint="#757575"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/report_label"
-            android:autofillHints="" />
+            app:layout_constraintTop_toBottomOf="@+id/report_label" />
 
         <com.androidplot.xy.XYPlot
             android:id="@+id/report_plot"
@@ -54,31 +54,31 @@
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="24dp"
 
-            android:visibility="invisible"
+            android:visibility="gone"
 
-            app:graphBackgroundColor="@color/ap_transparent"
-            app:gridBackgroundColor="@color/ap_transparent"
             app:backgroundColor="@color/ap_transparent"
             app:borderColor="@color/ap_transparent"
-
             app:domainTitle="@string/domain_title"
             app:domainTitleTextColor="?attr/colorSecondaryVariant"
-            app:domainTitleTextSize="20sp"
 
+            app:domainTitleTextSize="20sp"
+            app:graphBackgroundColor="@color/ap_transparent"
             app:graphMarginBottom="70dp"
+
             app:graphMarginLeft="10dp"
             app:graphMarginRight="15dp"
             app:graphMarginTop="50dp"
+            app:gridBackgroundColor="@color/ap_transparent"
 
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.49"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/editText_date"
+            app:layout_constraintTop_toBottomOf="@id/report_session_spinner"
 
+            app:legendHeight="50dp"
             app:legendTextColor="?attr/colorSecondaryVariant"
             app:legendTextSize="15sp"
-            app:legendHeight="50dp"
 
             app:lineLabelRotationBottom="-45"
             app:lineLabelTextColorBottom="?attr/colorSecondaryVariant"
@@ -94,6 +94,18 @@
             app:title="@string/report_plot_title"
             app:titleTextColor="?attr/colorSecondaryVariant"
             app:titleTextSize="30sp" />
+
+        <Spinner
+            android:id="@+id/report_session_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:prompt="@string/spinner_prompt"
+            android:spinnerMode="dialog"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/editText_date" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
 
