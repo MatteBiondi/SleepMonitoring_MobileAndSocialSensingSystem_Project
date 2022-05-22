@@ -7,6 +7,7 @@ import java.util.List;
 public class SleepEventDatabase {
     private static SleepEventDatabase instance = null;
     private final SleepEventDB database;
+    private static final String DB_NAME  = "sleep_event_db.db";
 
     public static SleepEventDatabase build(Context context){
         if (instance == null){
@@ -24,12 +25,12 @@ public class SleepEventDatabase {
 
     private SleepEventDatabase(Context context, String asset){
         if (asset != null){
-            database =  Room.databaseBuilder(context, SleepEventDB.class, "sleep_event_db")
+            database =  Room.databaseBuilder(context, SleepEventDB.class, DB_NAME)
                     .createFromAsset(asset)
                     .build();
         }
         else {
-            database = Room.databaseBuilder(context, SleepEventDB.class, "sleep_event_db")
+            database = Room.databaseBuilder(context, SleepEventDB.class, DB_NAME)
                     .build();
         }
     }
