@@ -23,7 +23,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -89,12 +88,22 @@ public class ReportFragment extends Fragment {
             // date picker dialog
             DatePickerDialog datepicker = new DatePickerDialog(getActivity(),
                     (dp, year, monthOfYear, dayOfMonth) -> {
-                        date.setText(
-                                DateFormat.format(ReportFragment.this.getString(R.string.report_date_format),
-                                        new GregorianCalendar(year, monthOfYear, dayOfMonth)));
+                        String newDateValue =(String) DateFormat.format(ReportFragment.this.getString(R.string.report_date_format),
+                                        new GregorianCalendar(year, monthOfYear, dayOfMonth));
+                        date.setText(newDateValue);
 
-                        // PLot update
-                        plotUpdate(date.getText().toString());
+                        new Thread(){
+                            @Override
+                            public void run() {
+                                super.run();
+                                //todo da rimettere build
+                                // Request data for the received date
+                                SleepEventDatabase db = SleepEventDatabase.buildExample(getContext().getApplicationContext(),"SleepEventExample.db");
+                                List<SleepEvent> sleepEventList = db.getByDate(newDateValue);
+                                // PLot update
+                                plotUpdate(sleepEventList);
+                            }
+                        }.start();
                     },
                     currentYear, currentMonth, currentDay);
             datepicker.show();
@@ -109,17 +118,24 @@ public class ReportFragment extends Fragment {
                 @Override
                 public void run() {
                     super.run();
-                    SleepEventDatabase db = SleepEventDatabase.build(getContext());
+                    //todo da rimettere build
+                    SleepEventDatabase db = SleepEventDatabase.buildExample(getContext(),"SleepEventExample.db");
+                    //todo forse da sostituire con last session che ritorna solo la data
                     List<SleepEvent> sleepEventList = db.getLastReport();
-                    if (sleepEventList.size() <= 0)
-                            return;
+
                     Activity mainActivity = getActivity();
+
                     if (mainActivity != null) {
+                        if (sleepEventList.size() <= 0) {
+                            mainActivity.runOnUiThread(() -> Toast.makeText(getContext(),R.string.no_report_to_plot, Toast.LENGTH_SHORT).show());
+                            return;
+                        }
+
                         mainActivity.runOnUiThread(() -> {
-                            String extractedData = sleepEventList.get(0).getTimestamp();
+                            String extractedDate = sleepEventList.get(0).getTimestamp();
                             SimpleDateFormat timestampFormat = new SimpleDateFormat(getString(R.string.timestamp_format), Locale.getDefault());
                             try {
-                                Date dateLastReport = timestampFormat.parse(extractedData);
+                                Date dateLastReport = timestampFormat.parse(extractedDate);
                                 String requestedDate = DateFormat.format(getString(R.string.report_date_format), dateLastReport).toString();
                                 // Set the current date on the editText and update the plot
                                 date.setText(requestedDate);
@@ -127,11 +143,10 @@ public class ReportFragment extends Fragment {
                                 e.printStackTrace();
                             }
                         });
+                        //Todo qui o dopo start?
+                        // update the plot
+                        plotUpdate(sleepEventList);
                     }
-
-                    //Todo qui o dopo start?
-                    // update the plot
-                    plotUpdate(date.getText().toString());
                 }
             }.start();
         }
@@ -175,23 +190,18 @@ public class ReportFragment extends Fragment {
         Log.i(TAG,"destroy");
     }
 
-    public void plotUpdate(String date){
+    public void plotUpdate(List<SleepEvent> sleepEventList){
         new Thread(){
             @Override
             public void run() {
                 super.run();
                 plot.setVisibility(View.INVISIBLE);
-                // Request data for the received date
-                SleepEventDatabase db = SleepEventDatabase.build(getContext());
-                List<SleepEvent> sleepEventList = db.getByDate(date);
 
                 // If there are no data to plot
                 if(sleepEventList.size() == 0){
                     Activity mainActivity = getActivity();
                     if (mainActivity != null) {
-                        mainActivity.runOnUiThread(() -> {
-                            Toast.makeText(getContext(),R.string.no_report_to_plot, Toast.LENGTH_SHORT).show();
-                        });
+                        mainActivity.runOnUiThread(() -> Toast.makeText(getContext(),R.string.no_report_to_plot, Toast.LENGTH_SHORT).show());
                     }
                     return;
                 }
