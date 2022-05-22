@@ -43,6 +43,7 @@ import it.unipi.ing.mobile.sleepmonitoring_smartphone.ui.home.HomeFragmentDirect
 
 public class HomeFragment extends Fragment {
     public final String TAG = "HomeFragment";
+    public boolean welcomeMessageUpdated;
     private FragmentHomeBinding binding;
 
     private String sharedPrefFile ;
@@ -60,17 +61,15 @@ public class HomeFragment extends Fragment {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+        welcomeMessageUpdated=false;
+
         // Set attributes for shared preferences
         sharedPrefFile = getString(R.string.shared_preferences_file);
         mPreferences=inflater.getContext().getSharedPreferences(sharedPrefFile, MODE_PRIVATE);
         user_first_name_preferences_key = getString(R.string.user_first_name_preferences_key);
 
-        // Get account information from sharedPreferences
-        String firstName = mPreferences.getString(user_first_name_preferences_key, "");
-
-        final TextView textView = binding.homeWelcomeLabel;
-        textView.append(" "+firstName);
-
+        //Update welcome message
+        updateWelcomeMessage();
 
         // Set home fragment button listener for click event
         Button seeLastReport = binding.homeLastReportButton;
@@ -80,7 +79,8 @@ public class HomeFragment extends Fragment {
             Navigation.findNavController(view).navigate(action);
         });
 
-        homeViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+        //todo serve?
+        //homeViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
 
         // Define status receiver to update UI
         status_receiver = new StatusReceiver();
@@ -189,4 +189,27 @@ public class HomeFragment extends Fragment {
             return this.color;
         }
     }
+
+    public boolean updateWelcomeMessage(){
+        // Get account information from sharedPreferences
+        String firstName = mPreferences.getString(user_first_name_preferences_key, "");
+        String welcomeMessage = getString(R.string.home_welcome_label)+" "+firstName;
+
+        TextView textView = binding.homeWelcomeLabel;
+        textView.setText(welcomeMessage);
+
+        return !firstName.equals("");
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        Log.i(TAG,"onResume + "+welcomeMessageUpdated);
+
+        if(!welcomeMessageUpdated) {
+            // Update welcome message
+            welcomeMessageUpdated=updateWelcomeMessage();;
+        }
+    }
+
 }
