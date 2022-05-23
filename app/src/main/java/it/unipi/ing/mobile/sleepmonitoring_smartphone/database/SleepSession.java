@@ -55,6 +55,6 @@ public class SleepSession {
 
     @Override @NonNull
     public String toString(){
-        return String.format(Locale.ITALIAN, "<%s: %s,%s>", id, start, stop);
+        return String.format(Locale.ITALIAN, "%s / %s", start, stop);
     }
 }

@@ -9,7 +9,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 public class SleepEventDatabase {
     private static SleepEventDatabase instance = null;
@@ -88,23 +87,16 @@ public class SleepEventDatabase {
     public Report getLastReport(){
         SleepSession session = database.sleep_event_dao().getLastSession();
         List<SleepEvent> events = database.sleep_event_dao().getEventsBySession(session.getId());
-        List<SleepEvent> filtered_events =
-                events.stream()
-                        .filter(sleepEvent -> sleepEvent.getTimestamp().substring(0,10).equals(session.getStop()))
-                        .collect(Collectors.toList());
 
-        return new Report(session.getStart(), session.getStop(), filtered_events);
+        return new Report(session.getStop().substring(0,10), session.getStart(), session.getStop(), events);
     }
 
     public Report getReport(String date, Long session_id){
         SleepSession session = database.sleep_event_dao().getSessionById(session_id);
-        List<SleepEvent> events = database.sleep_event_dao().getEventsBySession(session_id);
-        List<SleepEvent> filtered_events =
-                events.stream()
-                        .filter(sleepEvent -> sleepEvent.getTimestamp().substring(0,10).equals(date))
-                        .collect(Collectors.toList());
 
-        return new Report(session.getStart(), session.getStop(), filtered_events);
+        List<SleepEvent> events = database.sleep_event_dao().getEventsBySession(session_id);
+
+        return new Report(date, session.getStart(), session.getStop(), events);
     }
 
     // DELETE HISTORY
