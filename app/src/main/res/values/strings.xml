@@ -18,6 +18,8 @@
     <string name="failed_google_login">There are problems with Google Play services in your device</string>
     <string name="rejected_login_or_permissions">The user\'s account information and permissions are needed.</string>
     <string name="no_wearable_api">Wearable APIs are not available on this device. Download WearOS and retry.</string>
+    <string name="main_activity_error">Application stops work for internal error</string>
+
     <!-- Description string -->
     <string name="nav_header_desc">Navigation Header</string>
 

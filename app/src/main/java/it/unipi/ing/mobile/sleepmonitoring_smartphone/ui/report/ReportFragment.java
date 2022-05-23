@@ -5,6 +5,7 @@ import static android.content.Context.MODE_PRIVATE;
 import static com.androidplot.xy.StepMode.INCREMENT_BY_VAL;
 import static com.androidplot.xy.StepMode.SUBDIVIDE;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.annotation.SuppressLint;
@@ -23,7 +24,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.androidplot.ui.DynamicTableModel;
@@ -48,8 +52,10 @@ import java.util.List;
 import java.util.Locale;
 
 import it.unipi.ing.mobile.sleepmonitoring_smartphone.R;
+import it.unipi.ing.mobile.sleepmonitoring_smartphone.database.Report;
 import it.unipi.ing.mobile.sleepmonitoring_smartphone.database.SleepEvent;
 import it.unipi.ing.mobile.sleepmonitoring_smartphone.database.SleepEventDatabase;
+import it.unipi.ing.mobile.sleepmonitoring_smartphone.database.SleepSession;
 
 public class ReportFragment extends Fragment {
 
@@ -57,8 +63,11 @@ public class ReportFragment extends Fragment {
     private final String TAG = "ReportFragment";
     private EditText date;
     private XYPlot plot;
+    private Spinner spinner;
     private String sharedPrefFile;
     private SharedPreferences mPreferences;
+
+    private Activity mainActivity;
 
     public static ReportFragment newInstance() {
         return new ReportFragment();
@@ -75,11 +84,25 @@ public class ReportFragment extends Fragment {
         mPreferences=inflater.getContext().getSharedPreferences(sharedPrefFile, MODE_PRIVATE);
 
 
+        mainActivity = getActivity();
+        if (mainActivity == null) {
+            Toast.makeText(getContext(),R.string.main_activity_error, Toast.LENGTH_SHORT);
+            mainActivity.finishAndRemoveTask();
+        }
+
         plot=view.findViewById(R.id.report_plot);
         date=view.findViewById(R.id.editText_date);
+        spinner=view.findViewById(R.id.report_session_spinner);
+
+
         date.setOnFocusChangeListener((v, hasFocus) -> {
             if(!hasFocus)
                 return;
+
+            mainActivity.runOnUiThread(()->spinner.setVisibility(View.GONE));
+            mainActivity.runOnUiThread(()->plot.setVisibility(View.GONE));
+
+
             final Calendar cldr = Calendar.getInstance();
             //Get current date
             int currentDay = cldr.get(Calendar.DAY_OF_MONTH);
@@ -98,16 +121,62 @@ public class ReportFragment extends Fragment {
                                 super.run();
                                 //todo da rimettere build
                                 // Request data for the received date
-                                SleepEventDatabase db = SleepEventDatabase.buildExample(getContext().getApplicationContext(),"SleepEventExample.db");
-                                List<SleepEvent> sleepEventList = db.getByDate(newDateValue);
-                                // PLot update
-                                plotUpdate(sleepEventList);
+                                SleepEventDatabase db = SleepEventDatabase.buildExample(getContext(),"SleepEventExample.db");
+                                List<SleepSession> sessions = db.getSessionsByDate(newDateValue);
+
+                                //Put session item in the spinner
+                                ArrayAdapter<SleepSession> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, sessions);
+                                spinner.setAdapter(adapter);
+
+                                mainActivity.runOnUiThread(()->spinner.setVisibility(View.VISIBLE));
                             }
                         }.start();
                     },
                     currentYear, currentMonth, currentDay);
             datepicker.show();
+            ConstraintLayout cl = (ConstraintLayout) date.getParent();
+            cl.requestFocusFromTouch();
             date.clearFocus();
+        });
+
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+                new Thread(){
+                    @Override
+                    public void run() {
+                        super.run();
+                        //todo posso fare in modo di riusare lo stesso di prima?
+                        //Take the selected item
+                        SleepSession selectedSession = (SleepSession) parent.getItemAtPosition(pos);
+                        // Request data for the received date
+                        SleepEventDatabase db = SleepEventDatabase.buildExample(getContext(),"SleepEventExample.db");
+                        Report selectedReport = db.getReport(date.getText().toString(), selectedSession.getId());
+                        List<SleepEvent> sleepEventList = selectedReport.getEvents();
+
+                        // Take start time and stop time
+                        String startTime = selectedReport.getStartTimestamp();
+                        String stopTime = selectedReport.getStopTimestamp();
+
+                        SimpleDateFormat timestampFormat = new SimpleDateFormat(getString(R.string.timestamp_format), Locale.getDefault());
+                        Date startTimeReport = null;
+                        Date stopTimeReport = null;
+                        try {
+                            startTimeReport = timestampFormat.parse(startTime);
+                            stopTimeReport = timestampFormat.parse(stopTime);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                        // PLot update
+                        plotUpdate(sleepEventList, startTimeReport, stopTimeReport);
+                    }
+                }.start();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
         });
 
         // Get args to check if the request of creation come from home fragment button or not
@@ -121,32 +190,50 @@ public class ReportFragment extends Fragment {
                     //todo da rimettere build
                     SleepEventDatabase db = SleepEventDatabase.buildExample(getContext(),"SleepEventExample.db");
                     //todo forse da sostituire con last session che ritorna solo la data
-                    List<SleepEvent> sleepEventList = db.getLastReport();
+                    Report lastReport = db.getLastReport();
+                    List<SleepEvent> sleepEventList = lastReport.getEvents();
 
-                    Activity mainActivity = getActivity();
-
-                    if (mainActivity != null) {
-                        if (sleepEventList.size() <= 0) {
-                            mainActivity.runOnUiThread(() -> Toast.makeText(getContext(),R.string.no_report_to_plot, Toast.LENGTH_SHORT).show());
-                            return;
-                        }
-
-                        mainActivity.runOnUiThread(() -> {
-                            String extractedDate = sleepEventList.get(0).getTimestamp();
-                            SimpleDateFormat timestampFormat = new SimpleDateFormat(getString(R.string.timestamp_format), Locale.getDefault());
-                            try {
-                                Date dateLastReport = timestampFormat.parse(extractedDate);
-                                String requestedDate = DateFormat.format(getString(R.string.report_date_format), dateLastReport).toString();
-                                // Set the current date on the editText and update the plot
-                                date.setText(requestedDate);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        });
-                        //Todo qui o dopo start?
-                        // update the plot
-                        plotUpdate(sleepEventList);
+                    if (sleepEventList.size() <= 0) {
+                        mainActivity.runOnUiThread(() -> Toast.makeText(getContext(),R.string.no_report_to_plot, Toast.LENGTH_SHORT).show());
+                        return;
                     }
+
+                    String lastReportDateStart = lastReport.getStartTimestamp();
+                    String lastReportDateStop = lastReport.getStopTimestamp();
+
+                    SimpleDateFormat timestampFormat = new SimpleDateFormat(getString(R.string.timestamp_format), Locale.getDefault());
+                    Date startTimestampLastReport = null;
+                    Date stopTimestampLastReport = null;
+                    String requestedDate = "";
+
+                    try {
+                        startTimestampLastReport = timestampFormat.parse(lastReportDateStart);
+                        stopTimestampLastReport = timestampFormat.parse(lastReportDateStop);
+
+                        requestedDate = DateFormat.format(getString(R.string.report_date_format), startTimestampLastReport).toString();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    String finalRequestedDate = requestedDate;
+                    mainActivity.runOnUiThread(() -> {
+                        // Set the current date on the editText and update the plot
+                        date.setText(finalRequestedDate);
+                    });
+
+                    //Put session item in the spinner
+                    List<SleepSession> sessions = db.getSessionsByDate(requestedDate);
+                    ArrayAdapter<SleepSession> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, sessions);
+                    mainActivity.runOnUiThread(()->{
+                        spinner.setAdapter(adapter);
+                        spinner.setVisibility(View.VISIBLE);
+                    });
+
+                    //Todo qui o dopo start?
+
+                    // update the plot
+                    plotUpdate(sleepEventList,startTimestampLastReport, stopTimestampLastReport);
+
                 }
             }.start();
         }
@@ -190,19 +277,14 @@ public class ReportFragment extends Fragment {
         Log.i(TAG,"destroy");
     }
 
-    public void plotUpdate(List<SleepEvent> sleepEventList){
+    public void plotUpdate(List<SleepEvent> sleepEventList, Date startTime, Date stopTime){
         new Thread(){
             @Override
             public void run() {
                 super.run();
-                plot.setVisibility(View.INVISIBLE);
-
                 // If there are no data to plot
                 if(sleepEventList.size() == 0){
-                    Activity mainActivity = getActivity();
-                    if (mainActivity != null) {
-                        mainActivity.runOnUiThread(() -> Toast.makeText(getContext(),R.string.no_report_to_plot, Toast.LENGTH_SHORT).show());
-                    }
+                    mainActivity.runOnUiThread(() -> Toast.makeText(getContext(),R.string.no_report_to_plot, Toast.LENGTH_SHORT).show());
                     return;
                 }
 
@@ -258,9 +340,12 @@ public class ReportFragment extends Fragment {
                 // Subdivision of graph in vertical sections
                 plot.setDomainStep(SUBDIVIDE, 10);
                 // todo decidere plot.setDomainStep(StepMode.INCREMENT_BY_VAL, 1800000);
-                // Take the first time of the report and put it as lower boundary
-                // Take the first time of the report and put it as upper boundary
-                //todo plot.setDomainBoundaries(,,BoundaryMode.FIXED);
+
+                // Define lower boundary and  upper boundary of the plot domain
+                if(startTime != null)
+                    plot.setDomainLowerBoundary((double)startTime.getTime(),BoundaryMode.FIXED);
+                if(stopTime != null)
+                    plot.setDomainUpperBoundary((double)stopTime.getTime(),BoundaryMode.FIXED);
 
                 plot.getGraph().getLineLabelStyle(XYGraphWidget.Edge.BOTTOM).setFormat(new NumberFormat() {
                     @NonNull
@@ -308,19 +393,16 @@ public class ReportFragment extends Fragment {
 
 
                 // Update Plot UI
-                Activity mainActivity = getActivity();
-                if (mainActivity != null) {
-                    mainActivity.runOnUiThread(() -> {
-                        plot.clear();
+                mainActivity.runOnUiThread(() -> {
+                    plot.clear();
 
-                        plot.setVisibility(View.VISIBLE);
-                        plot.addSeries(microMovementsSeries, microMovementsFormat);
-                        plot.addSeries(macroMovementsSeries, macroMovementsFormat);
-                        plot.addSeries(rollMovementsSeries, rollMovementsFormat);
+                    plot.setVisibility(View.VISIBLE);
+                    plot.addSeries(microMovementsSeries, microMovementsFormat);
+                    plot.addSeries(macroMovementsSeries, macroMovementsFormat);
+                    plot.addSeries(rollMovementsSeries, rollMovementsFormat);
 
-                        plot.redraw();
-                    });
-                }
+                    plot.redraw();
+                });
             }
         }.start();
     }
