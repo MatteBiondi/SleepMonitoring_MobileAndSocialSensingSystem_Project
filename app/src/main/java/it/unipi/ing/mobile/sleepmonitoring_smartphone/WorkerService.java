@@ -26,6 +26,9 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Scanner;
 
+import it.unipi.ing.mobile.sleepmonitoring_smartphone.database.SleepEvent;
+import it.unipi.ing.mobile.sleepmonitoring_smartphone.database.SleepEventDatabase;
+
 public class WorkerService extends Service {
     public final String TAG = "WorkerService";
     public final String CHANNEL_ID = "WorkerServiceChannel";
@@ -39,23 +42,32 @@ public class WorkerService extends Service {
 
         // create new worker thread
         worker = new Thread(() -> {
+            SleepEventDatabase sleepDB = SleepEventDatabase.build(getApplicationContext());
+            sleepDB.startSession();
             try {
-                // TODO: this is just a test
-
                 // Get stream
                 InputStream data_stream = WearableListener.getDataStream();
                 Scanner inputScanner = new Scanner(data_stream);
+
                 while(!worker.isInterrupted()){
                     JSONObject data = new JSONObject(inputScanner.nextLine());
                     Log.i("consumer", "received values " + data);
+
+                    // TODO: process if necessary
+
+                    String timestamp = ""; // TODO
+                    String event = ""; // TODO
+
+                    sleepDB.insertSleepEvents(new SleepEvent(timestamp, event));
                 }
                 // Close stream
                 data_stream.close();
             } catch (IOException | JSONException e) {
                 e.printStackTrace();
             }
-
-            // TODO: read data from wearable, process if necessary, store into db
+            finally {
+                sleepDB.stopSession();
+            }
         });
     }
 
