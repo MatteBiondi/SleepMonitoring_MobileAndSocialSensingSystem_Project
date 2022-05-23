@@ -71,7 +71,15 @@ public class SleepEventDatabase {
     }
 
     public List<SleepSession> getSessionsByDate(String date){
-        return database.sleep_event_dao().getSessionsByDate(date);
+        List<SleepSession> sessions = database.sleep_event_dao().getSessionsByDate(date);
+        sessions.forEach(session -> {
+            if(!session.getStart().substring(0,10).equals(date))
+                session.setStart(date + " 00:00:00");
+            if(!session.getStop().substring(0,10).equals(date))
+                session.setStop(date + " 23:59:59");
+        });
+
+        return sessions;
     }
 
     public void startSession(){
