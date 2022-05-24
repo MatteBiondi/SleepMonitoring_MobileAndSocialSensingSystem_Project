@@ -22,7 +22,7 @@ public class AccountFragment extends Fragment {
     private String user_first_name_preferences_key;
     private String user_last_name_preferences_key;
     private String user_email_preferences_key;
-    // Shared Preferences attribute
+    // Shared Preferences
     private SharedPreferences mPreferences;
 
 
@@ -33,7 +33,7 @@ public class AccountFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_account, container, false);
 
         // Set attributes for shared preferences
-        initSharedPrefAttribute(inflater);
+        initSharedPrefAttributes(inflater);
 
         // Get account information from sharedPreferences
         String firstName = mPreferences.getString(user_first_name_preferences_key, "");
@@ -72,7 +72,7 @@ public class AccountFragment extends Fragment {
         });
     }
 
-    private void initSharedPrefAttribute(LayoutInflater inflater) {
+    private void initSharedPrefAttributes(LayoutInflater inflater) {
         // Shared Preferences file name
         String sharedPrefFile = getString(R.string.shared_preferences_file);
         // Init shared preference attribute
