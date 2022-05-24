@@ -18,10 +18,13 @@ import it.unipi.ing.mobile.sleepmonitoring_smartphone.R;
 
 public class AccountFragment extends Fragment {
 
+    // Shared Preferences file name
     private String sharedPrefFile ;
+    // Shared Preferences keys
     private String user_first_name_preferences_key;
     private String user_last_name_preferences_key;
     private String user_email_preferences_key;
+    // Shared Preferences attribute
     private SharedPreferences mPreferences;
 
 
