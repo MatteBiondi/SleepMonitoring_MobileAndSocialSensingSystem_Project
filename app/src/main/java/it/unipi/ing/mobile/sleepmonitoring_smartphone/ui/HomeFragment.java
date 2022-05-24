@@ -34,13 +34,16 @@ import it.unipi.ing.mobile.sleepmonitoring_smartphone.WearableListener;
 import it.unipi.ing.mobile.sleepmonitoring_smartphone.databinding.FragmentHomeBinding;
 
 public class HomeFragment extends Fragment {
-    public final String TAG = "HomeFragment";
-    public boolean welcomeMessageUpdated;
     private FragmentHomeBinding binding;
-
-    private String sharedPrefFile ;
+    // Tag attribute used in log
+    public final String TAG = "HomeFragment";
+    // Attribute used to check if the welcome message is updated with user firstname
+    public boolean welcomeMessageUpdated;
+    // Shared Preferences key
     private String user_first_name_preferences_key;
+    // Shared Preferences attribute
     private SharedPreferences mPreferences;
+
     private StatusReceiver status_receiver;
     private final String WATCH_CAPABILITY = "it.unipi.ing.mobile.sleepmonitoring.watch";
     private final String RUNNING_INTENT = "it.unipi.ing.mobile.sleepmonitoring_smartphone.RUNNING";
@@ -51,26 +54,17 @@ public class HomeFragment extends Fragment {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+        // Attribute for welcome message check is init to false(message is not updated)
         welcomeMessageUpdated=false;
 
         // Set attributes for shared preferences
-        sharedPrefFile = getString(R.string.shared_preferences_file);
-        mPreferences=inflater.getContext().getSharedPreferences(sharedPrefFile, MODE_PRIVATE);
-        user_first_name_preferences_key = getString(R.string.user_first_name_preferences_key);
+        initSharedPrefAttributes(inflater);
 
         //Update welcome message
         updateWelcomeMessage();
 
-        // Set home fragment button listener for click event
-        Button seeLastReport = binding.homeLastReportButton;
-        seeLastReport.setOnClickListener(view -> {
-            HomeFragmentDirections.ActionNavHomeToNavReport action =HomeFragmentDirections.actionNavHomeToNavReport();
-            action.setLastReport(true);
-            Navigation.findNavController(view).navigate(action);
-        });
-
-        //todo serve?
-        //homeViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+        // Define listeners
+        defineListeners();
 
         // Define status receiver to update UI
         status_receiver = new StatusReceiver();
@@ -106,6 +100,29 @@ public class HomeFragment extends Fragment {
 
         }
         return root;
+    }
+
+    private void defineListeners() {
+        // Set home fragment button listener for click event
+        Button seeLastReport = binding.homeLastReportButton;
+        seeLastReport.setOnClickListener(view -> {
+            // Navigate to Report fragment
+            HomeFragmentDirections.ActionNavHomeToNavReport action =
+                    HomeFragmentDirections.actionNavHomeToNavReport();
+            // Set argument value for the navigation action
+            action.setLastReport(true);
+            // Perform navigation
+            Navigation.findNavController(view).navigate(action);
+        });
+    }
+
+    private void initSharedPrefAttributes(LayoutInflater inflater) {
+        // Shared Preferences file name
+        String sharedPrefFile = getString(R.string.shared_preferences_file);
+        // Init shared preference attribute
+        mPreferences=inflater.getContext().getSharedPreferences(sharedPrefFile, MODE_PRIVATE);
+        // Initialize shared preference keys
+        user_first_name_preferences_key = getString(R.string.user_first_name_preferences_key);
     }
 
     @Override
@@ -185,9 +202,11 @@ public class HomeFragment extends Fragment {
         String firstName = mPreferences.getString(user_first_name_preferences_key, "");
         String welcomeMessage = getString(R.string.home_welcome_label)+" "+firstName;
 
+        // Update text of related TextView
         TextView textView = binding.homeWelcomeLabel;
         textView.setText(welcomeMessage);
 
+        // Return false if firstname was not in the shared preferences (welcome message not updated)
         return !firstName.equals("");
     }
 
@@ -197,9 +216,11 @@ public class HomeFragment extends Fragment {
         Log.i(TAG,"onResume + "+welcomeMessageUpdated);
 
         if(!welcomeMessageUpdated) {
-            // Update welcome message
+            // Update welcome message if it is not updated
             welcomeMessageUpdated=updateWelcomeMessage();
         }
+        /* The welcome message is updated onResume because of Fragment LifeCycle phase after
+        *  login popup disappears */
     }
 
 }
