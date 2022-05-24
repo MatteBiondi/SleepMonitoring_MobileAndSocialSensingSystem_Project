@@ -5,25 +5,18 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.IBinder;
-import android.provider.Settings;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
-
-import com.google.android.gms.wearable.CapabilityClient;
-import com.google.android.gms.wearable.CapabilityInfo;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 import it.unipi.ing.mobile.sleepmonitoring_smartphone.database.SleepEvent;
@@ -43,29 +36,42 @@ public class WorkerService extends Service {
         // create new worker thread
         worker = new Thread(() -> {
             SleepEventDatabase sleepDB = SleepEventDatabase.build(getApplicationContext());
+
+            // Start new session
             sleepDB.startSession();
+
             try {
                 // Get stream
                 InputStream data_stream = WearableListener.getDataStream();
                 Scanner inputScanner = new Scanner(data_stream);
 
+                String event = null;
+                String timestamp;
+
                 while(!worker.isInterrupted()){
                     JSONObject data = new JSONObject(inputScanner.nextLine());
                     Log.i("consumer", "received values " + data);
 
-                    // TODO: process if necessary
+                    timestamp = SleepEventDatabase.getCurrentTimestamp();
+                    if (true){ // TODO
+                        event = "micro"; // TODO: process raw data
+                    }
+                    else {
+                        event = data.getString("event");
+                    }
 
-                    String timestamp = ""; // TODO
-                    String event = ""; // TODO
-
-                    sleepDB.insertSleepEvents(new SleepEvent(timestamp, event));
+                    if (event != null){
+                        sleepDB.insertSleepEvents(new SleepEvent(timestamp, event));
+                    }
+                    event = null;
                 }
                 // Close stream
                 data_stream.close();
-            } catch (IOException | JSONException e) {
+            } catch (IOException | JSONException | NoSuchElementException e) {
                 e.printStackTrace();
             }
             finally {
+                // Stop session
                 sleepDB.stopSession();
             }
         });
@@ -92,7 +98,7 @@ public class WorkerService extends Service {
             NotificationChannel serviceChannel = new NotificationChannel(
                     CHANNEL_ID,
                     "ForegroundServiceChannel",
-                    NotificationManager.IMPORTANCE_DEFAULT
+                    NotificationManager.IMPORTANCE_HIGH
             );
             NotificationManager manager = getSystemService(NotificationManager.class);
             manager.createNotificationChannel(serviceChannel);
