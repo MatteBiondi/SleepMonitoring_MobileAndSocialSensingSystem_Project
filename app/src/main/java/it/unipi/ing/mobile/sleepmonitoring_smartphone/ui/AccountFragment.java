@@ -15,9 +15,11 @@ import androidx.fragment.app.Fragment;
 
 import it.unipi.ing.mobile.sleepmonitoring_smartphone.MainActivity;
 import it.unipi.ing.mobile.sleepmonitoring_smartphone.R;
+import it.unipi.ing.mobile.sleepmonitoring_smartphone.databinding.FragmentAccountBinding;
 
 public class AccountFragment extends Fragment {
 
+    private FragmentAccountBinding binding;
     // Shared Preferences keys
     private String user_first_name_preferences_key;
     private String user_last_name_preferences_key;
@@ -30,7 +32,8 @@ public class AccountFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_account, container, false);
+        binding = FragmentAccountBinding.inflate(inflater, container, false);
+        View root = binding.getRoot();
 
         // Set attributes for shared preferences
         initSharedPrefAttributes(inflater);
@@ -41,33 +44,34 @@ public class AccountFragment extends Fragment {
         String email = mPreferences.getString(user_email_preferences_key, "");
 
         // Update UI
-        setAccountInfoUI(view, firstName, lastName, email);
+        setAccountInfoUI(firstName, lastName, email);
 
         // Define listeners
-        defineListeners(view);
+        defineListeners();
 
-        return view;
+        return root;
     }
 
-    private void setAccountInfoUI(View view, String firstName, String lastName, String email) {
+    private void setAccountInfoUI(String firstName, String lastName, String email) {
         // Firstname field
-        TextView firstNameField = view.findViewById(R.id.account_first_name_value);
+        TextView firstNameField = binding.accountFirstNameValue;
         firstNameField.setText(firstName);
 
         // Lastname field
-        TextView lastNameField = view.findViewById(R.id.account_last_name_value);
+        TextView lastNameField = binding.accountLastNameValue;
         lastNameField.setText(lastName);
 
         // Email field
-        TextView emailField = view.findViewById(R.id.account_email_value);
+        TextView emailField = binding.accountEmailValue;
         emailField.setText(email);
     }
 
-    private void defineListeners(View view) {
+    private void defineListeners() {
         // Delete account button listener
-        view.findViewById(R.id.account_delete_button).setOnClickListener(targetView -> {
+        binding.accountDeleteButton.setOnClickListener(targetView -> {
             MainActivity mainActivity = ((MainActivity)getActivity());
             if(mainActivity != null)
+                //Revoke user access
                 mainActivity.revokeAccess();
         });
     }
