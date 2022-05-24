@@ -83,10 +83,12 @@ public class HomeFragment extends Fragment {
                     CapabilityClient.FILTER_REACHABLE
             ).addOnCompleteListener(task -> {
                 try {
+                    // Update status label about node connection
                     Set<Node> nodes = task.getResult().getNodes();
                     HomeFragment.this.checkNearbyNodes(nodes);
                 }
                 catch (Exception e){
+                    // Maybe there are no Wear API
                     Toast.makeText(getContext(),R.string.no_wearable_api,Toast.LENGTH_LONG).show();
                     Activity thisActivity = getActivity();
                     if(thisActivity != null) thisActivity.finishAndRemoveTask();
