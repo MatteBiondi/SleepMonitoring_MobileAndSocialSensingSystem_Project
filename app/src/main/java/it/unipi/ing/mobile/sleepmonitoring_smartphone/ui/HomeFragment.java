@@ -99,11 +99,6 @@ public class HomeFragment extends Fragment {
                 }
 
             });
-
-            // Register capabilities listener
-            Wearable.getCapabilityClient(activity.getApplicationContext())
-                    .addListener(status_receiver, WATCH_CAPABILITY);
-
         }
         return root;
     }
@@ -116,8 +111,6 @@ public class HomeFragment extends Fragment {
         // Remove status receiver and capabilities listener
         if(activity != null){
             activity.unregisterReceiver(status_receiver);
-            Wearable.getCapabilityClient(activity.getApplicationContext())
-                    .removeListener(status_receiver, WATCH_CAPABILITY);
         }
         binding = null;
     }
@@ -144,15 +137,12 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    class StatusReceiver extends BroadcastReceiver implements CapabilityClient.OnCapabilityChangedListener{
-        @Override
-        public void onCapabilityChanged(@NonNull CapabilityInfo capabilityInfo) {
-            checkNearbyNodes(capabilityInfo.getNodes());
-        }
-
+    class StatusReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            updateUIStatus( WearableListener.isRunning() ? Status.RUNNING : Status.CONNECTED );
+            String status = intent.getStringExtra("status");
+            Log.e(TAG, status);
+            updateUIStatus( Status.valueOf(status) );
         }
     }
 

@@ -36,6 +36,7 @@ public class WearableListener extends WearableListenerService {
     private static boolean running = false;
     private static InputStream data_stream = null;
 
+    // Used to update status
     public static boolean isRunning(){
         return running;
     }
@@ -52,6 +53,7 @@ public class WearableListener extends WearableListenerService {
 
             // Update UI, if activity is started
             Intent statusIntent = new Intent(STATUS_INTENT);
+            statusIntent.putExtra("status","RUNNING");
             sendBroadcast(statusIntent);
             running = true;
 
@@ -67,8 +69,9 @@ public class WearableListener extends WearableListenerService {
     public void onChannelClosed(@NonNull ChannelClient.Channel channel, int closeReason, int appSpecificErrorCode) {
 
         // Update UI, if activity is started
-        Intent startIntent = new Intent(STATUS_INTENT);
-        sendBroadcast(startIntent);
+        Intent statusIntent = new Intent(STATUS_INTENT);
+        statusIntent.putExtra("status","CONNECTED");
+        sendBroadcast(statusIntent);
         running = false;
 
         // Stop foreground service
@@ -81,24 +84,36 @@ public class WearableListener extends WearableListenerService {
     @Override
     public void onCapabilityChanged(@NonNull CapabilityInfo capabilityInfo) {
         Log.i("TAG", "Available nodes: " + capabilityInfo.getNodes().size());
-        if (capabilityInfo.getNodes().size() == 0 && running){
-            // Update UI, if activity is started
-            Intent startIntent = new Intent(STATUS_INTENT);
-            sendBroadcast(startIntent);
-            running = false;
 
-            // Stop foreground service
-            Intent serviceIntent = new Intent(this, WorkerService.class);
-            serviceIntent.setAction("/stop-service");
-            startForegroundService(serviceIntent);
-            data_stream = null;
+        if (capabilityInfo.getNodes().size() == 0){
 
-            //Notify user
-            notifyDisconnection(getApplicationContext());
+            // Update status
+            Intent statusIntent = new Intent(STATUS_INTENT);
+            statusIntent.putExtra("status","DISCONNECTED");
+            sendBroadcast(statusIntent);
+
+            if (running){
+                // Stop foreground service
+                Intent serviceIntent = new Intent(this, WorkerService.class);
+                serviceIntent.setAction("/stop-service");
+                startForegroundService(serviceIntent);
+                data_stream = null;
+
+                //Notify user
+                notifyDisconnection(getApplicationContext());
+            }
         }
-        else {
-            //TODO: correct ?
-            destroyNotification(getApplicationContext());
+        else{
+            //Update status
+            Intent statusIntent = new Intent(STATUS_INTENT);
+            //statusIntent.putExtra("status", running ? "RUNNING":"CONNECTED");
+            statusIntent.putExtra("status","CONNECTED");
+            sendBroadcast(statusIntent);
+
+            // Remove notification, if necessary
+            if (running){
+                destroyNotification(getApplicationContext());
+            }
         }
     }
 
