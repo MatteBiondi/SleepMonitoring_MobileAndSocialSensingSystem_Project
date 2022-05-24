@@ -15,7 +15,7 @@ public class SleepEventDatabase {
     private final SleepEventDB database;
     private static final String DB_NAME  = "sleep_event_db.db";
 
-    private String getCurrentTimestamp(){
+    public static String getCurrentTimestamp(){
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ITALY);
         return df.format(new Date());
     }

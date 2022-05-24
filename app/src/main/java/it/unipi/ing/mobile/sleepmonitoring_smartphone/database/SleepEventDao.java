@@ -20,8 +20,8 @@ public interface SleepEventDao {
     @Query("SELECT * FROM sleep_event WHERE date(timestamp) == :date ORDER BY timestamp ASC")
     List<SleepEvent> getEventsByDate(String date);
 
-        @Query("SELECT * FROM sleep_event WHERE timestamp >= (SELECT start FROM sleep_session WHERE id =:id) " +
-                "AND timestamp <= (SELECT stop FROM sleep_session WHERE id =:id) ORDER BY timestamp ASC")
+    @Query("SELECT * FROM sleep_event WHERE timestamp >= (SELECT start FROM sleep_session WHERE id =:id) " +
+            "AND timestamp <= (SELECT stop FROM sleep_session WHERE id =:id) ORDER BY timestamp ASC")
     List<SleepEvent> getEventsBySession(Long id);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -36,7 +36,8 @@ public interface SleepEventDao {
     @Query("SELECT * FROM sleep_session")
     List<SleepSession> getSessions();
 
-    @Query("SELECT DISTINCT (id), start, stop FROM sleep_session WHERE date(start) == :date or date(stop) == :date ORDER BY stop")
+    @Query("SELECT DISTINCT (id), start, stop FROM sleep_session WHERE (date(start) == :date or date(stop) == :date) " +
+            "and stop is not NULL ORDER BY stop DESC")
     List<SleepSession> getSessionsByDate(String date);
 
     @Query("SELECT * FROM sleep_session WHERE id = :id")
@@ -48,9 +49,9 @@ public interface SleepEventDao {
     @Query("UPDATE sleep_session SET stop = :timestamp WHERE id = (SELECT MAX(id) from sleep_session)")
     void stopSession(String timestamp);
 
-    @Query("SELECT * FROM sleep_session WHERE id = (SELECT MAX(id) from sleep_session)")
+    @Query("SELECT * FROM sleep_session WHERE stop is not NULL ORDER BY id DESC LIMIT 1")
     SleepSession getLastSession();
 
-    @Query("DELETE FROM sleep_session WHERE start < date(:timestamp)")
+    @Query("DELETE FROM sleep_session WHERE start <= date(:timestamp)")
     void deleteSessionsBefore(String timestamp);
 }
