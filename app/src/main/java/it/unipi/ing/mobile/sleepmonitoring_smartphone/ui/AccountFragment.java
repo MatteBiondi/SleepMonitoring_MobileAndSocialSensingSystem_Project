@@ -24,9 +24,6 @@ public class AccountFragment extends Fragment {
     private String user_email_preferences_key;
     private SharedPreferences mPreferences;
 
-    public static AccountFragment newInstance() {
-        return new AccountFragment();
-    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -35,11 +32,7 @@ public class AccountFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_account, container, false);
 
         // Set attributes for shared preferences
-        sharedPrefFile = getString(R.string.shared_preferences_file);
-        mPreferences=inflater.getContext().getSharedPreferences(sharedPrefFile, MODE_PRIVATE);
-        user_first_name_preferences_key = getString(R.string.user_first_name_preferences_key);
-        user_last_name_preferences_key = getString(R.string.user_last_name_preferences_key);
-        user_email_preferences_key = getString(R.string.user_email_preferences_key);
+        initSharedPrefAttribute(inflater);
 
         // Get account information from sharedPreferences
         String firstName = mPreferences.getString(user_first_name_preferences_key, "");
@@ -47,15 +40,29 @@ public class AccountFragment extends Fragment {
         String email = mPreferences.getString(user_email_preferences_key, "");
 
         // Update UI
+        setAccountInfoUI(view, firstName, lastName, email);
+
+        // Define listeners
+        defineListeners(view);
+
+        return view;
+    }
+
+    private void setAccountInfoUI(View view, String firstName, String lastName, String email) {
+        // Firstname field
         TextView firstNameField = view.findViewById(R.id.account_first_name_value);
         firstNameField.setText(firstName);
 
+        // Lastname field
         TextView lastNameField = view.findViewById(R.id.account_last_name_value);
         lastNameField.setText(lastName);
 
+        // Email field
         TextView emailField = view.findViewById(R.id.account_email_value);
         emailField.setText(email);
+    }
 
+    private void defineListeners(View view) {
         // Delete account button listener
         view.findViewById(R.id.account_delete_button).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -65,8 +72,17 @@ public class AccountFragment extends Fragment {
                     mainActivity.revokeAccess();
             }
         });
+    }
 
-        return view;
+    private void initSharedPrefAttribute(LayoutInflater inflater) {
+        // Get shared preference file
+        sharedPrefFile = getString(R.string.shared_preferences_file);
+        mPreferences=inflater.getContext().getSharedPreferences(sharedPrefFile, MODE_PRIVATE);
+
+        // Initialize shared preference keys
+        user_first_name_preferences_key = getString(R.string.user_first_name_preferences_key);
+        user_last_name_preferences_key = getString(R.string.user_last_name_preferences_key);
+        user_email_preferences_key = getString(R.string.user_email_preferences_key);
     }
 
 }
