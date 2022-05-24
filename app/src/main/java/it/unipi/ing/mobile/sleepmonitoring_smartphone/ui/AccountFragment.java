@@ -18,8 +18,6 @@ import it.unipi.ing.mobile.sleepmonitoring_smartphone.R;
 
 public class AccountFragment extends Fragment {
 
-    // Shared Preferences file name
-    private String sharedPrefFile ;
     // Shared Preferences keys
     private String user_first_name_preferences_key;
     private String user_last_name_preferences_key;
@@ -67,19 +65,17 @@ public class AccountFragment extends Fragment {
 
     private void defineListeners(View view) {
         // Delete account button listener
-        view.findViewById(R.id.account_delete_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View targetView) {
-                MainActivity mainActivity = ((MainActivity)getActivity());
-                if(mainActivity != null)
-                    mainActivity.revokeAccess();
-            }
+        view.findViewById(R.id.account_delete_button).setOnClickListener(targetView -> {
+            MainActivity mainActivity = ((MainActivity)getActivity());
+            if(mainActivity != null)
+                mainActivity.revokeAccess();
         });
     }
 
     private void initSharedPrefAttribute(LayoutInflater inflater) {
-        // Get shared preference file
-        sharedPrefFile = getString(R.string.shared_preferences_file);
+        // Shared Preferences file name
+        String sharedPrefFile = getString(R.string.shared_preferences_file);
+        // Init shared preference attribute
         mPreferences=inflater.getContext().getSharedPreferences(sharedPrefFile, MODE_PRIVATE);
 
         // Initialize shared preference keys
