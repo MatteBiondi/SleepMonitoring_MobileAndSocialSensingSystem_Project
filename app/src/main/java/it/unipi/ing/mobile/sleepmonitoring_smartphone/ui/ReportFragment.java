@@ -1,12 +1,8 @@
-package it.unipi.ing.mobile.sleepmonitoring_smartphone.ui.report;
+package it.unipi.ing.mobile.sleepmonitoring_smartphone.ui;
 
 import static android.content.Context.MODE_PRIVATE;
-
 import static com.androidplot.xy.StepMode.INCREMENT_BY_VAL;
 import static com.androidplot.xy.StepMode.SUBDIVIDE;
-
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.lifecycle.ViewModelProvider;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -14,11 +10,6 @@ import android.app.DatePickerDialog;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -29,6 +20,11 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.fragment.app.Fragment;
 
 import com.androidplot.ui.DynamicTableModel;
 import com.androidplot.ui.TableOrder;
@@ -58,8 +54,6 @@ import it.unipi.ing.mobile.sleepmonitoring_smartphone.database.SleepEventDatabas
 import it.unipi.ing.mobile.sleepmonitoring_smartphone.database.SleepSession;
 
 public class ReportFragment extends Fragment {
-
-    private ReportViewModel mViewModel;
     private final String TAG = "ReportFragment";
     private EditText date;
     private XYPlot plot;
@@ -77,7 +71,7 @@ public class ReportFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        mViewModel = new ViewModelProvider(this).get(ReportViewModel.class);
+
         View view = inflater.inflate(R.layout.fragment_report, container, false);
 
         sharedPrefFile = getString(R.string.shared_preferences_file);

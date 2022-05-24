@@ -10,7 +10,7 @@
     destinations of your app -->
     <fragment
         android:id="@+id/nav_home"
-        android:name="it.unipi.ing.mobile.sleepmonitoring_smartphone.ui.home.HomeFragment"
+        android:name="it.unipi.ing.mobile.sleepmonitoring_smartphone.ui.HomeFragment"
         android:label="@string/menu_home"
         tools:layout="@layout/fragment_home" >
         <action
@@ -19,7 +19,7 @@
     </fragment>
     <fragment
         android:id="@+id/nav_report"
-        android:name="it.unipi.ing.mobile.sleepmonitoring_smartphone.ui.report.ReportFragment"
+        android:name="it.unipi.ing.mobile.sleepmonitoring_smartphone.ui.ReportFragment"
         android:label="@string/menu_report"
         tools:layout="@layout/fragment_report" >
         <argument
@@ -29,12 +29,12 @@
     </fragment>
     <fragment
         android:id="@+id/nav_settings"
-        android:name="it.unipi.ing.mobile.sleepmonitoring_smartphone.ui.settings.SettingsFragment"
+        android:name="it.unipi.ing.mobile.sleepmonitoring_smartphone.ui.SettingsFragment"
         android:label="@string/menu_settings"
         tools:layout="@layout/fragment_settings" />
     <fragment
         android:id="@+id/nav_account"
-        android:name="it.unipi.ing.mobile.sleepmonitoring_smartphone.ui.account.AccountFragment"
+        android:name="it.unipi.ing.mobile.sleepmonitoring_smartphone.ui.AccountFragment"
         android:label="@string/menu_account"
         tools:layout="@layout/fragment_account" />
 

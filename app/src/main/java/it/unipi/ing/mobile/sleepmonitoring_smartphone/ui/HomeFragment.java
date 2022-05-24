@@ -1,15 +1,13 @@
-package it.unipi.ing.mobile.sleepmonitoring_smartphone.ui.home;
+package it.unipi.ing.mobile.sleepmonitoring_smartphone.ui;
 
 import static android.content.Context.MODE_PRIVATE;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,11 +20,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.gms.wearable.CapabilityClient;
 import com.google.android.gms.wearable.CapabilityInfo;
 import com.google.android.gms.wearable.Node;
@@ -36,10 +31,7 @@ import java.util.Set;
 
 import it.unipi.ing.mobile.sleepmonitoring_smartphone.R;
 import it.unipi.ing.mobile.sleepmonitoring_smartphone.WearableListener;
-import it.unipi.ing.mobile.sleepmonitoring_smartphone.WorkerService;
-import it.unipi.ing.mobile.sleepmonitoring_smartphone.bluetooth.Bluetooth;
 import it.unipi.ing.mobile.sleepmonitoring_smartphone.databinding.FragmentHomeBinding;
-import it.unipi.ing.mobile.sleepmonitoring_smartphone.ui.home.HomeFragmentDirections.ActionNavHomeToNavReport;
 
 public class HomeFragment extends Fragment {
     public final String TAG = "HomeFragment";
@@ -55,8 +47,6 @@ public class HomeFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        HomeViewModel homeViewModel =
-                new ViewModelProvider(this).get(HomeViewModel.class);
 
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
@@ -74,7 +64,7 @@ public class HomeFragment extends Fragment {
         // Set home fragment button listener for click event
         Button seeLastReport = binding.homeLastReportButton;
         seeLastReport.setOnClickListener(view -> {
-            ActionNavHomeToNavReport action =HomeFragmentDirections.actionNavHomeToNavReport();
+            HomeFragmentDirections.ActionNavHomeToNavReport action =HomeFragmentDirections.actionNavHomeToNavReport();
             action.setLastReport(true);
             Navigation.findNavController(view).navigate(action);
         });
@@ -208,7 +198,7 @@ public class HomeFragment extends Fragment {
 
         if(!welcomeMessageUpdated) {
             // Update welcome message
-            welcomeMessageUpdated=updateWelcomeMessage();;
+            welcomeMessageUpdated=updateWelcomeMessage();
         }
     }
 

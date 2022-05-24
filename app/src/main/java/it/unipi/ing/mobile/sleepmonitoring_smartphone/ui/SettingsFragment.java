@@ -1,26 +1,14 @@
-package it.unipi.ing.mobile.sleepmonitoring_smartphone.ui.settings;
+package it.unipi.ing.mobile.sleepmonitoring_smartphone.ui;
 
 import static android.content.Context.MODE_PRIVATE;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatDelegate;
-import androidx.lifecycle.ViewModelProvider;
-
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
 import android.text.format.DateFormat;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
@@ -28,20 +16,20 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.fragment.app.Fragment;
+
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 
 import it.unipi.ing.mobile.sleepmonitoring_smartphone.R;
 import it.unipi.ing.mobile.sleepmonitoring_smartphone.database.SleepEventDatabase;
 
 public class SettingsFragment extends Fragment {
-
-    private SettingsViewModel mViewModel;
     private String sharedPrefFile;
     private String theme_preferences_label;
-
-
     private SharedPreferences mPreferences;
     public static SettingsFragment newInstance() {
         return new SettingsFragment();
@@ -50,7 +38,7 @@ public class SettingsFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        mViewModel = new ViewModelProvider(this).get(SettingsViewModel.class);
+
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
 
         sharedPrefFile = getString(R.string.shared_preferences_file);

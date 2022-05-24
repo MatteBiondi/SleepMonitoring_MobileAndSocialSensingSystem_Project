@@ -1,27 +1,22 @@
-package it.unipi.ing.mobile.sleepmonitoring_smartphone.ui.account;
+package it.unipi.ing.mobile.sleepmonitoring_smartphone.ui;
 
 import static android.content.Context.MODE_PRIVATE;
 
-import androidx.lifecycle.ViewModelProvider;
-
 import android.content.SharedPreferences;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
 import it.unipi.ing.mobile.sleepmonitoring_smartphone.MainActivity;
 import it.unipi.ing.mobile.sleepmonitoring_smartphone.R;
 
 public class AccountFragment extends Fragment {
-
-    private AccountViewModel mViewModel;
 
     private String sharedPrefFile ;
     private String user_first_name_preferences_key;
@@ -37,7 +32,6 @@ public class AccountFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-        mViewModel = new ViewModelProvider(this).get(AccountViewModel.class);
         View view = inflater.inflate(R.layout.fragment_account, container, false);
 
         // Set attributes for shared preferences
