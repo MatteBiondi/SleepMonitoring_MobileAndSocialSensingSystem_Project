@@ -24,6 +24,7 @@ import androidx.fragment.app.Fragment;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
+import it.unipi.ing.mobile.sleepmonitoring.MainActivity;
 import it.unipi.ing.mobile.sleepmonitoring.R;
 import it.unipi.ing.mobile.sleepmonitoring.database.SleepEventDatabase;
 import it.unipi.ing.mobile.sleepmonitoring.databinding.FragmentSettingsBinding;
@@ -68,8 +69,11 @@ public class SettingsFragment extends Fragment {
     private void reloadValuesFromSharedPref(){
         RadioButton radioButton;
         RadioGroup themeRadioGroup = binding.themeRadioGroup;
+
         // Get saved theme
-        String saved_theme = mPreferences.getString(theme_preferences_key, getString(R.string.light_theme));
+        String saved_theme = mPreferences.getString(
+                theme_preferences_key, getString(R.string.light_theme));
+
         // Checked the corresponding button
         radioButton=themeRadioGroup.findViewWithTag(saved_theme);
         radioButton.setChecked(true);
@@ -136,8 +140,11 @@ public class SettingsFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 // Take the selected items from radio group
-                RadioGroup historyRadioGroup = view.getRootView().findViewById(R.id.history_radio_group);
-                RadioButton checked = view.getRootView().findViewById(historyRadioGroup.getCheckedRadioButtonId());
+                RadioGroup historyRadioGroup =
+                        view.getRootView().findViewById(R.id.history_radio_group);
+
+                RadioButton checked =
+                        view.getRootView().findViewById(historyRadioGroup.getCheckedRadioButtonId());
 
                 // Compute the selected date
                 String selectedItem = checked.getText().toString();
@@ -148,8 +155,13 @@ public class SettingsFragment extends Fragment {
                     @Override
                     public void run() {
                         super.run();
-                        SleepEventDatabase db = SleepEventDatabase.build(getContext());
-                        db.deleteBefore(date);
+                        MainActivity mainActivity = (MainActivity) getActivity();
+                        if(mainActivity != null){
+                            SleepEventDatabase db =
+                                    SleepEventDatabase.build(mainActivity.getApplicationContext());
+
+                            db.deleteBefore(date);
+                        }
                     }
                 }.start();
 
@@ -157,7 +169,11 @@ public class SettingsFragment extends Fragment {
                 popupWindow.dismiss();
 
                 // Toast message for user as confirmation
-                Toast.makeText(getActivity(), R.string.deleted_report_confirmation, Toast.LENGTH_SHORT).show();
+                Toast.makeText(
+                        getActivity(),
+                        R.string.deleted_report_confirmation,
+                        Toast.LENGTH_SHORT
+                ).show();
             }
         });
     }
