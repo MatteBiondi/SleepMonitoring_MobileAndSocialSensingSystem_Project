@@ -64,7 +64,8 @@ public class ReportFragment extends Fragment {
 
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
         binding = FragmentReportBinding.inflate(inflater, container, false);
@@ -106,9 +107,11 @@ public class ReportFragment extends Fragment {
             // Date picker dialog
             DatePickerDialog datepicker = new DatePickerDialog(getActivity(),
                     (dp, year, monthOfYear, dayOfMonth) -> {
+
                         // Selected date is written in date field using a specified format
                         String newDateValue =(String) DateFormat.format(ReportFragment.this.getString(R.string.report_date_format),
                                 new GregorianCalendar(year, monthOfYear, dayOfMonth));
+
                         date.setText(newDateValue);
 
                         new Thread(){
@@ -118,7 +121,11 @@ public class ReportFragment extends Fragment {
                                 //todo da rimettere build
 
                                 // Request sessions for the selected date
-                                SleepEventDatabase db = SleepEventDatabase.buildExample(context,"SleepEventExample.db");
+                                SleepEventDatabase db = SleepEventDatabase.buildExample(
+                                        context,
+                                        "SleepEventExample.db"
+                                );
+
                                 populateSpinner(newDateValue, db);
                             }
                         }.start();
@@ -151,8 +158,16 @@ public class ReportFragment extends Fragment {
                         SleepSession selectedSession = (SleepSession) parent.getItemAtPosition(pos);
 
                         // Request events data for the received date
-                        SleepEventDatabase db = SleepEventDatabase.buildExample(context,"SleepEventExample.db");
-                        Report selectedReport = db.getReport(date.getText().toString(), selectedSession.getId());
+                        SleepEventDatabase db = SleepEventDatabase.buildExample(
+                                context,
+                                "SleepEventExample.db"
+                        );
+
+                        Report selectedReport = db.getReport(
+                                date.getText().toString(),
+                                selectedSession.getId()
+                        );
+
                         if(selectedReport == null)
                             return;
                         List<SleepEvent> sleepEventList = getEventsFromReport(selectedReport);
@@ -188,7 +203,11 @@ public class ReportFragment extends Fragment {
                 //todo da rimettere build
 
                 // Get movement events from last reported session
-                SleepEventDatabase db = SleepEventDatabase.buildExample(context,"SleepEventExample.db");
+                SleepEventDatabase db = SleepEventDatabase.buildExample(
+                        context,
+                        "SleepEventExample.db"
+                );
+
                 Report lastReport = db.getLastReport();
                 if(lastReport == null)
                     return;
@@ -228,7 +247,12 @@ public class ReportFragment extends Fragment {
 
         // If no movements are present -> Show toast and don't show plot
         if (sleepEventList.size() <= 0) {
-            mainActivity.runOnUiThread(() -> Toast.makeText(getContext(),R.string.no_report_to_plot, Toast.LENGTH_SHORT).show());
+            mainActivity.runOnUiThread(() -> Toast.makeText(
+                    getContext(),
+                    R.string.no_report_to_plot,
+                    Toast.LENGTH_SHORT
+            ).show());
+
             return null;
         }
         return sleepEventList;
@@ -239,10 +263,20 @@ public class ReportFragment extends Fragment {
         List<SleepSession> sessions = db.getSessionsByDate(requestedDate);
         // If there are no sessions in that date -> show a toast and don't create spinner
         if (sessions.size() <= 0) {
-            mainActivity.runOnUiThread(() -> Toast.makeText(getContext(),R.string.no_sessions_in_date, Toast.LENGTH_SHORT).show());
+            mainActivity.runOnUiThread(() -> Toast.makeText(
+                    getContext(),
+                    R.string.no_sessions_in_date,
+                    Toast.LENGTH_SHORT
+            ).show());
+
             return;
         }
-        ArrayAdapter<SleepSession> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, sessions);
+        ArrayAdapter<SleepSession> adapter = new ArrayAdapter<>(
+                getContext(),
+                android.R.layout.simple_spinner_item,
+                sessions
+        );
+
         mainActivity.runOnUiThread(()->{
             spinner.setAdapter(adapter);
             spinner.setVisibility(View.VISIBLE);
@@ -265,7 +299,8 @@ public class ReportFragment extends Fragment {
         String reportStartString = report.getStartTimestamp();
         String reportStopString = report.getStopTimestamp();
 
-        SimpleDateFormat timestampFormat = new SimpleDateFormat(getString(R.string.timestamp_format), Locale.getDefault());
+        SimpleDateFormat timestampFormat = new SimpleDateFormat(
+                getString(R.string.timestamp_format), Locale.getDefault());
 
         Date reportStartDate = null;
         Date reportStopDate = null;
@@ -286,8 +321,7 @@ public class ReportFragment extends Fragment {
         mainActivity = getActivity();
         if (mainActivity == null) {
             // If it is not possible => error. Stop application
-            Toast.makeText(getContext(),
-                    R.string.main_activity_error, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), R.string.main_activity_error, Toast.LENGTH_SHORT).show();
             mainActivity.finishAndRemoveTask();
         }
         // UI elements
@@ -300,7 +334,12 @@ public class ReportFragment extends Fragment {
     public void plotUpdate(List<SleepEvent> sleepEventList, Date startTime, Date stopTime){
         // If there are no data to plot
         if(sleepEventList.size() == 0){
-            mainActivity.runOnUiThread(() -> Toast.makeText(getContext(),R.string.no_report_to_plot, Toast.LENGTH_SHORT).show());
+            mainActivity.runOnUiThread(() -> Toast.makeText(
+                    getContext(),
+                    R.string.no_report_to_plot,
+                    Toast.LENGTH_SHORT
+            ).show());
+
             return;
         }
 
@@ -342,12 +381,15 @@ public class ReportFragment extends Fragment {
         plot.getGraph().getLineLabelStyle(XYGraphWidget.Edge.BOTTOM).setFormat(new NumberFormat() {
             @NonNull
             @Override
-            public StringBuffer format(double epochTime, @NonNull StringBuffer stringBuffer, @NonNull FieldPosition fieldPosition) {
+            public StringBuffer format(double epochTime,
+                                       @NonNull StringBuffer stringBuffer,
+                                       @NonNull FieldPosition fieldPosition) {
                 /* The n values identified and placed in the domain axis do not correspond
                 exactly to the time of the individual events. The vertical lines are equally
                 distributed between the lower and upper bound */
                 String timeFormatString = getString(R.string.report_time_format);
-                SimpleDateFormat timeFormat = new SimpleDateFormat(timeFormatString, Locale.getDefault());
+                SimpleDateFormat timeFormat = new SimpleDateFormat( timeFormatString,
+                                                                    Locale.getDefault());
                 Date selectedDateTime = new Date((long)epochTime);
 
                 return new StringBuffer(timeFormat.format(selectedDateTime));
@@ -355,7 +397,9 @@ public class ReportFragment extends Fragment {
 
             @NonNull
             @Override
-            public StringBuffer format(long epochTime, @NonNull StringBuffer stringBuffer, @NonNull FieldPosition fieldPosition) {
+            public StringBuffer format(long epochTime,
+                                       @NonNull StringBuffer stringBuffer,
+                                       @NonNull FieldPosition fieldPosition) {
                 throw new UnsupportedOperationException("Not yet implemented.");
             }
 
@@ -369,7 +413,9 @@ public class ReportFragment extends Fragment {
 
     private void defineGraphicCharacteristics(Date startTime, Date stopTime) {
         // Organize the legend item as in a table with 1 column and 3 rows
-        plot.getLegend().setTableModel(new DynamicTableModel(1, 3, TableOrder.ROW_MAJOR));
+        plot.getLegend().setTableModel(
+                new DynamicTableModel(1, 3, TableOrder.ROW_MAJOR)
+        );
 
         // Distance between horizontal lines and define fixed boundaries
         plot.setRangeStep(INCREMENT_BY_VAL, 1);
@@ -385,14 +431,21 @@ public class ReportFragment extends Fragment {
             plot.setDomainUpperBoundary((double)stopTime.getTime(),BoundaryMode.FIXED);
     }
 
-    private void extractMovementFromEventsList(List<SleepEvent> sleepEventList,MovementsList micro, MovementsList macro, MovementsList roll) {
+    private void extractMovementFromEventsList(List<SleepEvent> sleepEventList,
+                                               MovementsList micro,
+                                               MovementsList macro,
+                                               MovementsList roll) {
         // Prepare movement labels
         String microMovementLabel = getString(R.string.micro_movements_label);
         String macroMovementLabel = getString(R.string.macro_movements_label);
         String rolloverLabel = getString(R.string.roll_movements_label);
 
         // Put timestamp and data values in the corresponding list depending on the type of each action
-        SimpleDateFormat timestampFormat = new SimpleDateFormat(getString(R.string.timestamp_format), Locale.getDefault());
+        SimpleDateFormat timestampFormat = new SimpleDateFormat(
+                getString(R.string.timestamp_format),
+                Locale.getDefault()
+        );
+
         for (SleepEvent event : sleepEventList){
             Date date;
             try {
