@@ -23,7 +23,6 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
 import com.google.android.gms.wearable.CapabilityClient;
-import com.google.android.gms.wearable.CapabilityInfo;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
 
@@ -64,7 +63,7 @@ public class HomeFragment extends Fragment {
         updateWelcomeMessage();
 
         // Define listeners
-        defineListeners();
+        defineButtonListener();
 
         // Define status receiver to update UI
         status_receiver = new StatusReceiver();
@@ -99,7 +98,7 @@ public class HomeFragment extends Fragment {
         return root;
     }
 
-    private void defineListeners() {
+    private void defineButtonListener() {
         // Set home fragment button listener for click event
         Button seeLastReport = binding.homeLastReportButton;
         seeLastReport.setOnClickListener(view -> {
@@ -165,30 +164,6 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    enum Status{
-        CONNECTED("Connected", Color.GREEN),
-        DISCONNECTED("Disconnected", Color.RED),
-        RUNNING("Running", Color.BLUE);
-
-        private final String status;
-        private final int color;
-
-        Status(String status, int color) {
-            this.status = status;
-            this.color = color;
-        }
-
-        @NonNull
-        @Override
-        public String toString(){
-            return this.status.toUpperCase();
-        }
-
-        public int getColor(){
-            return this.color;
-        }
-    }
-
     public boolean updateWelcomeMessage(){
         // Get account information from sharedPreferences
         String firstName = mPreferences.getString(user_first_name_preferences_key, "");
@@ -213,6 +188,31 @@ public class HomeFragment extends Fragment {
         }
         /* The welcome message is updated onResume because of Fragment LifeCycle phase after
         *  login popup disappears */
+    }
+
+
+    enum Status{
+        CONNECTED("Connected", Color.GREEN),
+        DISCONNECTED("Disconnected", Color.RED),
+        RUNNING("Running", Color.BLUE);
+
+        private final String status;
+        private final int color;
+
+        Status(String status, int color) {
+            this.status = status;
+            this.color = color;
+        }
+
+        @NonNull
+        @Override
+        public String toString(){
+            return this.status.toUpperCase();
+        }
+
+        public int getColor(){
+            return this.color;
+        }
     }
 
 }

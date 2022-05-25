@@ -63,7 +63,8 @@
     <string name="micro_movements_label">micro</string>
     <string name="macro_movements_label">macro</string>
     <string name="roll_movements_label">roll</string>
-    <string name="no_report_to_plot">There are no data to plot</string>
+    <string name="no_report_to_plot">There are no movements to plot</string>
+    <string name="no_sessions_in_date">There are no sessions for this day</string>
     <string name="spinner_prompt">Select one session</string>
 
     <!-- Settings fragment -->
