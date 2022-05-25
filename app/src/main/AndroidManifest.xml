@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="it.unipi.ing.mobile.sleepmonitoring_smartphone">
+    package="it.unipi.ing.mobile.sleepmonitoring">
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.INTERNET" /><!-- Required for Google Login -->
@@ -20,13 +20,13 @@
         android:theme="@style/Theme.SleepMonitoring_Smartphone">
 
         <service
-            android:name=".WorkerService"
+            android:name="it.unipi.ing.mobile.sleepmonitoring.WorkerService"
             android:enabled="true"
             android:exported="true">
         </service>
 
         <service
-            android:name=".WearableListener"
+            android:name="it.unipi.ing.mobile.sleepmonitoring.WearableListener"
             android:enabled="true"
             android:exported="true">
 
@@ -39,7 +39,7 @@
         </service>
 
         <activity
-            android:name=".MainActivity"
+            android:name="it.unipi.ing.mobile.sleepmonitoring.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.SleepMonitoring_Smartphone.NoActionBar">
