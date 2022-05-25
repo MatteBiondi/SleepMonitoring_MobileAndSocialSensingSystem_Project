@@ -26,48 +26,65 @@ import java.util.GregorianCalendar;
 
 import it.unipi.ing.mobile.sleepmonitoring_smartphone.R;
 import it.unipi.ing.mobile.sleepmonitoring_smartphone.database.SleepEventDatabase;
+import it.unipi.ing.mobile.sleepmonitoring_smartphone.databinding.FragmentSettingsBinding;
 
 public class SettingsFragment extends Fragment {
-    private String sharedPrefFile;
-    private String theme_preferences_label;
+    private FragmentSettingsBinding binding;
+    // Shared Preferences keys
+    private String theme_preferences_key;
+    // Shared Preferences
     private SharedPreferences mPreferences;
-    public static SettingsFragment newInstance() {
-        return new SettingsFragment();
-    }
+
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_settings, container, false);
+        binding = FragmentSettingsBinding.inflate(inflater, container, false);
+        View root = binding.getRoot();
 
-        sharedPrefFile = getString(R.string.shared_preferences_file);
-        mPreferences=inflater.getContext().getSharedPreferences(sharedPrefFile, MODE_PRIVATE);
-        theme_preferences_label = getString(R.string.theme_preferences_key);
+        // Set attributes for shared preferences
+        initSharedPrefAttributes(inflater);
 
-        reloadValuesFromSharedPref(view);
-        defineListeners(view);
+        // Reload precedence value of the theme from preview application setting change
+        reloadValuesFromSharedPref();
 
-        return view;
+        // Define listeners for UI element
+        defineThemeRadioGroupListeners();
+        defineButtonListeners();
+
+        return root;
     }
 
-    private void reloadValuesFromSharedPref(View view){
+    private void initSharedPrefAttributes(LayoutInflater inflater) {
+        // Shared Preferences file name
+        String sharedPrefFile = getString(R.string.shared_preferences_file);
+        // Init shared preference attribute
+        mPreferences=inflater.getContext().getSharedPreferences(sharedPrefFile, MODE_PRIVATE);
+        // Initialize shared preference keys
+        theme_preferences_key = getString(R.string.theme_preferences_key);
+    }
+
+    private void reloadValuesFromSharedPref(){
         RadioButton radioButton;
-        RadioGroup themeRadioGroup = view.findViewById(R.id.theme_radio_group);
-        //Theme
-        String saved_theme = mPreferences.getString(theme_preferences_label, getString(R.string.light_theme));
+        RadioGroup themeRadioGroup = binding.themeRadioGroup;
+        // Get saved theme
+        String saved_theme = mPreferences.getString(theme_preferences_key, getString(R.string.light_theme));
+        // Checked the corresponding button
         radioButton=themeRadioGroup.findViewWithTag(saved_theme);
         radioButton.setChecked(true);
     }
 
-    private void defineListeners(View view){
-        //Theme change
-        RadioGroup themeRadioGroup = view.findViewById(R.id.theme_radio_group);
+    private void defineThemeRadioGroupListeners(){
+        // on theme change
+        RadioGroup themeRadioGroup = binding.themeRadioGroup;
         themeRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
-            // checkedId is the RadioButton selected
-            RadioButton checkedRadioButton = view.findViewById(checkedId);
+            // checkedId is the selected RadioButton
+            RadioButton checkedRadioButton = group.findViewById(checkedId);
             String text = checkedRadioButton.getText().toString();
-            mPreferences.edit().putString(theme_preferences_label, text).apply();
+            // Save selected theme in the shared preferences
+            mPreferences.edit().putString(theme_preferences_key, text).apply();
+            // Change theme
             if(text.equals("Light") || text.equals("light")) {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
             }
@@ -75,95 +92,108 @@ public class SettingsFragment extends Fragment {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
             }
         });
+    }
 
-        // Delete hisotry
-        Button deleteHistory = view.findViewById(R.id.delete_report_history_button);
-        deleteHistory.setOnClickListener(new View.OnClickListener() {
+    private void defineButtonListeners() {
+        // Delete history
+        Button deleteHistory = binding.deleteReportHistoryButton;
+        deleteHistory.setOnClickListener(view -> {
+            // Inflate the layout of the popup window
+            View popupView = View.inflate(getContext(), R.layout.popup_delate_history, null);
+
+            // Create the popup window
+            // Taps outside the popup also dismiss it -> Focusable = true
+            int width = LinearLayout.LayoutParams.WRAP_CONTENT;
+            int height = LinearLayout.LayoutParams.WRAP_CONTENT;
+            PopupWindow popupWindow = new PopupWindow(popupView, width, height, true);
+
+            // show the popup window
+            // which view you pass in doesn't matter, it is only used for the window tolken
+            popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0);
+
+            // Blur effect on the background
+            View v = getView();
+            if(v != null)
+                v.setAlpha((float) 0.2);
+
+            // Define popup window's listeners
+            definePopupWindowListeners(popupView, popupWindow);
+
+        });
+    }
+
+    private void definePopupWindowListeners(View popupView, PopupWindow popupWindow) {
+        // When the popup window is closed, remove blur effect
+        popupWindow.setOnDismissListener(() ->{
+            View view = getView();
+            if(view != null)
+                view.setAlpha((float) 1);
+        });
+
+        // Dismiss the popup window when button clicked
+        Button startDelete = popupView.findViewById(R.id.start_delete_button);
+        startDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // inflate the layout of the popup window
-                View popupView = View.inflate(getContext(), R.layout.popup_delate_history, null);
+                // Take the selected items from radio group
+                RadioGroup historyRadioGroup = view.getRootView().findViewById(R.id.history_radio_group);
+                RadioButton checked = view.getRootView().findViewById(historyRadioGroup.getCheckedRadioButtonId());
 
+                // Compute the selected date
+                String selectedItem = checked.getText().toString();
+                String date = computeSelectedDate(selectedItem);
 
-                // create the popup window
-                int width = LinearLayout.LayoutParams.WRAP_CONTENT;
-                int height = LinearLayout.LayoutParams.WRAP_CONTENT;
-                boolean focusable = true; // lets taps outside the popup also dismiss it
-                PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
-
-
-                // show the popup window
-                // which view you pass in doesn't matter, it is only used for the window tolken
-                popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0);
-
-                // Blur effect on the background
-                getView().setAlpha((float) 0.2);
-
-                popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+                // Delete reports
+                new Thread(){
                     @Override
-                    public void onDismiss() {
-                        getView().setAlpha((float) 1);
+                    public void run() {
+                        super.run();
+                        SleepEventDatabase db = SleepEventDatabase.build(getContext());
+                        db.deleteBefore(date);
                     }
-                });
+                }.start();
 
-                // dismiss the popup window when button clicked
-                Button startDelete = popupView.findViewById(R.id.start_delete_button);
-                startDelete.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        // take the selected items from radio group
-                        RadioGroup historyRadioGroup = view.getRootView().findViewById(R.id.history_radio_group);
-                        RadioButton checked = view.getRootView().findViewById(historyRadioGroup.getCheckedRadioButtonId());
+                // Close the popup window
+                popupWindow.dismiss();
 
-
-                        //Get current date
-                        final Calendar cldr = Calendar.getInstance();
-                        int day = cldr.get(Calendar.DAY_OF_MONTH);
-                        int month = cldr.get(Calendar.MONTH);
-                        int year = cldr.get(Calendar.YEAR);
-
-                        // Create the selected date before which user want to delete reports
-                        String date;
-
-                        switch (checked.getText().toString()){
-                            case "Today":
-                                date=DateFormat.format(getString(R.string.report_date_format),
-                                        new GregorianCalendar(year,month,day)).toString();
-                                break;
-                            case "Last month":
-                                month = (month == 0)? 11 : month-1;
-                                date=DateFormat.format(getString(R.string.report_date_format),
-                                        new GregorianCalendar(year,month,day)).toString();
-                                break;
-                            case "Last six month":
-                                month = (month < 6)? 11 + (month - 6) : month-6;
-                                date=DateFormat.format(getString(R.string.report_date_format),
-                                        new GregorianCalendar(year,month,day)).toString();
-                                break;
-                            default:
-                                year = year - 1;
-                                date=DateFormat.format(getString(R.string.report_date_format),
-                                        new GregorianCalendar(year,month,day)).toString();
-                        }
-
-                        // Delete reports
-                        new Thread(){
-                            @Override
-                            public void run() {
-                                super.run();
-                                SleepEventDatabase db = SleepEventDatabase.build(getContext());
-                                db.deleteBefore(date);
-                            }
-                        }.start();
-
-                        // Close the popup window
-                        popupWindow.dismiss();
-
-                        // Toast message for user as confirmation
-                        Toast.makeText(getActivity().getApplicationContext(), R.string.deleted_report_confirmation, Toast.LENGTH_SHORT).show();
-                    }
-                });
+                // Toast message for user as confirmation
+                Toast.makeText(getActivity(), R.string.deleted_report_confirmation, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private String computeSelectedDate(String checked) {
+        // Create the selected date before which user want to delete reports
+        String date;
+
+        //Get current date
+        final Calendar cldr = Calendar.getInstance();
+        int day = cldr.get(Calendar.DAY_OF_MONTH);
+        int month = cldr.get(Calendar.MONTH);
+        int year = cldr.get(Calendar.YEAR);
+
+        // Computed the selected date as a date string with specific format
+        switch (checked){
+            case "Today":
+                date=DateFormat.format(getString(R.string.report_date_format),
+                        new GregorianCalendar(year,month,day)).toString();
+                break;
+            case "Last month":
+                month = (month == 0)? 11 : month-1;
+                date=DateFormat.format(getString(R.string.report_date_format),
+                        new GregorianCalendar(year,month,day)).toString();
+                break;
+            case "Last six month":
+                month = (month < 6)? 11 + (month - 6) : month-6;
+                date=DateFormat.format(getString(R.string.report_date_format),
+                        new GregorianCalendar(year,month,day)).toString();
+                break;
+            default:
+                year = year - 1;
+                date=DateFormat.format(getString(R.string.report_date_format),
+                        new GregorianCalendar(year,month,day)).toString();
+        }
+
+        return date;
     }
 }
