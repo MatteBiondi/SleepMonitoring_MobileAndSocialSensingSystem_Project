@@ -9,7 +9,6 @@
     tools:context=".MainActivity"
     tools:deviceIds="wear">
 
-    <!-- src will be modified from ic_media_play to ic_media_stop when service will start and viceversa -->
     <TextView
         android:id="@+id/sleep_monitoring_label"
         android:layout_width="wrap_content"
@@ -25,6 +24,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- src will be modified from ic_media_play to ic_media_stop when service will start and viceversa -->
     <ImageButton
         android:id="@+id/play_stop_button"
         android:layout_width="wrap_content"
@@ -40,6 +40,7 @@
         app:layout_constraintTop_toBottomOf="@+id/sleep_monitoring_label"
         app:layout_constraintVertical_bias="0.0" />
 
+    <!-- It will contain the value of the service status -->
     <TextView
         android:id="@+id/status_label"
         android:layout_width="wrap_content"
@@ -51,7 +52,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/play_stop_button"
         app:layout_constraintVertical_bias="0.869" />
-
-    <!-- It will contain the value of the service status -->
 
 </androidx.constraintlayout.widget.ConstraintLayout>
