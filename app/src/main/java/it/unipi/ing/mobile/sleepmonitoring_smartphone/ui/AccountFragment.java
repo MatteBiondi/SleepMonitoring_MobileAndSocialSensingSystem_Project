@@ -47,7 +47,7 @@ public class AccountFragment extends Fragment {
         setAccountInfoUI(firstName, lastName, email);
 
         // Define listeners
-        defineListeners();
+        defineButtonListener();
 
         return root;
     }
@@ -66,7 +66,7 @@ public class AccountFragment extends Fragment {
         emailField.setText(email);
     }
 
-    private void defineListeners() {
+    private void defineButtonListener() {
         // Delete account button listener
         binding.accountDeleteButton.setOnClickListener(targetView -> {
             MainActivity mainActivity = ((MainActivity)getActivity());
