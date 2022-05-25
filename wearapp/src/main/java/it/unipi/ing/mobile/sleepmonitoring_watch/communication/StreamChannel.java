@@ -87,9 +87,11 @@ public class StreamChannel extends ChannelClient.ChannelCallback {
         if (stream_channel == null)
             return;
         try {
-            in_stream.close();
+            if(in_stream != null)
+                in_stream.close();
             in_stream = null;
-            out_stream.close();
+            if (out_stream != null)
+                out_stream.close();
             out_stream = null;
         }
         catch (IOException e) { e.printStackTrace(); }
@@ -101,7 +103,6 @@ public class StreamChannel extends ChannelClient.ChannelCallback {
     @Override
     public void onChannelClosed(@NonNull ChannelClient.Channel channel, int closeReason, int appSpecificErrorCode){
         super.onChannelClosed(channel, closeReason, appSpecificErrorCode);
-        Log.i(TAG, "Channel closed");
         try {
             if (in_stream != null)
                 in_stream.close();
