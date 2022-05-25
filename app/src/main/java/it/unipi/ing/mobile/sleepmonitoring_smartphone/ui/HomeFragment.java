@@ -164,30 +164,6 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    enum Status{
-        CONNECTED("Connected", Color.GREEN),
-        DISCONNECTED("Disconnected", Color.RED),
-        RUNNING("Running", Color.BLUE);
-
-        private final String status;
-        private final int color;
-
-        Status(String status, int color) {
-            this.status = status;
-            this.color = color;
-        }
-
-        @NonNull
-        @Override
-        public String toString(){
-            return this.status.toUpperCase();
-        }
-
-        public int getColor(){
-            return this.color;
-        }
-    }
-
     public boolean updateWelcomeMessage(){
         // Get account information from sharedPreferences
         String firstName = mPreferences.getString(user_first_name_preferences_key, "");
@@ -212,6 +188,31 @@ public class HomeFragment extends Fragment {
         }
         /* The welcome message is updated onResume because of Fragment LifeCycle phase after
         *  login popup disappears */
+    }
+
+
+    enum Status{
+        CONNECTED("Connected", Color.GREEN),
+        DISCONNECTED("Disconnected", Color.RED),
+        RUNNING("Running", Color.BLUE);
+
+        private final String status;
+        private final int color;
+
+        Status(String status, int color) {
+            this.status = status;
+            this.color = color;
+        }
+
+        @NonNull
+        @Override
+        public String toString(){
+            return this.status.toUpperCase();
+        }
+
+        public int getColor(){
+            return this.color;
+        }
     }
 
 }
