@@ -1,13 +1,10 @@
 package it.unipi.ing.mobile.sleepmonitoring_smartphone.ui;
 
-import static android.content.Context.MODE_PRIVATE;
 import static com.androidplot.xy.StepMode.INCREMENT_BY_VAL;
 import static com.androidplot.xy.StepMode.SUBDIVIDE;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DatePickerDialog;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.format.DateFormat;
@@ -33,7 +30,6 @@ import com.androidplot.xy.LineAndPointFormatter;
 import com.androidplot.xy.SimpleXYSeries;
 import com.androidplot.xy.XYGraphWidget;
 import com.androidplot.xy.XYPlot;
-import com.androidplot.xy.XYSeries;
 
 import java.text.FieldPosition;
 import java.text.NumberFormat;
@@ -52,61 +48,65 @@ import it.unipi.ing.mobile.sleepmonitoring_smartphone.database.Report;
 import it.unipi.ing.mobile.sleepmonitoring_smartphone.database.SleepEvent;
 import it.unipi.ing.mobile.sleepmonitoring_smartphone.database.SleepEventDatabase;
 import it.unipi.ing.mobile.sleepmonitoring_smartphone.database.SleepSession;
+import it.unipi.ing.mobile.sleepmonitoring_smartphone.databinding.FragmentReportBinding;
 
 public class ReportFragment extends Fragment {
+    FragmentReportBinding binding;
+    // Tag attribute used in log
     private final String TAG = "ReportFragment";
+    // Attribute for UI components
     private EditText date;
     private XYPlot plot;
     private Spinner spinner;
-    private String sharedPrefFile;
-    private SharedPreferences mPreferences;
-
+    // Attribute for MainActivity used to close app and run code on UI thread
     private Activity mainActivity;
 
-    public static ReportFragment newInstance() {
-        return new ReportFragment();
-    }
 
-    @SuppressLint("ClickableViewAccessibility")
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_report, container, false);
+        binding = FragmentReportBinding.inflate(inflater, container, false);
+        View root = binding.getRoot();
 
-        sharedPrefFile = getString(R.string.shared_preferences_file);
-        mPreferences=inflater.getContext().getSharedPreferences(sharedPrefFile, MODE_PRIVATE);
+        // Init class attributes
+        initAttribute();
 
+        // Define listeners for UI elements
+        defineDateFieldListener();
+        defineSpinnerFieldListener();
 
-        mainActivity = getActivity();
-        if (mainActivity == null) {
-            Toast.makeText(getContext(),R.string.main_activity_error, Toast.LENGTH_SHORT);
-            mainActivity.finishAndRemoveTask();
+        // Get args to check if the creation request come from home fragment button or not
+        boolean fromHome = ReportFragmentArgs.fromBundle(getArguments()).getLastReport();
+        if(fromHome){
+            handleLastReportRequest();
         }
 
-        plot=view.findViewById(R.id.report_plot);
-        date=view.findViewById(R.id.editText_date);
-        spinner=view.findViewById(R.id.report_session_spinner);
+        return root;
+    }
 
-
+    private void defineDateFieldListener() {
         date.setOnFocusChangeListener((v, hasFocus) -> {
+            // If we unfocus this element -> do nothing
             if(!hasFocus)
                 return;
 
-            mainActivity.runOnUiThread(()->spinner.setVisibility(View.GONE));
-            mainActivity.runOnUiThread(()->plot.setVisibility(View.GONE));
+            // Clean UI from other elements
+            mainActivity.runOnUiThread(()->spinner.setVisibility(View.INVISIBLE));
+            mainActivity.runOnUiThread(()->plot.setVisibility(View.INVISIBLE));
 
-
+            // Get current date
             final Calendar cldr = Calendar.getInstance();
-            //Get current date
             int currentDay = cldr.get(Calendar.DAY_OF_MONTH);
             int currentMonth = cldr.get(Calendar.MONTH);
             int currentYear = cldr.get(Calendar.YEAR);
-            // date picker dialog
+
+            // Date picker dialog
             DatePickerDialog datepicker = new DatePickerDialog(getActivity(),
                     (dp, year, monthOfYear, dayOfMonth) -> {
+                        // Selected date is written in date field using a specified format
                         String newDateValue =(String) DateFormat.format(ReportFragment.this.getString(R.string.report_date_format),
-                                        new GregorianCalendar(year, monthOfYear, dayOfMonth));
+                                new GregorianCalendar(year, monthOfYear, dayOfMonth));
                         date.setText(newDateValue);
 
                         new Thread(){
@@ -114,25 +114,27 @@ public class ReportFragment extends Fragment {
                             public void run() {
                                 super.run();
                                 //todo da rimettere build
-                                // Request data for the received date
+
+                                // Request sessions for the selected date
                                 SleepEventDatabase db = SleepEventDatabase.buildExample(getContext(),"SleepEventExample.db");
-                                List<SleepSession> sessions = db.getSessionsByDate(newDateValue);
-
-                                //Put session item in the spinner
-                                ArrayAdapter<SleepSession> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, sessions);
-                                spinner.setAdapter(adapter);
-
-                                mainActivity.runOnUiThread(()->spinner.setVisibility(View.VISIBLE));
+                                populateSpinner(newDateValue, db);
                             }
                         }.start();
                     },
                     currentYear, currentMonth, currentDay);
+
+            // Set constraint that user can't select date after today
+            datepicker.getDatePicker().setMaxDate(new Date().getTime());
+            // Show the date picker dialog
             datepicker.show();
+            // Pass focus to the layout
             ConstraintLayout cl = (ConstraintLayout) date.getParent();
             cl.requestFocusFromTouch();
             date.clearFocus();
         });
+    }
 
+    private void defineSpinnerFieldListener() {
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
@@ -140,29 +142,29 @@ public class ReportFragment extends Fragment {
                     @Override
                     public void run() {
                         super.run();
-                        //todo posso fare in modo di riusare lo stesso di prima?
-                        //Take the selected item
+                        // Hide plot element
+                        mainActivity.runOnUiThread(()->plot.setVisibility(View.INVISIBLE));
+
+                        //Take the selected item from the spinner
                         SleepSession selectedSession = (SleepSession) parent.getItemAtPosition(pos);
-                        // Request data for the received date
+
+                        // Request events data for the received date
                         SleepEventDatabase db = SleepEventDatabase.buildExample(getContext(),"SleepEventExample.db");
                         Report selectedReport = db.getReport(date.getText().toString(), selectedSession.getId());
-                        List<SleepEvent> sleepEventList = selectedReport.getEvents();
+                        List<SleepEvent> sleepEventList = getEventsFromReport(selectedReport);
+                        if( sleepEventList == null)
+                            return;
 
-                        // Take start time and stop time
-                        String startTime = selectedReport.getStartTimestamp();
-                        String stopTime = selectedReport.getStopTimestamp();
+                        // Take start time and stop time for the events report
+                        Date[] reportTimestamps = getReportTimestamps(selectedReport);
+                        if(reportTimestamps[0] == null || reportTimestamps[1] == null)
+                            // Error occurs
+                            return;
+                        Date startTimeDate = reportTimestamps[0];
+                        Date stopTimeDate = reportTimestamps[1];
 
-                        SimpleDateFormat timestampFormat = new SimpleDateFormat(getString(R.string.timestamp_format), Locale.getDefault());
-                        Date startTimeReport = null;
-                        Date stopTimeReport = null;
-                        try {
-                            startTimeReport = timestampFormat.parse(startTime);
-                            stopTimeReport = timestampFormat.parse(stopTime);
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        }
-                        // PLot update
-                        plotUpdate(sleepEventList, startTimeReport, stopTimeReport);
+                        // Plot update
+                        plotUpdate(sleepEventList, startTimeDate, stopTimeDate);
                     }
                 }.start();
             }
@@ -172,67 +174,240 @@ public class ReportFragment extends Fragment {
 
             }
         });
+    }
 
-        // Get args to check if the request of creation come from home fragment button or not
-        boolean fromHome = ReportFragmentArgs.fromBundle(getArguments()).getLastReport();
-        //todo da sistemare e provare
-        if(fromHome){
-            new Thread(){
-                @Override
-                public void run() {
-                    super.run();
-                    //todo da rimettere build
-                    SleepEventDatabase db = SleepEventDatabase.buildExample(getContext(),"SleepEventExample.db");
-                    //todo forse da sostituire con last session che ritorna solo la data
-                    Report lastReport = db.getLastReport();
-                    List<SleepEvent> sleepEventList = lastReport.getEvents();
+    private void handleLastReportRequest() {
+        new Thread(){
+            @Override
+            public void run() {
+                super.run();
+                //todo da rimettere build
 
-                    if (sleepEventList.size() <= 0) {
-                        mainActivity.runOnUiThread(() -> Toast.makeText(getContext(),R.string.no_report_to_plot, Toast.LENGTH_SHORT).show());
-                        return;
-                    }
+                // Get movement events from last reported session
+                SleepEventDatabase db = SleepEventDatabase.buildExample(getContext(),"SleepEventExample.db");
+                Report lastReport = db.getLastReport();
+                List<SleepEvent> sleepEventList = getEventsFromReport(lastReport);
+                if(sleepEventList == null)
+                    return;
 
-                    String lastReportDateStart = lastReport.getStartTimestamp();
-                    String lastReportDateStop = lastReport.getStopTimestamp();
+                // Get start and stop timestamp
+                Date[] reportTimestamps = getReportTimestamps(lastReport);
+                if(reportTimestamps[0] == null || reportTimestamps[1] == null)
+                    // Error occurs
+                    return;
+                Date lastReportStartDate = reportTimestamps[0];
+                Date lastReportStopDate = reportTimestamps[1];
 
-                    SimpleDateFormat timestampFormat = new SimpleDateFormat(getString(R.string.timestamp_format), Locale.getDefault());
-                    Date startTimestampLastReport = null;
-                    Date stopTimestampLastReport = null;
-                    String requestedDate = "";
+                // Extract selected date of the report
+                String requestedDate = extractSelectedDate(lastReportStartDate);
 
-                    try {
-                        startTimestampLastReport = timestampFormat.parse(lastReportDateStart);
-                        stopTimestampLastReport = timestampFormat.parse(lastReportDateStop);
+                // Set the date of last report on the editText
+                mainActivity.runOnUiThread(() -> date.setText(requestedDate));
 
-                        requestedDate = DateFormat.format(getString(R.string.report_date_format), startTimestampLastReport).toString();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                //Put session items in the spinner
+                populateSpinner(requestedDate, db);
 
-                    String finalRequestedDate = requestedDate;
-                    mainActivity.runOnUiThread(() -> {
-                        // Set the current date on the editText and update the plot
-                        date.setText(finalRequestedDate);
-                    });
+                // Select the last item
+                mainActivity.runOnUiThread(()-> spinner.setSelection(spinner.getCount() - 1));
 
-                    //Put session item in the spinner
-                    List<SleepSession> sessions = db.getSessionsByDate(requestedDate);
-                    ArrayAdapter<SleepSession> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, sessions);
-                    mainActivity.runOnUiThread(()->{
-                        spinner.setAdapter(adapter);
-                        spinner.setVisibility(View.VISIBLE);
-                    });
+                // Update the plot
+                plotUpdate(sleepEventList,lastReportStartDate, lastReportStopDate);
 
-                    //Todo qui o dopo start?
+            }
+        }.start();
+    }
 
-                    // update the plot
-                    plotUpdate(sleepEventList,startTimestampLastReport, stopTimestampLastReport);
+    private List<SleepEvent> getEventsFromReport(Report selectedReport) {
+        List<SleepEvent> sleepEventList = selectedReport.getEvents();
 
-                }
-            }.start();
+        // If no movements are present -> Show toast and don't show plot
+        if (sleepEventList.size() <= 0) {
+            mainActivity.runOnUiThread(() -> Toast.makeText(getContext(),R.string.no_report_to_plot, Toast.LENGTH_SHORT).show());
+            return null;
+        }
+        return sleepEventList;
+    }
+
+    private void populateSpinner(String requestedDate, SleepEventDatabase db) {
+        // Get sessions of a requested date
+        List<SleepSession> sessions = db.getSessionsByDate(requestedDate);
+        // If there are no sessions in that date -> show a toast and don't create spinner
+        if (sessions.size() <= 0) {
+            mainActivity.runOnUiThread(() -> Toast.makeText(getContext(),R.string.no_sessions_in_date, Toast.LENGTH_SHORT).show());
+            return;
+        }
+        ArrayAdapter<SleepSession> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, sessions);
+        mainActivity.runOnUiThread(()->{
+            spinner.setAdapter(adapter);
+            spinner.setVisibility(View.VISIBLE);
+        });
+    }
+
+    private String extractSelectedDate(Date date) {
+        String requestedDate = "";
+        try {
+            // Identify the date of the last report
+            requestedDate = DateFormat.format(getString(R.string.report_date_format), date).toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return requestedDate;
+    }
+
+    private Date[] getReportTimestamps(Report report) {
+        // Identify start and stop timestamp related to the selected session
+        String reportStartString = report.getStartTimestamp();
+        String reportStopString = report.getStopTimestamp();
+
+        SimpleDateFormat timestampFormat = new SimpleDateFormat(getString(R.string.timestamp_format), Locale.getDefault());
+
+        Date reportStartDate = null;
+        Date reportStopDate = null;
+
+        try {
+            // Obtain timestamp in the specified format
+            reportStartDate = timestampFormat.parse(reportStartString);
+            reportStopDate = timestampFormat.parse(reportStopString);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new Date[]{reportStartDate,reportStopDate};
+    }
+
+
+    private void initAttribute() {
+        // Get MainActivity instance
+        mainActivity = getActivity();
+        if (mainActivity == null) {
+            // If it is not possible => error. Stop application
+            Toast.makeText(getContext(),
+                    R.string.main_activity_error, Toast.LENGTH_SHORT).show();
+            mainActivity.finishAndRemoveTask();
+        }
+        // UI elements
+        plot=binding.reportPlot;
+        date=binding.editTextDate;
+        spinner=binding.reportSessionSpinner;
+    }
+
+
+    public void plotUpdate(List<SleepEvent> sleepEventList, Date startTime, Date stopTime){
+        // If there are no data to plot
+        if(sleepEventList.size() == 0){
+            mainActivity.runOnUiThread(() -> Toast.makeText(getContext(),R.string.no_report_to_plot, Toast.LENGTH_SHORT).show());
+            return;
         }
 
-        return view;
+        // Data structures
+        // Micro movements
+        String microMovementsTitle = getString(R.string.micro_movements_title);
+        MovementsList microML = new MovementsList(microMovementsTitle, Color.BLUE, 30f);
+        // Macro movements
+        String macroMovementsTitle = getString(R.string.macro_movements_title);
+        MovementsList macroML = new MovementsList(macroMovementsTitle, Color.RED, 30f);
+        // Rollover
+        String rollMovementsTitle = getString(R.string.roll_movements_title);
+        MovementsList rollML = new MovementsList(rollMovementsTitle, Color.GREEN, 30f);
+
+        // Extract values from the list
+        extractMovementFromEventsList(sleepEventList, microML, macroML, rollML);
+
+        // Define graphic characteristics of the plot
+        defineGraphicCharacteristics(startTime, stopTime);
+
+        // Define how to manage domain axis values
+        setManagingPolicyForDomainValues();
+
+        // Update Plot and make it visible
+        mainActivity.runOnUiThread(() -> {
+            plot.clear();
+
+            // Define series to be the plotted
+            plot.addSeries(microML.fromListToSeries(), microML.getPointsFormat());
+            plot.addSeries(macroML.fromListToSeries(), macroML.getPointsFormat());
+            plot.addSeries(rollML.fromListToSeries(), rollML.getPointsFormat());
+
+            plot.redraw();
+            plot.setVisibility(View.VISIBLE);
+        });
+    }
+
+    private void setManagingPolicyForDomainValues() {
+        plot.getGraph().getLineLabelStyle(XYGraphWidget.Edge.BOTTOM).setFormat(new NumberFormat() {
+            @NonNull
+            @Override
+            public StringBuffer format(double epochTime, @NonNull StringBuffer stringBuffer, @NonNull FieldPosition fieldPosition) {
+                /* The n values identified and placed in the domain axis do not correspond
+                exactly to the time of the individual events. The vertical lines are equally
+                distributed between the lower and upper bound */
+                String timeFormatString = getString(R.string.report_time_format);
+                SimpleDateFormat timeFormat = new SimpleDateFormat(timeFormatString, Locale.getDefault());
+                Date selectedDateTime = new Date((long)epochTime);
+
+                return new StringBuffer(timeFormat.format(selectedDateTime));
+            }
+
+            @NonNull
+            @Override
+            public StringBuffer format(long epochTime, @NonNull StringBuffer stringBuffer, @NonNull FieldPosition fieldPosition) {
+                throw new UnsupportedOperationException("Not yet implemented.");
+            }
+
+            @Nullable
+            @Override
+            public Number parse(@NonNull String s, @NonNull ParsePosition parsePosition) {
+                throw new UnsupportedOperationException("Not yet implemented.");
+            }
+        });
+    }
+
+    private void defineGraphicCharacteristics(Date startTime, Date stopTime) {
+        // Organize the legend item as in a table with 1 column and 3 rows
+        plot.getLegend().setTableModel(new DynamicTableModel(1, 3, TableOrder.ROW_MAJOR));
+
+        // Distance between horizontal lines and define fixed boundaries
+        plot.setRangeStep(INCREMENT_BY_VAL, 1);
+        plot.setRangeBoundaries(0,4, BoundaryMode.FIXED);
+
+        // Subdivision of graph in vertical sections
+        plot.setDomainStep(SUBDIVIDE, 10);
+
+        // Define lower boundary and  upper boundary for plot domain
+        if(startTime != null)
+            plot.setDomainLowerBoundary((double)startTime.getTime(),BoundaryMode.FIXED);
+        if(stopTime != null)
+            plot.setDomainUpperBoundary((double)stopTime.getTime(),BoundaryMode.FIXED);
+    }
+
+    private void extractMovementFromEventsList(List<SleepEvent> sleepEventList,MovementsList micro, MovementsList macro, MovementsList roll) {
+        // Prepare movement labels
+        String microMovementLabel = getString(R.string.micro_movements_label);
+        String macroMovementLabel = getString(R.string.macro_movements_label);
+        String rolloverLabel = getString(R.string.roll_movements_label);
+
+        // Put timestamp and data values in the corresponding list depending on the type of each action
+        SimpleDateFormat timestampFormat = new SimpleDateFormat(getString(R.string.timestamp_format), Locale.getDefault());
+        for (SleepEvent event : sleepEventList){
+            Date date;
+            try {
+                date = timestampFormat.parse(event.getTimestamp());
+                if (date == null)
+                    // Error-> Don't crash app. Discard data
+                    continue;
+                if(event.getEvent().equals(microMovementLabel)){
+                    micro.addMovement(date.getTime(),1f);
+                }else if(event.getEvent().equals(macroMovementLabel)){
+                    macro.addMovement(date.getTime(),2f);
+                }else if(event.getEvent().equals(rolloverLabel)){
+                    roll.addMovement(date.getTime(),3f);
+                }
+
+                //else discard it
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
     @Override
@@ -271,133 +446,37 @@ public class ReportFragment extends Fragment {
         Log.i(TAG,"destroy");
     }
 
-    public void plotUpdate(List<SleepEvent> sleepEventList, Date startTime, Date stopTime){
-        new Thread(){
-            @Override
-            public void run() {
-                super.run();
-                // If there are no data to plot
-                if(sleepEventList.size() == 0){
-                    mainActivity.runOnUiThread(() -> Toast.makeText(getContext(),R.string.no_report_to_plot, Toast.LENGTH_SHORT).show());
-                    return;
-                }
+    // Static inner class to handle movements list and it's representation characteristics
+    private static class MovementsList {
+        private final List<Long> timestamp;
+        private final List<Float> values;
+        private final String title;
 
-                // Organize the legend item as in a table with 1 column and 3 rows
-                plot.getLegend().setTableModel(new DynamicTableModel(1, 3, TableOrder.ROW_MAJOR));
+        private final LineAndPointFormatter microMovementsFormat;
 
-                // Prepare movement label
-                String microMovementLabel = getString(R.string.micro_movements_label);
-                String macroMovementLabel = getString(R.string.macro_movements_label);
-                String rolloverLabel = getString(R.string.roll_movements_label);
+        public MovementsList(String title, Integer color, Float size){
+            timestamp = new ArrayList<>();
+            values = new ArrayList<>();
+            this.title = title;
 
-                // Data structure
-                // Micro movements
-                List<Long> miTimestamp = new ArrayList<>();
-                List<Float> miValues = new ArrayList<>();
-                // Macro movements
-                List<Long> maTimestamp = new ArrayList<>();
-                List<Float> maValues = new ArrayList<>();
-                // Rollover
-                List<Long> rTimestamp = new ArrayList<>();
-                List<Float> rValues = new ArrayList<>();
+            // Define characteristics of points
+            microMovementsFormat = new LineAndPointFormatter(null, color, null, null);
+            microMovementsFormat.getVertexPaint().setStrokeWidth(size);
+        }
 
-                // Extract values from the list
-                // Put timestamp and data values in the corresponding list depending on the type of action
-                SimpleDateFormat timestampFormat = new SimpleDateFormat(getString(R.string.timestamp_format), Locale.getDefault());
-                for (SleepEvent event : sleepEventList){
-                    Date date;
-                    try {
-                        date = timestampFormat.parse(event.getTimestamp());
-                        //todo assert: serve? c'è modo migliore?
-                        assert date != null;
-                        if(event.getEvent().equals(microMovementLabel)){
-                            miTimestamp.add(date.getTime());
-                            miValues.add(1f);
-                        }else if(event.getEvent().equals(macroMovementLabel)){
-                            maTimestamp.add(date.getTime());
-                            maValues.add(2f);
-                        }else if(event.getEvent().equals(rolloverLabel)){
-                            rTimestamp.add(date.getTime());
-                            rValues.add(3f);
-                        }
+        public void addMovement(long time, float value) {
+            // Add a movement event saving its timestamp and value
+            timestamp.add(time);
+            values.add(value);
+        }
 
-                        //else discard it
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
-                }
+        public SimpleXYSeries fromListToSeries(){
+            return new SimpleXYSeries(timestamp, values, title);
+        }
 
-                // Distance between horizontal lines
-                plot.setRangeStep(INCREMENT_BY_VAL, 1);
-                plot.setRangeBoundaries(0,4, BoundaryMode.FIXED);
+        public LineAndPointFormatter getPointsFormat() {
+            return  microMovementsFormat;
+        }
 
-                // Subdivision of graph in vertical sections
-                plot.setDomainStep(SUBDIVIDE, 10);
-                // todo decidere plot.setDomainStep(StepMode.INCREMENT_BY_VAL, 1800000);
-
-                // Define lower boundary and  upper boundary of the plot domain
-                if(startTime != null)
-                    plot.setDomainLowerBoundary((double)startTime.getTime(),BoundaryMode.FIXED);
-                if(stopTime != null)
-                    plot.setDomainUpperBoundary((double)stopTime.getTime(),BoundaryMode.FIXED);
-
-                plot.getGraph().getLineLabelStyle(XYGraphWidget.Edge.BOTTOM).setFormat(new NumberFormat() {
-                    @NonNull
-                    @Override
-                    public StringBuffer format(double epochTime, @NonNull StringBuffer stringBuffer, @NonNull FieldPosition fieldPosition) {
-                        //Qui sono identificati gli n valori posti nel dominio, non corrispondono esattamente al tempo dell'evento
-                        //Sono equidistribuiti fra il primo e l'ultimo valore
-                        String timeFormatString = getString(R.string.report_time_format);
-                        SimpleDateFormat timeFormat = new SimpleDateFormat(timeFormatString, Locale.getDefault());
-                        Date selectedDateTime = new Date((long)epochTime);
-
-                        return new StringBuffer(timeFormat.format(selectedDateTime));
-                    }
-
-                    @NonNull
-                    @Override
-                    public StringBuffer format(long epochTime, @NonNull StringBuffer stringBuffer, @NonNull FieldPosition fieldPosition) {
-                        throw new UnsupportedOperationException("Not yet implemented.");
-                    }
-
-                    @Nullable
-                    @Override
-                    public Number parse(@NonNull String s, @NonNull ParsePosition parsePosition) {
-                        throw new UnsupportedOperationException("Not yet implemented.");
-                    }
-                });
-
-                // Update plot
-                //MicroMovements
-                String microMovementsTitle = getString(R.string.micro_movements_title);
-                XYSeries microMovementsSeries = new SimpleXYSeries(miTimestamp, miValues, microMovementsTitle);
-                //MacroMovements
-                String macroMovementsTitle = getString(R.string.macro_movements_title);
-                XYSeries macroMovementsSeries = new SimpleXYSeries(maTimestamp, maValues, macroMovementsTitle);
-                //RolloverMovements
-                String rollMovementsTitle = getString(R.string.roll_movements_title);
-                XYSeries rollMovementsSeries = new SimpleXYSeries(rTimestamp, rValues, rollMovementsTitle);
-
-                LineAndPointFormatter microMovementsFormat = new LineAndPointFormatter(null, Color.BLUE, null, null);
-                microMovementsFormat.getVertexPaint().setStrokeWidth(30f);
-                LineAndPointFormatter macroMovementsFormat = new LineAndPointFormatter(null, Color.RED, null, null);
-                macroMovementsFormat.getVertexPaint().setStrokeWidth(30f);
-                LineAndPointFormatter rollMovementsFormat = new LineAndPointFormatter(null, Color.GREEN, null, null);
-                rollMovementsFormat.getVertexPaint().setStrokeWidth(30f);
-
-
-                // Update Plot UI
-                mainActivity.runOnUiThread(() -> {
-                    plot.clear();
-
-                    plot.setVisibility(View.VISIBLE);
-                    plot.addSeries(microMovementsSeries, microMovementsFormat);
-                    plot.addSeries(macroMovementsSeries, macroMovementsFormat);
-                    plot.addSeries(rollMovementsSeries, rollMovementsFormat);
-
-                    plot.redraw();
-                });
-            }
-        }.start();
     }
 }
