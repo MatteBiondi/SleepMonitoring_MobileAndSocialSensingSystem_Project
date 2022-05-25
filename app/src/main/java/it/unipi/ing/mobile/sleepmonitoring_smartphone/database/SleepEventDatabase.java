@@ -1,26 +1,30 @@
 package it.unipi.ing.mobile.sleepmonitoring_smartphone.database;
 
 import android.content.Context;
-
 import androidx.room.Room;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import it.unipi.ing.mobile.sleepmonitoring_smartphone.R;
+
 public class SleepEventDatabase {
     private static SleepEventDatabase instance = null;
     private final SleepEventDB database;
-    private static final String DB_NAME  = "sleep_event_db.db";
+    private static String timestamp_format;
 
     public static String getCurrentTimestamp(){
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ITALY);
+        DateFormat df = new SimpleDateFormat(
+                timestamp_format,
+                Locale.ITALY
+        );
         return df.format(new Date());
     }
 
     public static SleepEventDatabase build(Context context){
+        timestamp_format = context.getString(R.string.timestamp_format);
         if (instance == null){
             instance = new SleepEventDatabase(context, null);
         }
@@ -28,6 +32,7 @@ public class SleepEventDatabase {
     }
 
     public static SleepEventDatabase buildExample(Context context, String asset){
+        timestamp_format = context.getString(R.string.timestamp_format);
         if (instance == null){
             instance = new SleepEventDatabase(context, asset);
         }
@@ -36,12 +41,16 @@ public class SleepEventDatabase {
 
     private SleepEventDatabase(Context context, String asset){
         if (asset != null){
-            database =  Room.databaseBuilder(context, SleepEventDB.class, DB_NAME)
+            database =  Room.databaseBuilder(context, SleepEventDB.class,
+                           context.getString(R.string.db_name)
+                    )
                     .createFromAsset(asset)
                     .build();
         }
         else {
-            database = Room.databaseBuilder(context, SleepEventDB.class, DB_NAME)
+            database = Room.databaseBuilder(context, SleepEventDB.class,
+                            context.getString(R.string.db_name)
+                    )
                     .build();
         }
     }

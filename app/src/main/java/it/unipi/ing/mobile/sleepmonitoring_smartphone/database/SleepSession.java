@@ -1,5 +1,7 @@
 package it.unipi.ing.mobile.sleepmonitoring_smartphone.database;
 
+import android.content.res.Resources;
+
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
@@ -10,9 +12,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import it.unipi.ing.mobile.sleepmonitoring_smartphone.R;
-import kotlin.random.Random;
-
+/**
+ * Class representing the sleep_session entity of SQLiteDB used to store the sessions tracked
+ * by sleep monitoring
+ */
 @Entity(tableName = "sleep_session")
 public class SleepSession {
 
@@ -59,8 +62,17 @@ public class SleepSession {
 
     @Override @NonNull
     public String toString(){
-        SimpleDateFormat full_sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ITALY);
-        SimpleDateFormat short_sdf = new SimpleDateFormat("HH:mm", Locale.ITALY);
+        // The timestamp must be converted in a shorter format to be displayed on mobile app
+        SimpleDateFormat full_sdf = new SimpleDateFormat(
+                "yyyy-MM-dd HH:mm:ss",
+                Locale.ITALY
+        );
+
+        SimpleDateFormat short_sdf = new SimpleDateFormat(
+               "HH:mm",
+                Locale.ITALY
+        );
+
         String start_short = "";
         String stop_short = "";
 

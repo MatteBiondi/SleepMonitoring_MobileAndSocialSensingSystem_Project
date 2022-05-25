@@ -5,6 +5,10 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+/**
+ * Class representing the sleep_event entity of SQLiteDB used to store the events tracked
+ * by sleep monitoring
+ */
 @Entity(tableName = "sleep_event")
 public class SleepEvent {
 

@@ -86,7 +86,25 @@
     <string name="bluetooth_ignore">Ignore</string>
     <string name="bluetooth_neutral">Later</string>
 
-    <!-- Disconnection notification -->
-    <string name="notification_title">Sleep Monitor Disconnection</string>
-    <string name="notification_text">Smartwatch disconnected, the application will not be able to monitor your sleep</string>
+    <!-- Database -->
+    <string name="db_name">sleep_monitoring.db</string>
+
+    <!-- Connection -->
+    <string name="start_endpoint">/start-service</string>
+    <string name="start_action">/start-service</string>
+    <string name="stop_action">/stop-service</string>
+
+    <!-- Status -->
+    <string name="status_intent">it.unipi.ing.mobile.sleepmonitoring_smartphone.RUNNING</string>
+    <string name="status_connected">Connected</string>
+    <string name="status_disconnected">Disconnected</string>
+    <string name="status_running">Running</string>
+
+    <!-- Notification -->
+    <string name="notification_channel_id">SleepMonitoringNotification</string>
+    <string name="notification_channel_name">SleepMonitoring</string>
+    <string name="notification_disconnection_title">Sleep Monitoring Disconnection</string>
+    <string name="notification_disconnection_text">Watch disconnected, the application will not be able to monitor your sleep</string>
+    <string name="notification_service_title">Sleep Monitoring Running</string>
+    <string name="notification_service_text">Receiving data from watch</string>
 </resources>

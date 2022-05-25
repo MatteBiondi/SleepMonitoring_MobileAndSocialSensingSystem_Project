@@ -1,14 +1,15 @@
 package it.unipi.ing.mobile.sleepmonitoring_smartphone.database;
 
 import androidx.room.Dao;
-import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
-import androidx.room.Update;
 
 import java.util.List;
 
+/**
+ * Interface defining the query to be implemented by RoomAPI
+ */
 @Dao
 public interface SleepEventDao {
 
