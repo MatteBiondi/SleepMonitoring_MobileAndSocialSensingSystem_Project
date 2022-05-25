@@ -63,7 +63,7 @@ public class HomeFragment extends Fragment {
         updateWelcomeMessage();
 
         // Define listeners
-        defineListeners();
+        defineButtonListener();
 
         // Define status receiver to update UI
         status_receiver = new StatusReceiver();
@@ -98,7 +98,7 @@ public class HomeFragment extends Fragment {
         return root;
     }
 
-    private void defineListeners() {
+    private void defineButtonListener() {
         // Set home fragment button listener for click event
         Button seeLastReport = binding.homeLastReportButton;
         seeLastReport.setOnClickListener(view -> {
