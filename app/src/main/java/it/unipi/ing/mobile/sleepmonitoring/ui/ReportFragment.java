@@ -5,6 +5,7 @@ import static com.androidplot.xy.StepMode.SUBDIVIDE;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.format.DateFormat;
@@ -73,19 +74,20 @@ public class ReportFragment extends Fragment {
         initAttribute();
 
         // Define listeners for UI elements
-        defineDateFieldListener();
-        defineSpinnerFieldListener();
+        // Get context used as parameter
+        defineDateFieldListener(inflater.getContext());
+        defineSpinnerFieldListener(inflater.getContext());
 
         // Get args to check if the creation request come from home fragment button or not
         boolean fromHome = ReportFragmentArgs.fromBundle(getArguments()).getLastReport();
         if(fromHome){
-            handleLastReportRequest();
+            handleLastReportRequest(inflater.getContext());
         }
 
         return root;
     }
 
-    private void defineDateFieldListener() {
+    private void defineDateFieldListener(Context context) {
         date.setOnFocusChangeListener((v, hasFocus) -> {
             // If we unfocus this element -> do nothing
             if(!hasFocus)
@@ -116,7 +118,7 @@ public class ReportFragment extends Fragment {
                                 //todo da rimettere build
 
                                 // Request sessions for the selected date
-                                SleepEventDatabase db = SleepEventDatabase.buildExample(getContext(),"SleepEventExample.db");
+                                SleepEventDatabase db = SleepEventDatabase.buildExample(context,"SleepEventExample.db");
                                 populateSpinner(newDateValue, db);
                             }
                         }.start();
@@ -134,7 +136,7 @@ public class ReportFragment extends Fragment {
         });
     }
 
-    private void defineSpinnerFieldListener() {
+    private void defineSpinnerFieldListener(Context context) {
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
@@ -149,8 +151,10 @@ public class ReportFragment extends Fragment {
                         SleepSession selectedSession = (SleepSession) parent.getItemAtPosition(pos);
 
                         // Request events data for the received date
-                        SleepEventDatabase db = SleepEventDatabase.buildExample(getContext(),"SleepEventExample.db");
+                        SleepEventDatabase db = SleepEventDatabase.buildExample(context,"SleepEventExample.db");
                         Report selectedReport = db.getReport(date.getText().toString(), selectedSession.getId());
+                        if(selectedReport == null)
+                            return;
                         List<SleepEvent> sleepEventList = getEventsFromReport(selectedReport);
                         if( sleepEventList == null)
                             return;
@@ -176,7 +180,7 @@ public class ReportFragment extends Fragment {
         });
     }
 
-    private void handleLastReportRequest() {
+    private void handleLastReportRequest(Context context) {
         new Thread(){
             @Override
             public void run() {
@@ -184,8 +188,10 @@ public class ReportFragment extends Fragment {
                 //todo da rimettere build
 
                 // Get movement events from last reported session
-                SleepEventDatabase db = SleepEventDatabase.buildExample(getContext(),"SleepEventExample.db");
+                SleepEventDatabase db = SleepEventDatabase.buildExample(context,"SleepEventExample.db");
                 Report lastReport = db.getLastReport();
+                if(lastReport == null)
+                    return;
                 List<SleepEvent> sleepEventList = getEventsFromReport(lastReport);
                 if(sleepEventList == null)
                     return;
