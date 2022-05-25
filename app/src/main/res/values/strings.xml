@@ -23,7 +23,6 @@
     <!-- Description string -->
     <string name="nav_header_desc">Navigation Header</string>
 
-    <!-- todo utili? -->
     <!-- Default user information -->
     <string name="nav_header_name">Android Studio</string>
     <string name="nav_header_email">android.studio@android.com</string>
