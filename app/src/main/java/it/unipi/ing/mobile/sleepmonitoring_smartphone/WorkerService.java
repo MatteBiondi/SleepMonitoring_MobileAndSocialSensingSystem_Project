@@ -1,30 +1,21 @@
 package it.unipi.ing.mobile.sleepmonitoring_smartphone;
 
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
-
-import androidx.core.app.NotificationCompat;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
-
 import it.unipi.ing.mobile.sleepmonitoring_smartphone.database.SleepEvent;
 import it.unipi.ing.mobile.sleepmonitoring_smartphone.database.SleepEventDatabase;
+import it.unipi.ing.mobile.sleepmonitoring_smartphone.notification.Notification;
 
 public class WorkerService extends Service {
     public final String TAG = "WorkerService";
-    public final String CHANNEL_ID = "WorkerServiceChannel";
     public final int NOTIFICATION_ID = 2000;
     private Thread worker = null;
 
@@ -36,41 +27,40 @@ public class WorkerService extends Service {
         // create new worker thread
         worker = new Thread(() -> {
             SleepEventDatabase sleepDB = SleepEventDatabase.build(getApplicationContext());
-
             // Start new session
-            sleepDB.startSession();
 
-            try {
+            sleepDB.startSession();
+            try (InputStream data_stream = WearableListener.getDataStream()) {
                 // Get stream
-                InputStream data_stream = WearableListener.getDataStream();
                 Scanner inputScanner = new Scanner(data_stream);
 
                 String event = null;
                 String timestamp;
 
-                while(!worker.isInterrupted()){
-                    JSONObject data = new JSONObject(inputScanner.nextLine());
-                    Log.i("consumer", "received values " + data);
-
+                while (!worker.isInterrupted()) {
+                    String line = inputScanner.nextLine();
                     timestamp = SleepEventDatabase.getCurrentTimestamp();
-                    if (true){ // TODO
-                        event = "micro"; // TODO: process raw data
-                    }
-                    else {
-                        event = data.getString("event");
-                    }
 
-                    if (event != null){
-                        sleepDB.insertSleepEvents(new SleepEvent(timestamp, event));
+                    try {
+                        JSONObject data = new JSONObject(line);
+                        Log.i("consumer", "received values " + data);
+
+                        if (true) { // TODO
+                            event = "micro"; // TODO: process raw data
+                        } else {
+                            event = data.getString("event");
+                        }
+
+                        if (event != null) {
+                            sleepDB.insertSleepEvents(new SleepEvent(timestamp, event));
+                        }
+                        event = null;
                     }
-                    event = null;
+                    catch (JSONException e){ e.printStackTrace(); }
                 }
-                // Close stream
-                data_stream.close();
-            } catch (IOException | JSONException | NoSuchElementException e) {
+            } catch (IOException | NoSuchElementException e) {
                 e.printStackTrace();
-            }
-            finally {
+            } finally {
                 // Stop session
                 sleepDB.stopSession();
             }
@@ -91,42 +81,25 @@ public class WorkerService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent.getAction().equals("/start-service")) {
+        if (intent.getAction().equals(getString(R.string.start_action))) {
             Log.i(TAG, "Foreground service started");
 
-            // Define notification channel
-            NotificationChannel serviceChannel = new NotificationChannel(
-                    CHANNEL_ID,
-                    "ForegroundServiceChannel",
-                    NotificationManager.IMPORTANCE_HIGH
-            );
-            NotificationManager manager = getSystemService(NotificationManager.class);
-            manager.createNotificationChannel(serviceChannel);
-
-            // Define pending intent
-            Intent notificationIntent = new Intent(getApplicationContext(), MainActivity.class);
-            notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            PendingIntent pendingIntent = PendingIntent.getActivity(
+            // Define notification used by foreground service
+            Notification notification = new Notification(
                     getApplicationContext(),
-                    0, notificationIntent,
-                    PendingIntent.FLAG_IMMUTABLE
+                    getString(R.string.notification_service_title),
+                    getString(R.string.notification_service_text),
+                    NOTIFICATION_ID,
+                    null
             );
 
-            // Create new notification
-            Notification notification = new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ID)
-                    .setContentTitle("Sleep Monitoring")
-                    .setContentText("Sleep monitoring running")
-                    .setSmallIcon(R.drawable.ic_launcher_foreground)
-                    .setContentIntent(pendingIntent)
-                    .build();
-
-            // Start service
-            startForeground(NOTIFICATION_ID, notification);
+            // Start foreground mode
+            startForeground(NOTIFICATION_ID, notification.get());
 
             // Do work on a background thread
             worker.start();
         }
-        else if (intent.getAction().equals("/stop-service")) {
+        else if (intent.getAction().equals(getString(R.string.stop_action))) {
             Log.i(TAG, "Foreground service stopped");
             stopForeground(true);
             stopSelfResult(startId);

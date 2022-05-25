@@ -106,6 +106,7 @@
     <string name="notification_channel_name">SleepMonitoring</string>
     <string name="notification_disconnection_title">Sleep Monitoring Disconnection</string>
     <string name="notification_disconnection_text">Watch disconnected, the application will not be able to monitor your sleep</string>
+    <string name="notification_service_tag">SleepMonitoringDisconnection</string>
     <string name="notification_service_title">Sleep Monitoring Running</string>
     <string name="notification_service_text">Receiving data from watch</string>
 </resources>
