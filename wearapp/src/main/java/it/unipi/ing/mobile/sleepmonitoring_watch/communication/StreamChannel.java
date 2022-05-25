@@ -11,8 +11,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+/**
+ * The class wraps the Wearable API to set a communication channel between watch and mobile
+ * The channel offers the possibility to open a bidirectional stream used to simplify the messages
+ * exchange
+ */
 public class StreamChannel extends ChannelClient.ChannelCallback {
-    public final String TAG = "StreamChannel";
+    public final String TAG = "STREAM_CHANNEL";
     private final ChannelClient channel_client;
     private ChannelClient.Channel stream_channel;
     private OutputStream out_stream;

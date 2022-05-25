@@ -4,4 +4,14 @@
     <string name="sleep_monitoring_label">Sleep Monitoring</string>
     <string name="button_description">Play button service</string>
 
+    <!-- Connection -->
+    <string name="mobile_capability">it.unipi.ing.mobile.sleepmonitoring.mobile</string>
+    <string name="start_endpoint">/start-service</string>
+    <string name="no_devices">"No devices connected"</string>
+
+    <!-- Status -->
+    <string name="status_connected">Connected</string>
+    <string name="status_disconnected">Disconnected</string>
+    <string name="status_running">Running</string>
+
 </resources>

@@ -1,6 +1,7 @@
 package it.unipi.ing.mobile.sleepmonitoring_watch;
 
 import android.app.Activity;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,12 +27,13 @@ import it.unipi.ing.mobile.sleepmonitoring_watch.databinding.ActivityMainBinding
 import it.unipi.ing.mobile.sleepmonitoring_watch.sensors.SensorsManager;
 
 public class MainActivity extends Activity implements CapabilityClient.OnCapabilityChangedListener {
-    public final String MOBILE_CAPABILITY = "it.unipi.ing.mobile.sleepmonitoring.mobile";
+
+    private final String TAG = "MainActivity_LogTag";
+
     private ActivityMainBinding binding;
     private SensorsManager sensorsManager;
     private StreamChannel stream_channel = null;
     private String paired_node_id = null;
-    private final String TAG = "MainActivity_LogTag";
     private boolean running = false;
 
     @Override
@@ -40,7 +42,6 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        // Open channel
 
         sensorsManager =new SensorsManager(this.getApplicationContext());
     }
@@ -52,13 +53,13 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
         //Get capabilities node
         Log.i(TAG, "Searching nodes ...");
         Wearable.getCapabilityClient(this).getCapability(
-                MOBILE_CAPABILITY,
+                getString(R.string.mobile_capability),
                 CapabilityClient.FILTER_REACHABLE
         ).addOnSuccessListener(task -> setPairedDeviceNodeId(task.getNodes()));
 
         // Paired device listener add
         Wearable.getCapabilityClient(getApplicationContext()).addListener(
-                this, MOBILE_CAPABILITY);
+                this, getString(R.string.mobile_capability));
     }
 
     @Override
@@ -67,13 +68,15 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
 
         // Paired device listener remove
         Wearable.getCapabilityClient(getApplicationContext())
-                .removeListener(this, MOBILE_CAPABILITY);
+                .removeListener(this, getString(R.string.mobile_capability));
     }
+
 
     @Override
     protected void onDestroy(){
         super.onDestroy();
-        //stop_recording(null); TODO: error on mobile app if not stop
+        /*if (running)
+        stop_recording(null);*/ // TODO: error on mobile app if not stop
     }
 
     private void updateUIStatus(Status status){
@@ -86,7 +89,7 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
     public void start_recording(View view){
         try {
             if(paired_node_id == null){
-                Toast.makeText(this, "No devices connected", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.no_devices), Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -95,7 +98,7 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
             InputStream inS=new PipedInputStream(outS);
             stream_channel = new StreamChannel(
                     paired_node_id,
-                    "start-service",
+                    getString(R.string.start_endpoint),
                     Wearable.getChannelClient(getApplicationContext()),
                     new StreamHandler() {
                         @Override
@@ -190,9 +193,21 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
     }
 
     enum Status{
-        CONNECTED("Connected", Color.GREEN, R.drawable.ic_baseline_play_circle_filled),
-        DISCONNECTED("Disconnected", Color.RED, R.drawable.ic_baseline_play_circle_filled),
-        RUNNING("Running", Color.BLUE, R.drawable.ic_baseline_stop_circle);
+        CONNECTED(
+                "Connected",
+                Color.GREEN,
+                R.drawable.ic_baseline_play_circle_filled
+        ),
+        DISCONNECTED(
+                "Disconnected",
+                Color.RED,
+                R.drawable.ic_baseline_play_circle_filled
+        ),
+        RUNNING(
+                "Running",
+                Color.BLUE,
+                R.drawable.ic_baseline_stop_circle
+        );
 
         private final String status;
         private final int color;
