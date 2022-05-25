@@ -44,8 +44,6 @@ public class HomeFragment extends Fragment {
     private SharedPreferences mPreferences;
 
     private StatusReceiver status_receiver;
-    private final String WATCH_CAPABILITY = "it.unipi.ing.mobile.sleepmonitoring.watch";
-    private final String RUNNING_INTENT = "it.unipi.ing.mobile.sleepmonitoring_smartphone.RUNNING";
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -72,13 +70,13 @@ public class HomeFragment extends Fragment {
         if(activity != null){
             activity.registerReceiver(
                     status_receiver,
-                    new IntentFilter(RUNNING_INTENT)
+                    new IntentFilter(getString(R.string.status_intent))
             );
 
             // Check capabilities node
             Log.i(TAG, "Searching nodes ...");
             Wearable.getCapabilityClient(activity.getApplicationContext()).getCapability(
-                    WATCH_CAPABILITY,
+                    getString(R.string.watch_capability),
                     CapabilityClient.FILTER_REACHABLE
             ).addOnCompleteListener(task -> {
                 try {
