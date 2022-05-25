@@ -39,6 +39,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.io.InputStream;
 
 import it.unipi.ing.mobile.sleepmonitoring.bluetooth.Bluetooth;
+import it.unipi.ing.mobile.sleepmonitoring.database.SleepEventDatabase;
 import it.unipi.ing.mobile.sleepmonitoring.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
@@ -49,24 +50,25 @@ public class MainActivity extends AppCompatActivity {
 
     private final String TAG = "SleepMonitoring_smartphone";
 
-    private String sharedPrefFile;
     private SharedPreferences mPreferences;
 
 
     private GoogleSignInClient client;
-    private GoogleSignInOptions signInOptions;
     private GoogleSignInAccount account;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // Initialize the shared preferences
-        sharedPrefFile = getString(R.string.shared_preferences_file);
+        String sharedPrefFile = getString(R.string.shared_preferences_file);
         mPreferences=getSharedPreferences(sharedPrefFile, MODE_PRIVATE);
 
-        //Restore Theme preferences
+        // Restore Theme preferences
         // MUST be before super.onCreate() because of a bug that otherwise makes the app crash
-        String selectedTheme = mPreferences.getString(getString(R.string.theme_preferences_key),"Light");
+        String selectedTheme = mPreferences.getString(
+                getString(R.string.theme_preferences_key),
+                "Light"
+        );
         if(selectedTheme.equals("Light") || selectedTheme.equals("light")) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         }
@@ -74,29 +76,29 @@ public class MainActivity extends AppCompatActivity {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         }
 
-
         super.onCreate(savedInstanceState);
-
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
 
         setSupportActionBar(binding.appBarMain.toolbar);
 
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
+
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.nav_home, R.id.nav_report, R.id.nav_account, R.id.nav_settings, R.id.nav_exit)
                 .setOpenableLayout(drawer)
                 .build();
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
+        NavController navController = Navigation.findNavController(this,
+                R.id.nav_host_fragment_content_main);
+        NavigationUI.setupActionBarWithNavController(this, navController,
+                mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
 
-        // Signin with Google credentials
+        // Sign-in with Google credentials
         signInWithGoogle();
 
         // Bluetooth pop-up alert
@@ -111,8 +113,14 @@ public class MainActivity extends AppCompatActivity {
             showBluetoothAlert();
         }
 
+        // Define listeners for exit item in the sidebar menu
+        defineExitItemListener(navigationView);
+
+    }
+
+    private void defineExitItemListener(NavigationView navigationView) {
         // onClickListener for exit button in navBar
-        MenuItem exitItem = (MenuItem) navigationView.getMenu().findItem(R.id.nav_exit);
+        MenuItem exitItem = navigationView.getMenu().findItem(R.id.nav_exit);
         exitItem.setOnMenuItemClickListener(menuItem -> {
             client.signOut().addOnCompleteListener(task -> {
                 Toast.makeText(getApplicationContext(), R.string.signOut, Toast.LENGTH_SHORT).show();
@@ -125,17 +133,18 @@ public class MainActivity extends AppCompatActivity {
                 mPreferences.edit().remove(user_last_name_key).apply();
                 mPreferences.edit().remove(user_email_key).apply();
 
+                // Close application
                 finishAndRemoveTask();
             });
 
             return true;
         });
-
     }
 
     @Override
     public boolean onSupportNavigateUp() {
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
+        NavController navController = Navigation.findNavController(this,
+                R.id.nav_host_fragment_content_main);
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
     }
@@ -170,65 +179,85 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG,"onStop");
     }
 
-    // Disconnect Google account from the application
     public void revokeAccess(){
+        // Disconnect Google account from the application
         client.revokeAccess()
                 .addOnCompleteListener(this, task -> {
-                    Toast.makeText(getApplicationContext(), R.string.disconnection, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(
+                            getApplicationContext(),
+                            R.string.disconnection,
+                            Toast.LENGTH_SHORT
+                    ).show();
+
                     // Remove user info from shared preferences
                     mPreferences.edit().clear().apply();
 
-                    //todo rimuovi ogni altro dato delle label, history etc
+                    // Remove saved history reports
+                    new Thread(){
+                        @Override
+                        public void run() {
+                            super.run();
+                            SleepEventDatabase db = SleepEventDatabase.build(getApplicationContext());
+                            // Null as argument means "Delete all"
+                            db.deleteBefore(null);
+                        }
+                    }.start();
 
+                    // Close application
                     finishAndRemoveTask();
                 });
     }
 
-    //Funzione che richiede il login all'utente tramite le proprie credenziali Google
+    // Function that requires login action to the user using their Google credentials
     private void signInWithGoogle(){
-        // Check for existing Google Sign In account, if the user is already signed in
-        // the GoogleSignInAccount will be non-null.
-
-        // Opzioni di sign-in e scopes richiesti per l'accesso a Google Drive
-        // Configuro il sign-in per richiedere informazioni sull'ID utente, sull'email,
-        // informazioni base dell'utente. ID e informazioni base sono incluse in DEFAULT_SIGN_IN
-        signInOptions = new GoogleSignInOptions.Builder(
+        // Definition of the sign-in options and the required scopes (email in this case)
+        // Sign-in is configured to require information about user's ID, basic personal information and email
+        // ID e basic information are included in DEFAULT_SIGN_IN option
+        GoogleSignInOptions signInOptions = new GoogleSignInOptions.Builder(
                 GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
                 .build();
-        //Ora costruisco un oggetto di classe GoogleSignInClient con le opzioni sopra specificate
+
+        // Initialize the attribute of GoogleSignInClient class with the options just defined
         client = GoogleSignIn.getClient(this, signInOptions);
 
+        /*
+         Check for existing Google Signed-In account
+         If the user is already signed-in -> the GoogleSignInAccount will be non-null.
+        */
         account = GoogleSignIn.getLastSignedInAccount(this);
         if (account == null) {
+            // No already signed-in user -> Start Login
             requestSignIn();
         }
         else{
+            // Read information about already signed-in user
             readUserInfo();
         }
-
-        //todo check se puoi fare qualcosa durante il toast e le string in file xml non utili
     }
 
     private void requestSignIn(){
-        //Verifico che i servizi Google Play siano installati e disponibili per l'utilizzo
+        // Check that the Google Play Services are installed and available to be used
         if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this) != ConnectionResult.SUCCESS) {
+            // If not -> Error, show message and close the application
             Toast.makeText(getApplicationContext(),R.string.failed_google_login,Toast.LENGTH_LONG).show();
             finishAndRemoveTask();
         } else {
-            //todo
-            //Il risultato del sign-in Intent è gestito in onActivityResult
+            // The sign-in Intent is launched and result is handled
             Intent i = client.getSignInIntent();
             ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(
                     new ActivityResultContracts.StartActivityForResult(),
                     result -> {
+                        // Check if login success
                         if (result.getResultCode() == Activity.RESULT_OK) {
+                            // If yes take user data from intent result and read the information
                             Intent data = result.getData();
                             account = GoogleSignIn.getSignedInAccountFromIntent(data).getResult();
                             Toast.makeText(getApplicationContext(), R.string.signIn, Toast.LENGTH_SHORT).show();
                             readUserInfo();
                         }
                         else{
+                            // If not -> Error, show a message and close the application
                             Toast.makeText(getApplicationContext(),R.string.rejected_login_or_permissions,Toast.LENGTH_LONG).show();
                             finishAndRemoveTask();
                         }
@@ -238,18 +267,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void readUserInfo(){
-
-        //todo è necessario farlo dalle info in account o posso prendere quelle in shared pref?
-
         // Set nav header information
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = binding.navView;
         LinearLayout navHeaderView=(LinearLayout) navigationView.getHeaderView(0);
 
         if(account.getPhotoUrl() != null) {
-            // User image
-            //Download and set user image. Download any time, so that we can find any update of it
+            // User profile image
+            // Download (from Internet) and set user image.
+            // Download is performed any time, so that we can find any update of that image
             ImageView userImage = navHeaderView.findViewById(R.id.user_image);
-            // Image link from internet
             downloadImageFromInternet(userImage,account.getPhotoUrl().toString());
         }
 
@@ -261,7 +287,7 @@ public class MainActivity extends AppCompatActivity {
         TextView userEmail = navHeaderView.findViewById(R.id.user_email);
         userEmail.setText(account.getEmail());
 
-        //Save account information on shared preferences for account fragment
+        //Save account information on shared preferences that will be used by AccountFragment
         String user_first_name_key = getString(R.string.user_first_name_preferences_key);
         String user_last_name_key = getString(R.string.user_last_name_preferences_key);
         String user_email_key = getString(R.string.user_email_preferences_key);
@@ -286,7 +312,7 @@ public class MainActivity extends AppCompatActivity {
                 })
                 .setNeutralButton(R.string.bluetooth_neutral, null)
                 .setIcon(R.drawable.ic_baseline_bluetooth_24);
-        AlertDialog bluetooth_alert = bluetooth_alert_builder.show();
+        bluetooth_alert_builder.show();
     }
 
     // Android >= 12 bluetooth connection request run-time permission
@@ -318,12 +344,9 @@ public class MainActivity extends AppCompatActivity {
                     Bitmap userImageBitmap;
                     InputStream in=new java.net.URL(imageURL).openStream();
                     userImageBitmap=BitmapFactory.decodeStream(in);
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if(userImageBitmap != null)
-                                userImage.setImageBitmap(Bitmap.createScaledBitmap(userImageBitmap, 200, 200, false));
-                        }
+                    runOnUiThread(() -> {
+                        if(userImageBitmap != null)
+                            userImage.setImageBitmap(Bitmap.createScaledBitmap(userImageBitmap, 200, 200, false));
                     });
                 } catch (Exception e) {
                     Log.e("Error Message", e.getMessage());
