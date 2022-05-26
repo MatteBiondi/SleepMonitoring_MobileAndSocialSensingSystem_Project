@@ -90,7 +90,7 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
         binding.playStopButton.setImageResource(status.getButtonImage());
     }
 
-    Test testThread;
+    Worker testThread;
     public void start_recording(View view){
         try {
             if(paired_node_id == null){
@@ -120,7 +120,7 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
                                     piped_stream = outS;
 
                                     //TODO testing
-                                    testThread=new Test(inS, output_stream);
+                                    testThread=new Worker(inS, output_stream);
                                     testThread.start();
                                 }
 
