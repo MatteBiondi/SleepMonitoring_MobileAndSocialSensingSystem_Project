@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import org.json.*;
 import java.lang.System.*;
 
+
 public class MovementProcessor {
 
     /*
@@ -14,7 +15,6 @@ public class MovementProcessor {
      * Sensing Data" (Chang et al.), section 2.3
      * */
     private Float NOISE_THRESHOLD = 0.03f;
-    private int MICROMOV_MAX_DURATION = 2000;
 
     private float MOVEMENT_PEAK_THRESHOLD_LOW = 1.0f;
     private float MOVEMENT_PEAK_THRESHOLD_HIGH = 1.5f;
@@ -32,9 +32,9 @@ public class MovementProcessor {
 
     enum Movement{
          NO_MOVEMENT("No_movement"),
-         BODY_TREMBLING("Body_trembling"),
-         HAND_MOVEMENT("Hand_movement"),
-         ARM_RISING("Arm_rising");
+         BODY_TREMBLING("micro"),
+         HAND_MOVEMENT("micro"),
+         ARM_RISING("macro");
 
          private final String movement;
 
