@@ -51,9 +51,9 @@ public class RolloverProcessor {
             values = rotationData.getJSONArray("values");
 
             for (int i = 0; i < values.length(); i++) {
-                XData.add((Float)values.getJSONArray(i).get(0));
-                YData.add((Float)values.getJSONArray(i).get(1));
-                ZData.add((Float)values.getJSONArray(i).get(2));
+                XData.add((float)values.getJSONArray(i).getDouble(0));
+                YData.add((float)values.getJSONArray(i).getDouble(1));
+                ZData.add((float)values.getJSONArray(i).getDouble(2));
             }
 
         } catch (JSONException e) {
@@ -62,9 +62,9 @@ public class RolloverProcessor {
 
         boolean ret = false;
 
-        Float[] Xarray = (Float[])XData.toArray();
-        Float[] Yarray = (Float[])YData.toArray();
-        Float[] Zarray = (Float[])ZData.toArray();
+        Float[] Xarray = XData.toArray(new Float[0]);
+        Float[] Yarray = YData.toArray(new Float[0]);
+        Float[] Zarray = ZData.toArray(new Float[0]);
 
         if(isPostureStable(Xarray, Yarray, Zarray)){
 
@@ -76,6 +76,9 @@ public class RolloverProcessor {
             // if it is the first measurement, we do not detect a rollover regardless
             if(!firstStablePostureReached){
                 firstStablePostureReached = true;
+                for (int i = 0; i < 3; i++) {
+                    lastStablePosture[i] = currentStablePosture[i];
+                }
             }
             else{
                 Float postureDistance = new Float(0);

@@ -102,8 +102,17 @@ public class MovementProcessor {
             for (int i = 1; i < values.length(); i++) {
                 Float derivative = null;
                 try {
+                    Float[] current_array = new Float[3];
+                    current_array[0] = (float)values.getJSONArray(i).getDouble(0);
+                    current_array[1] = (float)values.getJSONArray(i).getDouble(1);
+                    current_array[2] = (float)values.getJSONArray(i).getDouble(2);
 
-                    derivative = Util.getRSS((Float[]) values.get(i)) - Util.getRSS((Float[]) values.get(i - 1));
+                    Float[] previous_array = new Float[3];
+                    previous_array[0] = (float)values.getJSONArray(i-1).getDouble(0);
+                    previous_array[1] = (float)values.getJSONArray(i-1).getDouble(1);
+                    previous_array[2] = (float)values.getJSONArray(i-1).getDouble(2);
+
+                    derivative = Util.getRSS(current_array) - Util.getRSS(previous_array);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

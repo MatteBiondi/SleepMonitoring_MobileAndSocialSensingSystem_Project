@@ -31,7 +31,7 @@ public class Worker extends Thread {
         String event;
 
         while (!isInterrupted()){
-            try {//TODO close input stream
+            try {
                 JSONObject data = new JSONObject(inputScanner.nextLine());
                 Log.i("consumer", "received values " + data);
 
@@ -45,9 +45,7 @@ public class Worker extends Thread {
             } catch (JSONException | NoSuchElementException e) {
                 e.printStackTrace();
             }
-            finally {
-                inputScanner.close();
-            }
         }
+        inputScanner.close();
     }
 }

@@ -18,12 +18,12 @@ public class DataProcessor {
 
         String event = null;
 
-        if (sensorData.getString("sensorName").equals("acc")) {
+        if (sensorData.getString("type").equals("acc")) {
             boolean rollover = rolloverProcessor.hasRolloverOccurred(sensorData);
             if (rollover) {
                 event = "roll";
             }
-        } else if (sensorData.getString("sensorName").equals("rot")) {
+        } else if (sensorData.getString("type").equals("rot")) {
             MovementProcessor.Movement movement = movementProcessor.detectMovement(sensorData);
             if (!movement.equals(MovementProcessor.Movement.NO_MOVEMENT)) {
                 event = movement.toString();
