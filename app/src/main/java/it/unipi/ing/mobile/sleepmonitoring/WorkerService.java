@@ -13,6 +13,8 @@ import java.util.Scanner;
 import it.unipi.ing.mobile.sleepmonitoring.database.SleepEvent;
 import it.unipi.ing.mobile.sleepmonitoring.database.SleepEventDatabase;
 import it.unipi.ing.mobile.sleepmonitoring.notification.Notification;
+import it.unipi.ing.mobile.processinglibrary.DataProcessor;
+import it.unipi.ing.mobile.processinglibrary.Util;
 
 public class WorkerService extends Service {
     public final String TAG = "WorkerService";
@@ -40,6 +42,8 @@ public class WorkerService extends Service {
                 String event = null;
                 String timestamp;
 
+                DataProcessor dataProcessor = new DataProcessor();
+
                 while (!worker.isInterrupted()) {
                     String line = inputScanner.nextLine();
                     timestamp = SleepEventDatabase.getCurrentTimestamp();
@@ -48,8 +52,10 @@ public class WorkerService extends Service {
                         JSONObject data = new JSONObject(line);
                         Log.i("consumer", "received values " + data);
 
-                        if (local) { // Computation on mobile TODO
-                            event = "micro"; // TODO: process raw data
+                        if (Util.OFFLOADED) { // Computation on mobile
+
+                            event = dataProcessor.getEventFromSensorData(data);
+
                         } else { // Computation on smartwatch
                             event = data.getString("event");
                         }

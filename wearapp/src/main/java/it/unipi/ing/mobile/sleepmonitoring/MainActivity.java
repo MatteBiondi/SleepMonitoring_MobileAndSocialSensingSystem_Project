@@ -22,6 +22,7 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.Set;
 
+import it.unipi.ing.mobile.processinglibrary.Util;
 import it.unipi.ing.mobile.sleepmonitoring.communication.StreamChannel;
 import it.unipi.ing.mobile.sleepmonitoring.communication.StreamHandler;
 import it.unipi.ing.mobile.sleepmonitoring.databinding.ActivityMainBinding;
@@ -38,10 +39,8 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
     private String paired_node_id = null;
     private boolean running = false;
 
-    private static boolean local = false; //TODO
-
     public static OutputStream getStream() throws IOException {
-        if (local){ // Computation on watch //TOOD
+        if (!Util.OFFLOADED){ // Computation on watch
             return piped_stream;
         }
         else { // Computation on mobile
@@ -114,9 +113,9 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
                         @Override
                         public void setOutputStream(OutputStream output_stream) {
                             try {
-                                if (local){ // Computation on watch TODO
-                                    PipedOutputStream outS= new PipedOutputStream();
-                                    InputStream inS=new PipedInputStream(outS);
+                                if (!Util.OFFLOADED){ // Computation on watch
+                                    PipedOutputStream outS = new PipedOutputStream();
+                                    InputStream inS = new PipedInputStream(outS);
 
                                     piped_stream = outS;
 
@@ -150,7 +149,7 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
             serviceIntent.setAction(getString(R.string.stop_service));
             startForegroundService(serviceIntent);
 
-            if (local){// Processing on watch TODO
+            if (!Util.OFFLOADED){// Processing on watch
                 testThread.interrupt();
                 piped_stream.close();
             }
