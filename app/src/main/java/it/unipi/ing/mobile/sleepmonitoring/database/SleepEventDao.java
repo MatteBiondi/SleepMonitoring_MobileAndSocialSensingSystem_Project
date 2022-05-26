@@ -38,7 +38,7 @@ public interface SleepEventDao {
     List<SleepSession> getSessions();
 
     @Query("SELECT DISTINCT (id), start, stop FROM sleep_session WHERE (date(start) == :date or date(stop) == :date) " +
-            "and stop is not NULL ORDER BY stop DESC")
+            "and stop is not NULL ORDER BY stop ASC")
     List<SleepSession> getSessionsByDate(String date);
 
     @Query("SELECT * FROM sleep_session WHERE id = :id")
