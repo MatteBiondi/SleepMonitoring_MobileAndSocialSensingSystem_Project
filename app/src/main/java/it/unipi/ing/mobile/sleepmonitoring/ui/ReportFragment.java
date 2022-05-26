@@ -118,14 +118,8 @@ public class ReportFragment extends Fragment {
                             @Override
                             public void run() {
                                 super.run();
-                                //todo da rimettere build
-
-                                // Request sessions for the selected date
-                                SleepEventDatabase db = SleepEventDatabase.buildExample(
-                                        context,
-                                        "SleepEventExample.db"
-                                );
-
+                                // Request sessions for the selected date and populate spinner
+                                SleepEventDatabase db = SleepEventDatabase.build(context);
                                 populateSpinner(newDateValue, db);
                             }
                         }.start();
@@ -200,13 +194,9 @@ public class ReportFragment extends Fragment {
             @Override
             public void run() {
                 super.run();
-                //todo da rimettere build
 
                 // Get movement events from last reported session
-                SleepEventDatabase db = SleepEventDatabase.buildExample(
-                        context,
-                        "SleepEventExample.db"
-                );
+                SleepEventDatabase db = SleepEventDatabase.build(context);
 
                 Report lastReport = db.getLastReport();
                 if(lastReport == null)
