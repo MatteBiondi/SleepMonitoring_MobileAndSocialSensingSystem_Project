@@ -103,6 +103,8 @@ public class SleepEventDatabase {
 
     public Report getLastReport(){
         SleepSession session = database.sleep_event_dao().getLastSession();
+        if (session == null)
+            return null;
         List<SleepEvent> events = database.sleep_event_dao().getEventsBySession(session.getId());
 
         return new Report(session.getStop().substring(0,10), session.getStart(), session.getStop(), events);
@@ -110,7 +112,8 @@ public class SleepEventDatabase {
 
     public Report getReport(String date, Long session_id){
         SleepSession session = database.sleep_event_dao().getSessionById(session_id);
-
+        if (session == null)
+            return null;
         List<SleepEvent> events = database.sleep_event_dao().getEventsBySession(session_id);
 
         return new Report(date, session.getStart(), session.getStop(), events);

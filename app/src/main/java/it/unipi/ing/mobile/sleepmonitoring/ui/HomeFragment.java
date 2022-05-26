@@ -157,7 +157,7 @@ public class HomeFragment extends Fragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             String status = intent.getStringExtra("status");
-            Log.e(TAG, status);
+            Log.i(TAG, status);
             updateUIStatus( Status.valueOf(status) );
         }
     }

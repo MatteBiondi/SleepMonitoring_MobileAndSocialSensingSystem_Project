@@ -19,6 +19,8 @@ public class WorkerService extends Service {
     public final int NOTIFICATION_ID = 2000;
     private Thread worker = null;
 
+    private static boolean local = true; //TODO
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -27,9 +29,10 @@ public class WorkerService extends Service {
         // create new worker thread
         worker = new Thread(() -> {
             SleepEventDatabase sleepDB = SleepEventDatabase.build(getApplicationContext());
-            // Start new session
 
+            // Start new session
             sleepDB.startSession();
+
             try (InputStream data_stream = WearableListener.getDataStream()) {
                 // Get stream
                 Scanner inputScanner = new Scanner(data_stream);
@@ -45,9 +48,9 @@ public class WorkerService extends Service {
                         JSONObject data = new JSONObject(line);
                         Log.i("consumer", "received values " + data);
 
-                        if (true) { // TODO
+                        if (local) { // Computation on mobile TODO
                             event = "micro"; // TODO: process raw data
-                        } else {
+                        } else { // Computation on smartwatch
                             event = data.getString("event");
                         }
 
@@ -56,7 +59,7 @@ public class WorkerService extends Service {
                         }
                         event = null;
                     }
-                    catch (JSONException e){ e.printStackTrace(); }
+                    catch (JSONException e){ Log.w(TAG, e.getMessage()); }
                 }
             } catch (IOException | NoSuchElementException e) {
                 e.printStackTrace();
