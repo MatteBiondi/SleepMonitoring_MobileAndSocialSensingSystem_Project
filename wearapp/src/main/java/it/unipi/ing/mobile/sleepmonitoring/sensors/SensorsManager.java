@@ -8,6 +8,7 @@ import android.hardware.SensorManager;
 import android.util.Log;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 
 import java.io.OutputStream;
 import java.io.PipedOutputStream;
@@ -99,7 +100,8 @@ public class SensorsManager implements SensorEventListener  {
                     }
                     acc_batch[i].getData().put(data);
                 }
-            } catch (Exception e) {
+            }
+            catch (JSONException e) {
                 e.printStackTrace();
             }
         }
