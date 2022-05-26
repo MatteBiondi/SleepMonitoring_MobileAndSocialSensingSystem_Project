@@ -1,6 +1,7 @@
 package it.unipi.ing.mobile.sleepmonitoring;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,6 +15,7 @@ import com.google.android.gms.wearable.CapabilityInfo;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
@@ -23,28 +25,41 @@ import java.util.Set;
 import it.unipi.ing.mobile.sleepmonitoring.communication.StreamChannel;
 import it.unipi.ing.mobile.sleepmonitoring.communication.StreamHandler;
 import it.unipi.ing.mobile.sleepmonitoring.databinding.ActivityMainBinding;
-import it.unipi.ing.mobile.sleepmonitoring.sensors.SensorsManager;
+//import it.unipi.ing.mobile.sleepmonitoring.sensors.SensorsManager;
 
 public class MainActivity extends Activity implements CapabilityClient.OnCapabilityChangedListener {
 
     private final String TAG = "MainActivity_LogTag";
 
     private ActivityMainBinding binding;
-    private SensorsManager sensorsManager;
-    private StreamChannel stream_channel = null;
+    //private SensorsManager sensorsManager;
+    private static StreamChannel stream_channel = null;
+    private static PipedOutputStream piped_stream = null;
     private String paired_node_id = null;
     private boolean running = false;
 
+    private static boolean local = false; //TODO
+
+    public static OutputStream getStream() throws IOException {
+        if (local){ // Computation on watch //TOOD
+            return piped_stream;
+        }
+        else { // Computation on mobile
+            return stream_channel.getOutStream();
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        sensorsManager =new SensorsManager(this.getApplicationContext());
+        //sensorsManager =new SensorsManager(this.getApplicationContext());
 
-        // Update status
+        // Set status
         Wearable.getCapabilityClient(this).getCapability(
                 getString(R.string.mobile_capability),
                 CapabilityClient.FILTER_REACHABLE
@@ -58,14 +73,16 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
     @Override
     protected void onDestroy(){
         super.onDestroy();
-        Log.e(TAG, "OnDestroy");
+        Log.i(TAG, "OnDestroy");
 
         // Paired device listener remove
         Wearable.getCapabilityClient(getApplicationContext())
                 .removeListener(this, getString(R.string.mobile_capability));
 
-        if (running)
-            stop_recording(null); // TODO: error on mobile app if not stop
+        if (running){
+            stop_recording(null);
+            Toast.makeText(getApplicationContext(), "Data collection stopped", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void updateUIStatus(Status status){
@@ -83,9 +100,8 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
             }
 
             Log.i(TAG,"startRecording");
-            PipedOutputStream outS= new PipedOutputStream();
-            InputStream inS=new PipedInputStream(outS);
-            stream_channel = new StreamChannel(
+
+            stream_channel = new StreamChannel (
                     paired_node_id,
                     getString(R.string.start_endpoint),
                     Wearable.getChannelClient(getApplicationContext()),
@@ -98,19 +114,27 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
                         @Override
                         public void setOutputStream(OutputStream output_stream) {
                             try {
-                                sensorsManager.registerListeners(output_stream);
-                                running = true;
-                                binding.playStopButton.setOnClickListener(view -> stop_recording(view));
-                                updateUIStatus(Status.RUNNING);
+                                if (local){ // Computation on watch TODO
+                                    PipedOutputStream outS= new PipedOutputStream();
+                                    InputStream inS=new PipedInputStream(outS);
+
+                                    piped_stream = outS;
+
+                                    //TODO testing
+                                    testThread=new Test(inS, output_stream);
+                                    testThread.start();
+                                }
+
+                                // Start data collection
+                                startDataCollection();
+
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
                         }
                     }
             );
-            //TODO testing
-            //testThread=new Test(inS);
-            //testThread.start();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -119,11 +143,18 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
     public void stop_recording(View view){
         try {
             Log.i(TAG,"stopRecording");
-            //testThread.interrupt();
-            //todo Unregister
-            sensorsManager.unregisterListeners();
+            //sensorsManager.unregisterListeners();
 
-            // Close channel
+            // Stop foreground service
+            Intent serviceIntent = new Intent(this, DataCollectorService.class);
+            serviceIntent.setAction(getString(R.string.stop_service));
+            startForegroundService(serviceIntent);
+
+            if (local){// Processing on watch TODO
+                testThread.interrupt();
+                piped_stream.close();
+            }
+
             if (stream_channel != null)
                 stream_channel.close();
             stream_channel = null;
@@ -141,6 +172,17 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void startDataCollection(){
+        // Start foreground service
+        Intent serviceIntent = new Intent(getApplicationContext(), DataCollectorService.class);
+        serviceIntent.setAction(getString(R.string.start_service));
+        startForegroundService(serviceIntent);
+        //sensorsManager.registerListeners(output_stream);
+        running = true;
+        binding.playStopButton.setOnClickListener(this::stop_recording);
+        updateUIStatus(Status.RUNNING);
     }
 
     private void setPairedDeviceNodeId(Set<Node> nodes){
@@ -163,7 +205,7 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
                 paired_node_id = node.getId();
 
                 if(running){ // Auto-restart
-                    //start_recording(null);
+                    start_recording(null);
                     updateUIStatus(Status.RUNNING);
                 }
                 else {
