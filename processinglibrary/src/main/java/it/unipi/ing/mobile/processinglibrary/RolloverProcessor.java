@@ -49,25 +49,29 @@ public class RolloverProcessor {
         JSONArray values = null;
         try {
             values = rotationData.getJSONArray("values");
-            // TODO: 26/05/2022 fix acceleration data retrieval from json
-//            for (int i = 0; i < values.length(); i++) {
-//                XData.add(values.get(i)[0]);
-//            }
+
+            for (int i = 0; i < values.length(); i++) {
+                XData.add((Float)values.getJSONArray(i).get(0));
+                YData.add((Float)values.getJSONArray(i).get(1));
+                ZData.add((Float)values.getJSONArray(i).get(2));
+            }
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
         boolean ret = false;
 
-        // TODO: 26/05/2022 fix types instead of casting with toArray()
-        if(isPostureStable(XData.toArray(new Float[0]),
-                            YData.toArray(new Float[0]),
-                            ZData.toArray(new Float[0]))){
+        Float[] Xarray = (Float[])XData.toArray();
+        Float[] Yarray = (Float[])YData.toArray();
+        Float[] Zarray = (Float[])ZData.toArray();
+
+        if(isPostureStable(Xarray, Yarray, Zarray)){
 
 
-//            for (int i = 0; i < rotationData.length; i++) {
-//                currentStablePosture[i] = Util.getAverage(rotationData[i]);
-//            }
+            currentStablePosture[0] = Util.getAverage(Xarray);
+            currentStablePosture[1] = Util.getAverage(Yarray);
+            currentStablePosture[2] = Util.getAverage(Zarray);
 
             // if it is the first measurement, we do not detect a rollover regardless
             if(!firstStablePostureReached){
@@ -77,7 +81,6 @@ public class RolloverProcessor {
                 Float postureDistance = new Float(0);
                 postureDistance = Util.getEuclideanDistanceWithWrap(currentStablePosture, lastStablePosture, ANGLE_WRAP_VALUE);
 
-                // TODO: 24/05/2022 check if array is being copied correctly
                 for (int i = 0; i < 3; i++) {
                     lastStablePosture[i] = currentStablePosture[i];
                 }
