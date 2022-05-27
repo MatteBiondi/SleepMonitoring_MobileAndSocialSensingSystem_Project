@@ -3,6 +3,7 @@ package it.unipi.ing.mobile.sleepmonitoring;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -21,7 +22,6 @@ import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import it.unipi.ing.mobile.processinglibrary.Util;
 import it.unipi.ing.mobile.sleepmonitoring.communication.StreamChannel;
@@ -152,9 +152,15 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
             Log.i(TAG,"stopRecording");
 
             // Stop foreground service
-            Intent serviceIntent = new Intent(this, DataCollectorService.class);
-            serviceIntent.setAction(getString(R.string.stop_service));
-            startForegroundService(serviceIntent);
+            Intent stopServiceIntent = new Intent(this, DataCollectorService.class);
+            stopServiceIntent.setAction(getString(R.string.stop_service));
+            // Available from Android 8 (API 26)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                startForegroundService(stopServiceIntent);
+            }
+            else {// Android API < 26
+               startService(stopServiceIntent);
+            }
 
             // Update button listener
             binding.playStopButton.setOnClickListener(this::start_recording);
@@ -177,7 +183,13 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
         Intent startServiceIntent = new Intent(getApplicationContext(), DataCollectorService.class);
         startServiceIntent.setAction(getString(R.string.start_service));
         startServiceIntent.putExtra("paired_node_id", paired_node_id);
-        startForegroundService(startServiceIntent);
+        // Available from Android 8 (API 26)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            startForegroundService(startServiceIntent);
+        }
+        else {// Android API < 26
+            startService(startServiceIntent);
+        }
 
         // Update button listener
         binding.playStopButton.setOnClickListener(this::stop_recording);

@@ -6,8 +6,10 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -38,7 +40,7 @@ public class DataCollectorService extends Service implements  CapabilityClient.O
         return paired_node_id;
     }
 
-    private SensorsManager sensor_manager;
+    private SensorsManager sensor_manager = null;
     public final String TAG = "DATA_COLLECTOR";
 
     public void onCreate(){
@@ -56,7 +58,11 @@ public class DataCollectorService extends Service implements  CapabilityClient.O
 
             running = true;
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, e.getMessage());
+            sensor_manager = null;
+            MainActivity.getInstance().finishAndRemoveTask();
+            Toast.makeText(getApplicationContext(), getString(R.string.missing_sensor), Toast.LENGTH_SHORT).show();
+            selfStop();
         }
     }
 
@@ -78,7 +84,8 @@ public class DataCollectorService extends Service implements  CapabilityClient.O
         Wearable.getCapabilityClient(getApplicationContext()).removeListener(
                 this, getString(R.string.mobile_capability));
 
-        sensor_manager.unregisterListeners();
+        if (sensor_manager != null)
+            sensor_manager.unregisterListeners();
     }
 
     @Override
@@ -91,15 +98,18 @@ public class DataCollectorService extends Service implements  CapabilityClient.O
             String channelName = getString(R.string.channel_name);
             int NOTIFICATION_ID = 3000;
 
-            NotificationChannel channel = new NotificationChannel(
-                    NOTIFICATION_CHANNEL_ID,
-                    channelName,
-                    NotificationManager.IMPORTANCE_HIGH
-            );
+            // Available from Android 8 (API 26)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                NotificationChannel channel = new NotificationChannel(
+                        NOTIFICATION_CHANNEL_ID,
+                        channelName,
+                        NotificationManager.IMPORTANCE_HIGH
+                );
 
-            NotificationManager manager = (NotificationManager) getSystemService(
-                    Context.NOTIFICATION_SERVICE);
-            manager.createNotificationChannel(channel);
+                NotificationManager manager = (NotificationManager) getSystemService(
+                        Context.NOTIFICATION_SERVICE);
+                manager.createNotificationChannel(channel);
+            }
 
             NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(
                     this,
@@ -134,10 +144,20 @@ public class DataCollectorService extends Service implements  CapabilityClient.O
 
     @Override
     public void onCapabilityChanged(@NonNull CapabilityInfo capabilityInfo) {
+        selfStop();
+    }
+
+    private void selfStop(){
         // If capability changes no nodes are connected to watch, then stop foreground service
         Intent stopServiceIntent = new Intent(this, DataCollectorService.class);
         stopServiceIntent.setAction(getString(R.string.stop_service));
-        startForegroundService(stopServiceIntent);
-    }
 
+        // Available from Android 8 (API 26)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            startForegroundService(stopServiceIntent);
+        }
+        else {// Android API < 26
+            startService(stopServiceIntent);
+        }
+    }
 }
