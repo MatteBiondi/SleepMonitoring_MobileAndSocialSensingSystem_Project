@@ -165,7 +165,8 @@ public class HomeFragment extends Fragment {
     public boolean updateWelcomeMessage(){
         // Get account information from sharedPreferences
         String firstName = mPreferences.getString(user_first_name_preferences_key, "");
-        String welcomeMessage = getString(R.string.home_welcome_label)+" "+firstName;
+        String welcomeMessage = getString(R.string.home_welcome_label)+
+                ((firstName.equals("")) ? "" : (" "+firstName));
 
         // Update text of related TextView
         TextView textView = binding.homeWelcomeLabel;

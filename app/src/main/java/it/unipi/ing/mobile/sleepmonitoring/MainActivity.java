@@ -279,21 +279,27 @@ public class MainActivity extends AppCompatActivity {
             downloadImageFromInternet(userImage,account.getPhotoUrl().toString());
         }
 
+        // Variables containing user information
+        String accountGivenName = (account.getGivenName() == null) ? "" : account.getGivenName();
+        String accountFamilyName = (account.getFamilyName() == null) ? "" : account.getFamilyName();
+        String accountDisplayName = (account.getDisplayName() == null) ? "" : account.getDisplayName();
+        String accountEmail = (account.getEmail() == null) ? "" : account.getEmail();
+
         // User name
         TextView userName = navHeaderView.findViewById(R.id.user_name);
-        userName.setText(account.getDisplayName());
+        userName.setText(accountDisplayName);
 
         // User email
         TextView userEmail = navHeaderView.findViewById(R.id.user_email);
-        userEmail.setText(account.getEmail());
+        userEmail.setText(accountEmail);
 
         //Save account information on shared preferences that will be used by AccountFragment
         String user_first_name_key = getString(R.string.user_first_name_preferences_key);
         String user_last_name_key = getString(R.string.user_last_name_preferences_key);
         String user_email_key = getString(R.string.user_email_preferences_key);
-        mPreferences.edit().putString(user_first_name_key, account.getGivenName()).apply();
-        mPreferences.edit().putString(user_last_name_key, account.getFamilyName()).apply();
-        mPreferences.edit().putString(user_email_key, account.getEmail()).apply();
+        mPreferences.edit().putString(user_first_name_key, accountGivenName).apply();
+        mPreferences.edit().putString(user_last_name_key, accountFamilyName).apply();
+        mPreferences.edit().putString(user_email_key, accountEmail).apply();
 
         Log.i(TAG, valueOf(mPreferences.getAll()));
 
