@@ -6,14 +6,15 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.IBinder;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
-import android.util.Log;
-
+import it.unipi.ing.mobile.sleepmonitoring.sensors.DumperSensorsManager;
+import it.unipi.ing.mobile.sleepmonitoring.sensors.FromFileSensorsManager;
+import it.unipi.ing.mobile.sleepmonitoring.sensors.OnlineSensorsManager;
 import it.unipi.ing.mobile.sleepmonitoring.sensors.SensorsManager;
 
 
@@ -23,10 +24,12 @@ public class DataCollectorService extends Service {
 
     public void onCreate(){
         super.onCreate();
-        this.sensor_manager = new SensorsManager(getApplicationContext());
-
         try {
-            sensor_manager.registerListeners(MainActivity.getStream());
+            // TODO change functionality
+            //this.sensor_manager = new OnlineSensorsManager(getApplicationContext(), MainActivity.getStream());
+            this.sensor_manager = new FromFileSensorsManager(getApplicationContext(), MainActivity.getStream());
+            //this.sensor_manager = new DumperSensorsManager(getApplicationContext());
+            sensor_manager.registerListeners();
         } catch (Exception e) {
             e.printStackTrace();
         }
