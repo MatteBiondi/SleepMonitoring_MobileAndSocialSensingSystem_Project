@@ -31,7 +31,6 @@ public class FromFileSensorsManager extends OnlineSensorsManager{
     public void onSensorChanged(SensorEvent event) {
         if(!reader.hasNextLine()){
             Log.w("FILE_READER", "sensors data file ended");
-            reader.close();
             this.unregisterListeners();
             return;
         }
@@ -52,10 +51,11 @@ public class FromFileSensorsManager extends OnlineSensorsManager{
         }
     }
 
-    public void registerListeners() throws Exception {
-        super.registerListeners();
+    @Override
+    public void unregisterListeners(){
+        super.unregisterListeners();
+        reader.close();
     }
-
     /**
      *
      * @param ja a jsonArray of float/double
