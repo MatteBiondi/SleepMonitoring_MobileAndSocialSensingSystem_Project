@@ -87,11 +87,15 @@ public class StreamChannel extends ChannelClient.ChannelCallback {
         if (stream_channel == null)
             return;
         try {
-            if(in_stream != null)
+            if(in_stream != null){
                 in_stream.close();
+                Log.i(TAG, "Input stream closed");
+            }
             in_stream = null;
-            if (out_stream != null)
+            if (out_stream != null){
                 out_stream.close();
+                Log.i(TAG, "Output stream closed");
+            }
             out_stream = null;
         }
         catch (IOException e) { e.printStackTrace(); }
@@ -104,11 +108,15 @@ public class StreamChannel extends ChannelClient.ChannelCallback {
     public void onChannelClosed(@NonNull ChannelClient.Channel channel, int closeReason, int appSpecificErrorCode){
         super.onChannelClosed(channel, closeReason, appSpecificErrorCode);
         try {
-            if (in_stream != null)
+            if(in_stream != null){
                 in_stream.close();
+                Log.i(TAG, "Input stream closed");
+            }
             in_stream = null;
-            if (out_stream != null)
+            if (out_stream != null){
                 out_stream.close();
+                Log.i(TAG, "Output stream closed");
+            }
             out_stream = null;
         }
         catch (IOException e) { e.printStackTrace(); }

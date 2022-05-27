@@ -37,11 +37,15 @@ public class DumperSensorsManager extends SensorsManager {
         }
     }
 
+    @Override
     public void registerListeners() throws Exception {
         super.registerListeners();
         writer = new PrintWriter(directory+FILE_NAME);
     }
+
     @Override
-    public void onAccuracyChanged(Sensor sensor, int i) {
+    public void unregisterListeners(){
+        super.unregisterListeners();
+        writer.close();
     }
 }

@@ -21,8 +21,6 @@ public class WorkerService extends Service {
     public final int NOTIFICATION_ID = 2000;
     private Thread worker = null;
 
-    private static boolean local = true; //TODO
-
     @Override
     public void onCreate() {
         super.onCreate();
