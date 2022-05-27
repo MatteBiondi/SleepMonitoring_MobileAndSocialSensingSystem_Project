@@ -9,27 +9,52 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
+import com.google.android.gms.wearable.CapabilityClient;
+import com.google.android.gms.wearable.CapabilityInfo;
+import com.google.android.gms.wearable.Wearable;
+
+import it.unipi.ing.mobile.sleepmonitoring.communication.StreamChannel;
 import it.unipi.ing.mobile.sleepmonitoring.sensors.DumperSensorsManager;
 import it.unipi.ing.mobile.sleepmonitoring.sensors.FromFileSensorsManager;
 import it.unipi.ing.mobile.sleepmonitoring.sensors.OnlineSensorsManager;
 import it.unipi.ing.mobile.sleepmonitoring.sensors.SensorsManager;
 
 
-public class DataCollectorService extends Service {
-    public final String TAG = "DATA_COLLECTOR";
+public class DataCollectorService extends Service implements  CapabilityClient.OnCapabilityChangedListener{
+    private static boolean running = false;
+    private static String paired_node_id = null;
+    private static Worker worker = null;
+    private static StreamChannel stream_channel = null;
+
+    public static boolean isRunning(){
+        return running;
+    }
+
+    public static String getPairedNodeId(){
+        return paired_node_id;
+    }
+
     private SensorsManager sensor_manager;
+    public final String TAG = "DATA_COLLECTOR";
 
     public void onCreate(){
         super.onCreate();
         try {
             // TODO change functionality
-            //this.sensor_manager = new OnlineSensorsManager(getApplicationContext(), MainActivity.getStream());
-            this.sensor_manager = new FromFileSensorsManager(getApplicationContext(), MainActivity.getStream());
+            //this.sensor_manager = new OnlineSensorsManager(getApplicationContext(), MainActivity.getInstance().getStream());
+            this.sensor_manager = new FromFileSensorsManager(getApplicationContext(), MainActivity.getInstance().getStream());
             //this.sensor_manager = new DumperSensorsManager(getApplicationContext());
             sensor_manager.registerListeners();
+
+            // Register capabilities listener
+            Wearable.getCapabilityClient(getApplicationContext()).addListener(
+                    this, getString(R.string.mobile_capability));
+
+            running = true;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -37,6 +62,22 @@ public class DataCollectorService extends Service {
 
     public void onDestroy(){
         super.onDestroy();
+        running = false;
+        paired_node_id = null;
+
+        // Stop worker if active
+        if (worker != null)
+            worker.interrupt();
+        worker = null;
+
+        // Close communication channel and related streams
+        if (stream_channel != null)
+            stream_channel.close();
+
+        // Unregister capabilities listener
+        Wearable.getCapabilityClient(getApplicationContext()).removeListener(
+                this, getString(R.string.mobile_capability));
+
         sensor_manager.unregisterListeners();
     }
 
@@ -69,6 +110,11 @@ public class DataCollectorService extends Service {
                     .setContentTitle(getString(R.string.notification_title))
                     .build();
 
+            // Save instances
+            paired_node_id = intent.getStringExtra("paired_node_id");
+            worker = MainActivity.getInstance().getWorker();
+            stream_channel = MainActivity.getInstance().getChannel();
+
             startForeground(NOTIFICATION_ID, notification);
         }
         else if (intent.getAction().equals(getString(R.string.stop_service))) {
@@ -84,6 +130,14 @@ public class DataCollectorService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    @Override
+    public void onCapabilityChanged(@NonNull CapabilityInfo capabilityInfo) {
+        // If capability changes no nodes are connected to watch, then stop foreground service
+        Intent stopServiceIntent = new Intent(this, DataCollectorService.class);
+        stopServiceIntent.setAction(getString(R.string.stop_service));
+        startForegroundService(stopServiceIntent);
     }
 
 }

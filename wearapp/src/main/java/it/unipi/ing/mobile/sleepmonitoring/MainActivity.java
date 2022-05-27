@@ -21,25 +21,27 @@ import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import it.unipi.ing.mobile.processinglibrary.Util;
 import it.unipi.ing.mobile.sleepmonitoring.communication.StreamChannel;
 import it.unipi.ing.mobile.sleepmonitoring.communication.StreamHandler;
 import it.unipi.ing.mobile.sleepmonitoring.databinding.ActivityMainBinding;
-//import it.unipi.ing.mobile.sleepmonitoring.sensors.SensorsManager;
 
 public class MainActivity extends Activity implements CapabilityClient.OnCapabilityChangedListener {
-
+    private static MainActivity instance;
     private final String TAG = "MainActivity_LogTag";
-
     private ActivityMainBinding binding;
-    //private SensorsManager sensorsManager;
-    private static StreamChannel stream_channel = null;
-    private static PipedOutputStream piped_stream = null;
+    private StreamChannel stream_channel = null;
+    private PipedOutputStream piped_stream = null;
     private String paired_node_id = null;
-    private boolean running = false;
+    private Worker worker_thread = null;
 
-    public static OutputStream getStream() throws IOException {
+    public static MainActivity getInstance(){
+        return instance;
+    }
+
+    public OutputStream getStream() throws IOException {
         if (!Util.OFFLOADED){ // Computation on watch
             return piped_stream;
         }
@@ -48,25 +50,41 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
         }
     }
 
+    public Worker getWorker() {
+        return worker_thread;
+    }
+
+    public StreamChannel getChannel(){
+        return stream_channel;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
 
+        // Used by getInstance method
+        instance = this;
+
+        // User interface
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
-        //sensorsManager =new SensorsManager(this.getApplicationContext());
-
-        // Set status
-        Wearable.getCapabilityClient(this).getCapability(
-                getString(R.string.mobile_capability),
-                CapabilityClient.FILTER_REACHABLE
-        ).addOnSuccessListener(task -> setPairedDeviceNodeId(task.getNodes()));
 
         // Register capabilities listener
         Wearable.getCapabilityClient(getApplicationContext()).addListener(
                 this, getString(R.string.mobile_capability));
+
+        if (DataCollectorService.isRunning()){ // Check if service is running
+            paired_node_id = DataCollectorService.getPairedNodeId();
+            binding.playStopButton.setOnClickListener(this::stop_recording);
+            updateUIStatus(Status.RUNNING);
+        }
+        else{ // Set status otherwise
+            Wearable.getCapabilityClient(this).getCapability(
+                    getString(R.string.mobile_capability),
+                    CapabilityClient.FILTER_REACHABLE
+            ).addOnSuccessListener(task -> setPairedDeviceNodeId(task.getNodes()));
+        }
     }
 
     @Override
@@ -77,20 +95,8 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
         // Paired device listener remove
         Wearable.getCapabilityClient(getApplicationContext())
                 .removeListener(this, getString(R.string.mobile_capability));
-
-        if (running){
-            stop_recording(null);
-            Toast.makeText(getApplicationContext(), "Data collection stopped", Toast.LENGTH_SHORT).show();
-        }
     }
 
-    private void updateUIStatus(Status status){
-        binding.statusLabel.setText(status.toString());
-        binding.statusLabel.setTextColor(status.getColor());
-        binding.playStopButton.setImageResource(status.getButtonImage());
-    }
-
-    Worker testThread;
     public void start_recording(View view){
         try {
             if(paired_node_id == null){
@@ -107,21 +113,23 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
                     new StreamHandler() {
                         @Override
                         public void setInputStream(InputStream input_stream) {
-                            Log.i(TAG, "Input stream handler not defined");
+                            // Not needed
+                            Log.d(TAG, "Input stream handler not defined");
                         }
 
                         @Override
                         public void setOutputStream(OutputStream output_stream) {
                             try {
                                 if (!Util.OFFLOADED){ // Computation on watch
+
+                                    // Stream used for communication between main thread and worker thread
                                     PipedOutputStream outS = new PipedOutputStream();
                                     InputStream inS = new PipedInputStream(outS);
-
                                     piped_stream = outS;
 
-                                    //TODO testing
-                                    testThread=new Worker(inS, output_stream);
-                                    testThread.start();
+                                    // Start worker thread
+                                    worker_thread=new Worker(inS, output_stream);
+                                    worker_thread.start();
                                 }
 
                                 // Start data collection
@@ -142,26 +150,11 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
     public void stop_recording(View view){
         try {
             Log.i(TAG,"stopRecording");
-            //sensorsManager.unregisterListeners();
 
             // Stop foreground service
             Intent serviceIntent = new Intent(this, DataCollectorService.class);
             serviceIntent.setAction(getString(R.string.stop_service));
             startForegroundService(serviceIntent);
-
-            if (!Util.OFFLOADED){// Processing on watch
-                testThread.interrupt();
-                piped_stream.close();
-            }
-
-            if (stream_channel != null)
-                stream_channel.close();
-            stream_channel = null;
-
-            // Reset running only when the function is invoked by user
-            if (view != null){
-                running = false;
-            }
 
             // Update button listener
             binding.playStopButton.setOnClickListener(this::start_recording);
@@ -173,14 +166,23 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
         }
     }
 
+    private void updateUIStatus(Status status){
+        binding.statusLabel.setText(status.toString());
+        binding.statusLabel.setTextColor(status.getColor());
+        binding.playStopButton.setImageResource(status.getButtonImage());
+    }
+
     private void startDataCollection(){
         // Start foreground service
-        Intent serviceIntent = new Intent(getApplicationContext(), DataCollectorService.class);
-        serviceIntent.setAction(getString(R.string.start_service));
-        startForegroundService(serviceIntent);
-        //sensorsManager.registerListeners(output_stream);
-        running = true;
+        Intent startServiceIntent = new Intent(getApplicationContext(), DataCollectorService.class);
+        startServiceIntent.setAction(getString(R.string.start_service));
+        startServiceIntent.putExtra("paired_node_id", paired_node_id);
+        startForegroundService(startServiceIntent);
+
+        // Update button listener
         binding.playStopButton.setOnClickListener(this::stop_recording);
+
+        // Update UI
         updateUIStatus(Status.RUNNING);
     }
 
@@ -191,9 +193,7 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
         //      the nodes should contain one node or zero
         if (nodes.size() == 0){// No nodes connected to watch
             paired_node_id = null;
-            if (running){  // Stop sensing data
-                stop_recording(null);
-            }
+            binding.playStopButton.setOnClickListener(this::start_recording);
             updateUIStatus(Status.DISCONNECTED);
             return;
         }
@@ -202,16 +202,11 @@ public class MainActivity extends Activity implements CapabilityClient.OnCapabil
             Log.i(TAG, node.getDisplayName());
             if (node.isNearby()){ // There is a node connected to watch
                 paired_node_id = node.getId();
-
-                if(running){ // Auto-restart
-                    start_recording(null);
-                    updateUIStatus(Status.RUNNING);
-                }
-                else {
-                    updateUIStatus(Status.CONNECTED);
-                }
+                updateUIStatus(Status.CONNECTED);
             }
             else { // No nodes connected to watch
+                paired_node_id = null;
+                binding.playStopButton.setOnClickListener(this::start_recording);
                 updateUIStatus(Status.DISCONNECTED);
             }
         }

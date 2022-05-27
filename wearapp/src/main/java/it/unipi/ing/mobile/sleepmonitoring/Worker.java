@@ -14,11 +14,16 @@ import java.util.Scanner;
 import it.unipi.ing.mobile.processinglibrary.DataProcessor;
 
 public class Worker extends Thread {
-
+    public final String TAG = "Worker";
     final  Scanner inputScanner;
     private PrintWriter printWriter;
     private DataProcessor dataProcessor;
 
+    /**
+     *
+     * @param inStream stream with main thread to receive data from sensors
+     * @param outStream stream with mobile app to send final values
+     */
     public Worker(InputStream inStream, OutputStream outStream) {
         inputScanner = new Scanner(inStream);
         printWriter = new PrintWriter(outStream);
@@ -46,6 +51,9 @@ public class Worker extends Thread {
                 e.printStackTrace();
             }
         }
+        // Close piped stream with main thread (output stream is closed with the channel)
         inputScanner.close();
+
+        Log.i(TAG, "Stopped");
     }
 }
