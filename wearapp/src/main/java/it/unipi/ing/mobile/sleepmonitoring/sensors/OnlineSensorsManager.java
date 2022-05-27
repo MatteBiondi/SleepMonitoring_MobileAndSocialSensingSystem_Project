@@ -21,23 +21,28 @@ public class OnlineSensorsManager extends SensorsManager  {
 
     final private long batchWindowSize;
 
+    final protected OutputStream outStream;
     public OnlineSensorsManager(Context context,OutputStream outStream ){
         super(context);
-        writer = new PrintWriter(outStream);
+        this.outStream=outStream;
         batchWindowSize= 1_000;
     }
 
+    @Override
     public void registerListeners() throws Exception {
         acc_batch[0]=new DataBatch("acc",0);
         acc_batch[1]=new DataBatch("acc",0);
         rot_batch[0]=new DataBatch("rot",0);
         rot_batch[1]=new DataBatch("rot",0);
         super.registerListeners();
+        writer = new PrintWriter(outStream);
 
     }
 
+    @Override
     public void unregisterListeners(){
         super.unregisterListeners();
+        writer.close();
     }
 
     private final DataBatch [] acc_batch= new DataBatch[2];
@@ -52,10 +57,6 @@ public class OnlineSensorsManager extends SensorsManager  {
         if (rotation_vector.equals(event.sensor)) {
             rotationHandler(event.values, event.timestamp);
         }
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int i) {
     }
 
     /**
