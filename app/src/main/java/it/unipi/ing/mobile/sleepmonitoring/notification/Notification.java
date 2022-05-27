@@ -55,7 +55,7 @@ public class Notification {
                 .setAutoCancel(true)
                 .setDefaults(android.app.Notification.DEFAULT_ALL)
                 .setWhen(System.currentTimeMillis())
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setSmallIcon(R.mipmap.ic_launcher_foreground)
                 .setContentTitle(title)
                 .setContentText(text)
                 .setContentIntent(intent);
