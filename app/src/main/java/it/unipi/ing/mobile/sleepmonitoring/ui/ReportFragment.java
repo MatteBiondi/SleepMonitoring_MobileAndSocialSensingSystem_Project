@@ -95,8 +95,8 @@ public class ReportFragment extends Fragment {
                 return;
 
             // Clean UI from other elements
-            mainActivity.runOnUiThread(()->spinner.setVisibility(View.INVISIBLE));
-            mainActivity.runOnUiThread(()->plot.setVisibility(View.INVISIBLE));
+            mainActivity.runOnUiThread(()->spinner.setVisibility(View.GONE));
+            mainActivity.runOnUiThread(()->plot.setVisibility(View.GONE));
 
             // Get current date
             final Calendar cldr = Calendar.getInstance();
@@ -132,7 +132,7 @@ public class ReportFragment extends Fragment {
             datepicker.show();
             // Pass focus to the layout
             ConstraintLayout cl = (ConstraintLayout) date.getParent();
-            cl.requestFocusFromTouch();
+            cl.requestFocus();
             date.clearFocus();
         });
     }
@@ -146,16 +146,13 @@ public class ReportFragment extends Fragment {
                     public void run() {
                         super.run();
                         // Hide plot element
-                        mainActivity.runOnUiThread(()->plot.setVisibility(View.INVISIBLE));
+                        mainActivity.runOnUiThread(()->plot.setVisibility(View.GONE));
 
                         //Take the selected item from the spinner
                         SleepSession selectedSession = (SleepSession) parent.getItemAtPosition(pos);
 
                         // Request events data for the received date
-                        SleepEventDatabase db = SleepEventDatabase.buildExample(
-                                context,
-                                "SleepEventExample.db"
-                        );
+                        SleepEventDatabase db = SleepEventDatabase.build(context);
 
                         Report selectedReport = db.getReport(
                                 date.getText().toString(),
@@ -199,8 +196,14 @@ public class ReportFragment extends Fragment {
                 SleepEventDatabase db = SleepEventDatabase.build(context);
 
                 Report lastReport = db.getLastReport();
-                if(lastReport == null)
+                if(lastReport == null) {
+                    mainActivity.runOnUiThread(() -> Toast.makeText(
+                            getContext(),
+                            R.string.no_sessions_at_all,
+                            Toast.LENGTH_SHORT
+                    ).show());
                     return;
+                }
                 List<SleepEvent> sleepEventList = getEventsFromReport(lastReport);
                 if(sleepEventList == null)
                     return;

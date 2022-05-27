@@ -64,6 +64,7 @@
     <string name="roll_movements_label">roll</string>
     <string name="no_report_to_plot">There are no movements to plot</string>
     <string name="no_sessions_in_date">There are no sessions for this day</string>
+    <string name="no_sessions_at_all">There are no saved sessions</string>
     <string name="spinner_prompt">Select one session</string>
 
     <!-- Settings fragment -->
