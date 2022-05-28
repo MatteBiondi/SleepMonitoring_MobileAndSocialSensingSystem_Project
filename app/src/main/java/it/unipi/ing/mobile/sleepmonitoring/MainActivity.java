@@ -176,6 +176,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStop(){
         super.onStop();
+        SleepEventDatabase.close();
         Log.i(TAG,"onStop");
     }
 

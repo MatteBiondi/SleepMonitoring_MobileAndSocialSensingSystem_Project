@@ -1,12 +1,16 @@
 package it.unipi.ing.mobile.sleepmonitoring.database;
 
 import android.content.Context;
+import android.util.Log;
+
 import androidx.room.Room;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import it.unipi.ing.mobile.sleepmonitoring.R;
 
@@ -14,6 +18,11 @@ public class SleepEventDatabase {
     private static SleepEventDatabase instance = null;
     private final SleepEventDB database;
     private static String timestamp_format;
+    private static List<Thread> threads;
+
+    static {
+        threads = new ArrayList<>();
+    }
 
     public static String getCurrentTimestamp(){
         DateFormat df = new SimpleDateFormat(
@@ -23,9 +32,19 @@ public class SleepEventDatabase {
         return df.format(new Date());
     }
 
-    public static SleepEventDatabase build(Context context){
+    public static synchronized SleepEventDatabase build(Context context){
+        //keep = keep + 1;
+
+        if (!threads.contains(Thread.currentThread())){
+            Log.i("DATABASE",
+                    "Thread " + Thread.currentThread() + " is using database"
+            );
+            threads.add(Thread.currentThread());
+        }
+
         timestamp_format = context.getString(R.string.timestamp_format);
-        if (instance == null){
+        if (instance == null || !instance.database.isOpen()){
+            Log.i("DATABASE", "Database opened");
             instance = new SleepEventDatabase(context, null);
         }
         return instance;
@@ -39,7 +58,21 @@ public class SleepEventDatabase {
         return instance;
     }
 
+    public static synchronized void close(){
+        threads = threads.stream()
+                .filter(thread -> (thread.isAlive() && !Thread.currentThread().equals(thread)))
+                .collect(Collectors.toList());
+
+        Log.i("DATABASE", "Remaining still " + threads.size() + " threads using database");
+        if (threads.size() == 0 && instance != null && instance.database.isOpen()){
+            Log.i("DATABASE", "Database closed");
+            instance.database.close();
+            instance = null;
+        }
+    }
+
     private SleepEventDatabase(Context context, String asset){
+
         if (asset != null){
             database =  Room.databaseBuilder(context, SleepEventDB.class,
                            context.getString(R.string.db_name)

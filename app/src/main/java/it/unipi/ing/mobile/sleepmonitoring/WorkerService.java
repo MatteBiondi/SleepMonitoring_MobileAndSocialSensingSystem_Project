@@ -70,6 +70,7 @@ public class WorkerService extends Service {
             } finally {
                 // Stop session
                 sleepDB.stopSession();
+                SleepEventDatabase.close();
             }
         });
     }
