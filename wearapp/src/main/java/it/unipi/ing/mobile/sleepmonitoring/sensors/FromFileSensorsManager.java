@@ -10,6 +10,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.nio.file.Paths;
 import java.util.Scanner;
 
@@ -24,7 +25,13 @@ public class FromFileSensorsManager extends OnlineSensorsManager{
         super(context, outStream);
         String directory = context.getFilesDir().getPath();
         this.reader=new Scanner(
-                Paths.get(directory+DumperSensorsManager.FILE_NAME));
+                Paths.get("/data/data/it.unipi.ing.mobile.sleepmonitoring/files/5min_session.json"));
+
+    }
+    @Override
+    public void registerListeners() throws Exception {
+        super.registerListeners();
+        //this.writer=new PrintWriter("/data/data/it.unipi.ing.mobile.sleepmonitoring/files/window.json");
     }
 
     @Override
@@ -37,12 +44,13 @@ public class FromFileSensorsManager extends OnlineSensorsManager{
         }
         try {
             JSONObject data =new JSONObject(reader.nextLine());
-            if(data.getString("sensor").equals(accelerometer.getName()))
+            Log.v("FILE_READER", data.toString());
+            if(data.getString("sensor").equals("LSM6DS3 Accelerometer"))
                 accelerometerHandler(
                         JSONArrayToArray(
                                 data.getJSONArray("values")),
                         data.getLong("timestamp"));
-            if(data.getString("sensor").equals(rotation_vector.getName()))
+            if(data.getString("sensor").equals("Game Rotation Vector"))
                 rotationHandler(
                         JSONArrayToArray(
                                 data.getJSONArray("values")),
