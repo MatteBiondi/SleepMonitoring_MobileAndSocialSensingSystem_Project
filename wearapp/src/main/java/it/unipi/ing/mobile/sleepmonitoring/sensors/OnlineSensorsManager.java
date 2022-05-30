@@ -11,6 +11,7 @@ import org.json.JSONException;
 
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.Collections;
 
 /**
@@ -65,18 +66,19 @@ public class OnlineSensorsManager extends SensorsManager  {
      * @param timestamp timestamp of sensor reading
      */
     protected void rotationHandler(float[] values, long timestamp){
-        final float[] rotationMatrix = new float[9];
-        SensorManager.getRotationMatrixFromVector(rotationMatrix, values);
-        float[] orientationAngle = new float[3];
-        SensorManager.getOrientation(rotationMatrix, orientationAngle);
+        //final float[] rotationMatrix = new float[9];
+        //SensorManager.getRotationMatrixFromVector(rotationMatrix, values);
+        //float[] orientationAngle = new float[3];
+        //SensorManager.getOrientation(rotationMatrix, orientationAngle);
         Log.d("rotation_vector", "received values " +
                 new JSONArray(Collections.singletonList(values)));
-        Log.v("rotation_matrix", "received values " +
-                new JSONArray(Collections.singletonList(rotationMatrix)));
+        //Log.v("rotation_matrix", "received values " +
+                //new JSONArray(Collections.singletonList(rotationMatrix)));
         try {
-            JSONArray data = new JSONArray(orientationAngle);
+            JSONArray data = new JSONArray(Arrays.copyOfRange(values, 0, 3));
             long ms_time=timestamp/1000_000;
             for (int i=0;i<rot_batch.length;i++) {
+
                 if (rot_batch[i].getStartTime() == 0) {
                     Log.i("rot sender", "initialized");
                     rot_batch[0] = new DataBatch("rot", ms_time);
@@ -86,10 +88,10 @@ public class OnlineSensorsManager extends SensorsManager  {
                 }
                 //Log.i("rot sender",String.format("%d %d",rot_batch[0].getStartTime(), rot_batch[1].getStartTime()));
                 if(ms_time <rot_batch[i].getStartTime() )
-                    break;
+                    continue;
                 if (ms_time - rot_batch[i].getStartTime() >batchWindowSize ) {
                     writer.println(rot_batch[i].getJson());
-                    Log.i("rot sender",String.format("sent out %d samples",rot_batch[i].getData().length()));
+                    Log.v("rot sender",String.format("sent out %d samples",rot_batch[i].getData().length()));
                     rot_batch[i] = new DataBatch("rot", ms_time);
 
                 }
@@ -119,7 +121,7 @@ public class OnlineSensorsManager extends SensorsManager  {
                     break;
                 }
                 if(ms_time <acc_batch[i].getStartTime() )
-                    break;
+                    continue;
                 if (ms_time - acc_batch[i].getStartTime() > batchWindowSize) {
 
                     Log.i("acc sender",String.format("sent out %d samples",acc_batch[i].getData().length()));
