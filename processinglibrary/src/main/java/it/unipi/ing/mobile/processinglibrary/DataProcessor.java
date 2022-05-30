@@ -1,5 +1,7 @@
 package it.unipi.ing.mobile.processinglibrary;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 

@@ -5,7 +5,7 @@ import java.util.stream.IntStream;
 
 public class Util {
 
-    public static final boolean OFFLOADED = false;
+    public static final boolean OFFLOADED = true;
 
     public static Float getAverage(Float[] data){
         Float sum = new Float(0);

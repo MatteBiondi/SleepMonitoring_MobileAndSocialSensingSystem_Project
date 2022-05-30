@@ -1,5 +1,7 @@
 package it.unipi.ing.mobile.processinglibrary;
 
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -8,8 +10,8 @@ import java.util.ArrayList;
 
 public class RolloverProcessor {
 
-    private final Float DISTANCE_THRESHOLD = 1.0f;
-    private final Float STABILITY_THRESHOLD = 1.0f;
+    private final Float DISTANCE_THRESHOLD = 100.0f;
+    private final Float STABILITY_THRESHOLD = 4.0f;
     private final Float[] ANGLE_WRAP_VALUE = {180.0f, 180.0f, 180.0f};
 
     private boolean firstStablePostureReached;
@@ -51,9 +53,10 @@ public class RolloverProcessor {
             values = rotationData.getJSONArray("values");
 
             for (int i = 0; i < values.length(); i++) {
-                XData.add((float)values.getJSONArray(i).getDouble(0));
-                YData.add((float)values.getJSONArray(i).getDouble(1));
-                ZData.add((float)values.getJSONArray(i).getDouble(2));
+                // TODO: 27/05/2022 remove magic number 
+                XData.add(180*(float)values.getJSONArray(i).getDouble(0));
+                YData.add(180*(float)values.getJSONArray(i).getDouble(1));
+                ZData.add(180*(float)values.getJSONArray(i).getDouble(2));
             }
 
         } catch (JSONException e) {
@@ -91,6 +94,12 @@ public class RolloverProcessor {
                     ret = true;
                 }
             }
+        }
+        if(ret){
+        Log.d("RolloverProcessor", "rolloverOccurred is TRUE");
+        }
+        else{
+        Log.d("RolloverProcessor", "rolloverOccurred is FALSE");
         }
         return ret;
     }

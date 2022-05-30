@@ -1,5 +1,7 @@
 package it.unipi.ing.mobile.processinglibrary;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import org.json.JSONArray;
@@ -19,12 +21,13 @@ public class MovementProcessor {
     private float MOVEMENT_PEAK_THRESHOLD_LOW = 1.0f;
     private float MOVEMENT_PEAK_THRESHOLD_HIGH = 1.5f;
 
-    private long SHORT_MOVEMENT_LOW = 800;
+    private long SHORT_MOVEMENT_LOW = 200;
     private long SHORT_MOVEMENT_HIGH = 1200;
 
     private long LONG_MOVEMENT_LOW = 1500;
     private long LONG_MOVEMENT_HIGH = 2000;
 
+    private boolean currentlyInMovement;
     private float lastMovementPeak;
     private long lastMovementStartTime;
     private long lastMovementDuration;
@@ -50,9 +53,10 @@ public class MovementProcessor {
     }
 
     public MovementProcessor(){
-         lastMovementPeak = 0;
-         lastMovementStartTime = 0;
-         lastMovementDuration = 0;
+        currentlyInMovement = false;
+        lastMovementPeak = -1;
+        lastMovementStartTime = -1;
+        lastMovementDuration = -1;
     }
 
     /**
@@ -63,7 +67,11 @@ public class MovementProcessor {
      */
     private Movement getMovementFromDurationAndPeak(Long duration, Float peak){
 
+        Log.d("movementProcessor:getMovement", "Duration: " + duration.toString() + "; peak: " + peak.toString());
+
         Movement ret = Movement.NO_MOVEMENT;
+        if(duration == -1  && peak == -1)
+            return ret;
 
         if(peak > MOVEMENT_PEAK_THRESHOLD_HIGH && duration > SHORT_MOVEMENT_LOW
                 && duration < SHORT_MOVEMENT_HIGH) {
@@ -116,24 +124,29 @@ public class MovementProcessor {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+
+                // we only signal a movement once it has ended
                 if (derivative > NOISE_THRESHOLD) {
+
+                    if(!currentlyInMovement){
+                        currentlyInMovement = true;
+                        lastMovementStartTime = System.currentTimeMillis();
+                    }
+                    Log.d("Movement processor", "Threshold exceeded. Movement detected");
                     if(derivative > lastMovementPeak){
                         lastMovementPeak = derivative;
                     }
-                    if(lastMovementStartTime == 0){
-                        lastMovementStartTime = System.currentTimeMillis();
-                    }
-                    else{
-                        lastMovementDuration = System.currentTimeMillis() - lastMovementStartTime;
-                    }
+                    lastMovementDuration = System.currentTimeMillis() - lastMovementStartTime;
                     movement = Movement.NO_MOVEMENT;
                 }
                 // movement has ended and we can signal it
                 else{
+                    currentlyInMovement = false;
                     movement = getMovementFromDurationAndPeak(lastMovementDuration, lastMovementPeak);
                 }
             }
         }
+        Log.d("Movement processor", "Returning movement: " + movement.toString());
         return movement;
     }
 

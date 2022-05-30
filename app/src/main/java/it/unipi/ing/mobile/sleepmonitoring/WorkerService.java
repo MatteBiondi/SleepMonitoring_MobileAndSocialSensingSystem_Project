@@ -53,9 +53,12 @@ public class WorkerService extends Service {
                         if (Util.OFFLOADED) { // Computation on mobile
 
                             event = dataProcessor.getEventFromSensorData(data);
+                            Log.d("consumer", "Detected sleep event: " + event);
 
                         } else { // Computation on smartwatch
                             event = data.getString("event");
+                            Log.d("consumer", "Received sleep event: " + event);
+
                         }
 
                         if (event != null) {

@@ -47,9 +47,10 @@ public class DataCollectorService extends Service implements  CapabilityClient.O
         super.onCreate();
         try {
             // TODO change functionality
-            //this.sensor_manager = new OnlineSensorsManager(getApplicationContext(), MainActivity.getInstance().getStream());
+//            this.sensor_manager = new OnlineSensorsManager(getApplicationContext(), MainActivity.getInstance().getStream());
             this.sensor_manager = new FromFileSensorsManager(getApplicationContext(), MainActivity.getInstance().getStream());
-            //this.sensor_manager = new DumperSensorsManager(getApplicationContext());
+            Log.d("DataCollector:onCreate", "Reading sensor data from file");
+            //            this.sensor_manager = new DumperSensorsManager(getApplicationContext());
             sensor_manager.registerListeners();
 
             // Register capabilities listener

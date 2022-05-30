@@ -29,6 +29,7 @@ public class FromFileSensorsManager extends OnlineSensorsManager{
 
     @Override
     public void onSensorChanged(SensorEvent event) {
+        Log.d("FromFileSensorManager:onSensorChanged", "Reading");
         if(!reader.hasNextLine()){
             Log.w("FILE_READER", "sensors data file ended");
             this.unregisterListeners();
@@ -42,7 +43,7 @@ public class FromFileSensorsManager extends OnlineSensorsManager{
                                 data.getJSONArray("values")),
                         data.getLong("timestamp"));
             if(data.getString("sensor").equals(rotation_vector.getName()))
-                accelerometerHandler(
+                rotationHandler(
                         JSONArrayToArray(
                                 data.getJSONArray("values")),
                         data.getLong("timestamp"));
