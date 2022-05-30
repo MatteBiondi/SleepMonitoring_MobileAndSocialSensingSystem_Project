@@ -43,9 +43,11 @@ public abstract class SensorsManager implements SensorEventListener  {
     }
 
     public void registerListeners() throws Exception {
-        if(!sm.registerListener(this, rotation_vector, SensorManager.SENSOR_DELAY_NORMAL))
+//        if(!sm.registerListener(this, rotation_vector, SensorManager.SENSOR_DELAY_NORMAL))
+        if(!sm.registerListener(this, rotation_vector, SensorManager.SENSOR_DELAY_GAME))
             throw new Exception("Unable to register to rotation vector sensor");
-        if(!sm.registerListener(this, accelerometer,SensorManager.SENSOR_DELAY_NORMAL))
+//        if(!sm.registerListener(this, accelerometer,SensorManager.SENSOR_DELAY_NORMAL))
+        if(!sm.registerListener(this, accelerometer,SensorManager.SENSOR_DELAY_GAME))
             throw new Exception("Unable to register to accelerometer sensor");
     }
 

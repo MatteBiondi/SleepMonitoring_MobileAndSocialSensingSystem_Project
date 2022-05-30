@@ -18,8 +18,11 @@ public class MovementProcessor {
      * */
     private Float NOISE_THRESHOLD = 0.03f;
 
-    private float MOVEMENT_PEAK_THRESHOLD_LOW = 1.0f;
-    private float MOVEMENT_PEAK_THRESHOLD_HIGH = 1.5f;
+//    private float MOVEMENT_PEAK_THRESHOLD_LOW = 1.0f;
+//    private float MOVEMENT_PEAK_THRESHOLD_HIGH = 1.5f;
+
+    private float MOVEMENT_PEAK_THRESHOLD_LOW = 8f;
+    private float MOVEMENT_PEAK_THRESHOLD_HIGH = 12f;
 
     private long SHORT_MOVEMENT_LOW = 200;
     private long SHORT_MOVEMENT_HIGH = 1200;
