@@ -16,31 +16,31 @@ public class MovementProcessor {
      * Data taken from "SleepGuard: Capturing Rich Sleep Information Using Smartwatch
      * Sensing Data" (Chang et al.), section 2.3
      * */
-    private Float NOISE_THRESHOLD = 0.03f;
+    private final Float NOISE_THRESHOLD = .8f;
 
-//    private float MOVEMENT_PEAK_THRESHOLD_LOW = 1.0f;
-//    private float MOVEMENT_PEAK_THRESHOLD_HIGH = 1.5f;
+    //private float MOVEMENT_PEAK_THRESHOLD_LOW = 1f;
+    //private float MOVEMENT_PEAK_THRESHOLD_HIGH = 1.5f;
 
-    private float MOVEMENT_PEAK_THRESHOLD_LOW = 8f;
-    private float MOVEMENT_PEAK_THRESHOLD_HIGH = 12f;
+    private final float SHORT_MOVEMENT_LOW = .5f;
+    private final float SHORT_MOVEMENT_HIGH = 1.2f;
 
-    private long SHORT_MOVEMENT_LOW = 200;
-    private long SHORT_MOVEMENT_HIGH = 1200;
+    private float LONG_MOVEMENT_LOW = SHORT_MOVEMENT_HIGH;
+    private float LONG_MOVEMENT_HIGH = 2.2f;
 
-    private long LONG_MOVEMENT_LOW = 1500;
-    private long LONG_MOVEMENT_HIGH = 2000;
 
+    private long n_samples=0;
+
+    private long current_window=-1;
     private boolean currentlyInMovement;
     private float lastMovementPeak;
-    private long lastMovementStartTime;
-    private long lastMovementDuration;
+    private float lastMovementStartTime;
+    private float lastMovementDuration;
 
 
     enum Movement{
          NO_MOVEMENT("No_movement"),
-         BODY_TREMBLING("micro"),
-         HAND_MOVEMENT("micro"),
-         ARM_RISING("macro");
+         MICRO("micro"),
+         MACRO("macro");
 
          private final String movement;
 
@@ -51,7 +51,7 @@ public class MovementProcessor {
         @NonNull
         @Override
         public String toString(){
-            return this.movement.toUpperCase();
+            return this.movement.toLowerCase();
         }
     }
 
@@ -68,27 +68,22 @@ public class MovementProcessor {
      * @param peak Maximum peak as read from the accelerometer data
      * @return A Movement enum type among no_movement, body_trembling, hand_movement and arm_rising
      */
-    private Movement getMovementFromDurationAndPeak(Long duration, Float peak){
+    private Movement getMovementFromDurationAndPeak(Float duration, Float peak){
 
-        Log.d("movementProcessor:getMovement", "Duration: " + duration.toString() + "; peak: " + peak.toString());
+        Log.i("movementProcessor:getMovement", "msTime"+n_samples*20+" Duration: " + duration.toString() + "; peak: " + peak.toString());
 
         Movement ret = Movement.NO_MOVEMENT;
         if(duration == -1  && peak == -1)
             return ret;
 
-        if(peak > MOVEMENT_PEAK_THRESHOLD_HIGH && duration > SHORT_MOVEMENT_LOW
-                && duration < SHORT_MOVEMENT_HIGH) {
-            ret = Movement.BODY_TREMBLING;
+        if(duration > SHORT_MOVEMENT_LOW && duration < SHORT_MOVEMENT_HIGH) {
+            ret = Movement.MICRO;
         }
 
-        if(peak < MOVEMENT_PEAK_THRESHOLD_LOW){
-            if(duration > SHORT_MOVEMENT_LOW && duration < SHORT_MOVEMENT_HIGH) {
-                ret = Movement.HAND_MOVEMENT;
-            }
-            else if(duration > LONG_MOVEMENT_LOW && duration < LONG_MOVEMENT_HIGH){
-                ret = Movement.ARM_RISING;
-            }
-        }
+       if(duration > LONG_MOVEMENT_LOW && duration < LONG_MOVEMENT_HIGH) {
+                ret = Movement.MACRO;
+       }
+
         return ret;
     }
 
@@ -98,7 +93,7 @@ public class MovementProcessor {
      * @return
      */
     public Movement detectMovement(JSONObject accelerationData) {
-
+        current_window+=1;
         Movement movement = Movement.NO_MOVEMENT;
 
         JSONArray values = null;
@@ -109,7 +104,9 @@ public class MovementProcessor {
         }
 
         // iterate through the whole window to check for spikes
+        boolean window_has_peak=false;
         if (values != null) {
+            n_samples+=values.length()*(current_window%2);
             for (int i = 1; i < values.length(); i++) {
                 Float derivative = null;
                 try {
@@ -124,32 +121,33 @@ public class MovementProcessor {
                     previous_array[2] = (float)values.getJSONArray(i-1).getDouble(2);
 
                     derivative = Util.getRSS(current_array) - Util.getRSS(previous_array);
+                    derivative = Math.abs(derivative);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
-                // we only signal a movement once it has ended
-                if (derivative > NOISE_THRESHOLD) {
-
-                    if(!currentlyInMovement){
+                Log.d("Movement processor", "derivative "+derivative.toString());
+                if(currentlyInMovement){
+                    if (derivative > NOISE_THRESHOLD) {
+                        window_has_peak=true;
+                        if(derivative > lastMovementPeak)
+                            lastMovementPeak = derivative;
+                    }
+                }else if (derivative > NOISE_THRESHOLD) {
                         currentlyInMovement = true;
-                        lastMovementStartTime = System.currentTimeMillis();
+                        window_has_peak=true;
+                        lastMovementStartTime = (0.5f*current_window) + ((float)i / values.length());
+                        lastMovementPeak=derivative;
+                        Log.v("Movement processor", "Threshold exceeded. Movement detected");
                     }
-                    Log.d("Movement processor", "Threshold exceeded. Movement detected");
-                    if(derivative > lastMovementPeak){
-                        lastMovementPeak = derivative;
-                    }
-                    lastMovementDuration = System.currentTimeMillis() - lastMovementStartTime;
-                    movement = Movement.NO_MOVEMENT;
-                }
-                // movement has ended and we can signal it
-                else{
-                    currentlyInMovement = false;
-                    movement = getMovementFromDurationAndPeak(lastMovementDuration, lastMovementPeak);
-                }
             }
         }
-        Log.d("Movement processor", "Returning movement: " + movement.toString());
+        if(currentlyInMovement && !window_has_peak){
+            lastMovementDuration = (0.5f * current_window) - lastMovementStartTime;
+            currentlyInMovement = false;
+            movement = getMovementFromDurationAndPeak(lastMovementDuration, lastMovementPeak);
+        }else
+            movement = Movement.NO_MOVEMENT;
+        Log.i("Movement processor", "Returning movement: " + movement.toString());
         return movement;
     }
 

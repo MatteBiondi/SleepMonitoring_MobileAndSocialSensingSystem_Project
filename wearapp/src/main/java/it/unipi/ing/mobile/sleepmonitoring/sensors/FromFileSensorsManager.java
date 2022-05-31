@@ -8,11 +8,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.nio.file.Paths;
+
 import java.util.Scanner;
+
 
 /**
  * this implementation will use data coming from a json file instead of those coming sensors
@@ -23,10 +25,10 @@ public class FromFileSensorsManager extends OnlineSensorsManager{
 
     public FromFileSensorsManager(Context context,OutputStream outStream ) throws IOException {
         super(context, outStream);
-        String directory = context.getFilesDir().getPath();
-        this.reader=new Scanner(
-                Paths.get("/data/data/it.unipi.ing.mobile.sleepmonitoring/files/5min_session.json"));
 
+        this.reader=new Scanner(
+            new File(context.getFilesDir().getPath()+"/federico_2.json"));
+            //new File(context.getFilesDir().getPath()+"/5min_session.json"));
     }
     @Override
     public void registerListeners() throws Exception {
@@ -34,8 +36,10 @@ public class FromFileSensorsManager extends OnlineSensorsManager{
         //this.writer=new PrintWriter("/data/data/it.unipi.ing.mobile.sleepmonitoring/files/window.json");
     }
 
+
     @Override
     public void onSensorChanged(SensorEvent event) {
+
         Log.d("FromFileSensorManager:onSensorChanged", "Reading");
         if(!reader.hasNextLine()){
             Log.w("FILE_READER", "sensors data file ended");
