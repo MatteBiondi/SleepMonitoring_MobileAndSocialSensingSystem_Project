@@ -59,7 +59,7 @@ public class WorkerService extends Service {
 
                     try {
                         JSONObject data = new JSONObject(line);
-                        Log.i("consumer", "received values " + data);
+                        Log.d("consumer", "received values " + data);
 
                         if (Util.OFFLOADED) { // Computation on mobile
 
