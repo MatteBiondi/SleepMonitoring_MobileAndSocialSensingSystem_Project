@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -26,11 +27,12 @@ import it.unipi.ing.mobile.sleepmonitoring.sensors.OnlineSensorsManager;
 import it.unipi.ing.mobile.sleepmonitoring.sensors.SensorsManager;
 
 
-public class DataCollectorService extends Service implements  CapabilityClient.OnCapabilityChangedListener{
+public class DataCollectorService extends Service implements  CapabilityClient.OnCapabilityChangedListener {
     private static boolean running = false;
     private static String paired_node_id = null;
     private static Worker worker = null;
     private static StreamChannel stream_channel = null;
+    private static PowerManager.WakeLock wake_lock = null;
 
     public static boolean isRunning(){
         return running;
@@ -45,6 +47,16 @@ public class DataCollectorService extends Service implements  CapabilityClient.O
 
     public void onCreate(){
         super.onCreate();
+
+        // Require wake-lock
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        wake_lock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                "SleepMonitoring::DataCollection");
+        if (wake_lock != null){
+            wake_lock.acquire();
+            Log.i(TAG, "Wake lock acquired");
+        }
+
         try {
             // TODO change functionality
 //            this.sensor_manager = new OnlineSensorsManager(getApplicationContext(), MainActivity.getInstance().getStream());
@@ -69,6 +81,13 @@ public class DataCollectorService extends Service implements  CapabilityClient.O
 
     public void onDestroy(){
         super.onDestroy();
+
+        // Release wake-lock
+        if (wake_lock.isHeld()){
+            Log.i(TAG, "Wake lock released");
+            wake_lock.release();
+        }
+
         running = false;
         paired_node_id = null;
 

@@ -3,6 +3,7 @@ package it.unipi.ing.mobile.sleepmonitoring;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,6 +18,7 @@ import it.unipi.ing.mobile.processinglibrary.DataProcessor;
 import it.unipi.ing.mobile.processinglibrary.Util;
 
 public class WorkerService extends Service {
+    private static PowerManager.WakeLock wake_lock = null;
     public final String TAG = "WorkerService";
     public final int NOTIFICATION_ID = 2000;
     private Thread worker = null;
@@ -26,7 +28,16 @@ public class WorkerService extends Service {
         super.onCreate();
         Log.i(TAG, "onCreate");
 
-        // create new worker thread
+        // Require wake-lock
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        wake_lock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                "SleepMonitoring::DataCollection");
+        if (wake_lock != null){
+            wake_lock.acquire();
+            Log.i(TAG, "Wake lock acquired");
+        }
+
+        // Create new worker thread
         worker = new Thread(() -> {
             SleepEventDatabase sleepDB = SleepEventDatabase.build(getApplicationContext());
 
@@ -81,10 +92,15 @@ public class WorkerService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-
         Log.i(TAG, "onDestroy");
 
-        // stop worker thread
+        // Release wake-lock
+        if (wake_lock.isHeld()) {
+            Log.i(TAG, "Wake lock released");
+            wake_lock.release();
+        }
+
+        // Stop worker thread
         if (worker != null){
             worker.interrupt();
         }
