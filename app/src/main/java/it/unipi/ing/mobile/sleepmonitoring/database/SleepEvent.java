@@ -12,6 +12,9 @@ import androidx.room.PrimaryKey;
 @Entity(tableName = "sleep_event")
 public class SleepEvent {
 
+    @PrimaryKey(autoGenerate = true)
+    private Long id;
+
     @NonNull
     private String timestamp;
 
@@ -19,6 +22,7 @@ public class SleepEvent {
     private String event;
 
     public SleepEvent(@NonNull String timestamp, @NonNull String event){
+        this.id = -1L;
         this.event = event;
         this.timestamp = timestamp;
     }
@@ -39,6 +43,15 @@ public class SleepEvent {
 
     public void setEvent(@NonNull String event) {
         this.event = event;
+    }
+
+    @NonNull
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(@NonNull Long id) {
+        this.id = id;
     }
 
     @NonNull @Override
