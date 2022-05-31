@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 public class RolloverProcessor {
 
-    private final Float DISTANCE_THRESHOLD = 18.0f;
+    private final Float DISTANCE_THRESHOLD = 180*0.278f;
     private final Float STABILITY_THRESHOLD = 180*180*0.04f;
     private final Float[] ANGLE_WRAP_VALUE = {180.0f, 180.0f, 180.0f};
 
