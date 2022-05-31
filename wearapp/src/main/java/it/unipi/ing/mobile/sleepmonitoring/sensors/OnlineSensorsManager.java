@@ -26,7 +26,7 @@ public class OnlineSensorsManager extends SensorsManager  {
     public OnlineSensorsManager(Context context,OutputStream outStream ){
         super(context);
         this.outStream=outStream;
-        batchWindowSize= 1_000;
+        batchWindowSize= 2_000;
     }
 
     @Override

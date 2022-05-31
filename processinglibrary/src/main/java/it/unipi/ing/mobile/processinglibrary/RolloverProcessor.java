@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 public class RolloverProcessor {
 
-    private final Float DISTANCE_THRESHOLD = 180*0.278f;
+    private final Float DISTANCE_THRESHOLD = 18.0f;
     private final Float STABILITY_THRESHOLD = 180*180*0.04f;
     private final Float[] ANGLE_WRAP_VALUE = {180.0f, 180.0f, 180.0f};
 
@@ -27,11 +27,11 @@ public class RolloverProcessor {
 
     private boolean isPostureStable(Float[] XData, Float[] YData, Float[] ZData){
 
-        Float Xvar = Util.getVariance(XData);
-        Float Yvar = Util.getVariance(YData);
-        Float Zvar = Util.getVariance(ZData);
+        Float heightX = Util.getMax(XData) - Util.getMin(XData);
+        Float heightY = Util.getMax(YData) - Util.getMin(YData);
+        Float heightZ = Util.getMax(ZData) - Util.getMin(ZData);
 
-        if(Xvar > STABILITY_THRESHOLD || Yvar > STABILITY_THRESHOLD || Zvar > STABILITY_THRESHOLD)
+        if(heightX > STABILITY_THRESHOLD || heightY > STABILITY_THRESHOLD || heightZ > STABILITY_THRESHOLD)
             return false;
         else
             return true;
