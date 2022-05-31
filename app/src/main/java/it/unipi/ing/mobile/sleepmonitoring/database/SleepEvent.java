@@ -12,7 +12,7 @@ import androidx.room.PrimaryKey;
 @Entity(tableName = "sleep_event")
 public class SleepEvent {
 
-    @PrimaryKey @NonNull
+    @NonNull
     private String timestamp;
 
     @ColumnInfo(name = "event") @NonNull
