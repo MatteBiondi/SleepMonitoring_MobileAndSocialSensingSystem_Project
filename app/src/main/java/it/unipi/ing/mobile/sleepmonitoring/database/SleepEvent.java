@@ -22,7 +22,6 @@ public class SleepEvent {
     private String event;
 
     public SleepEvent(@NonNull String timestamp, @NonNull String event){
-        this.id = -1L;
         this.event = event;
         this.timestamp = timestamp;
     }
