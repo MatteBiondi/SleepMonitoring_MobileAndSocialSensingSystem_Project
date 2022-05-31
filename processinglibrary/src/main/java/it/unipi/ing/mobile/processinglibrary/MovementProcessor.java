@@ -16,13 +16,17 @@ public class MovementProcessor {
      * Data taken from "SleepGuard: Capturing Rich Sleep Information Using Smartwatch
      * Sensing Data" (Chang et al.), section 2.3
      * */
+
     private final Float NOISE_THRESHOLD = .8f;
+
 
     //private float MOVEMENT_PEAK_THRESHOLD_LOW = 1f;
     //private float MOVEMENT_PEAK_THRESHOLD_HIGH = 1.5f;
 
+
     private final float SHORT_MOVEMENT_LOW = .5f;
     private final float SHORT_MOVEMENT_HIGH = 1.2f;
+
 
     private float LONG_MOVEMENT_LOW = SHORT_MOVEMENT_HIGH;
     private float LONG_MOVEMENT_HIGH = 2.2f;
