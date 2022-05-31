@@ -7,6 +7,26 @@ public class Util {
 
     public static final boolean OFFLOADED = true;
 
+    public static Float getMin(Float[] data){
+        Float min = data[0];
+        for (int i = 0; i < data.length; i++) {
+            if(data[i] < min){
+                min = data[i];
+            }
+        }
+        return min;
+    }
+
+    public static Float getMax(Float[] data){
+        Float max = data[0];
+        for (int i = 0; i < data.length; i++) {
+            if(data[i] > max){
+                max = data[i];
+            }
+        }
+        return max;
+    }
+
     public static Float getAverage(Float[] data){
         Float sum = new Float(0);
         for (Float sample : data) {

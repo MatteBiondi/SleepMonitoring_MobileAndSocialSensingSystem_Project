@@ -16,12 +16,12 @@ public class MovementProcessor {
      * Data taken from "SleepGuard: Capturing Rich Sleep Information Using Smartwatch
      * Sensing Data" (Chang et al.), section 2.3
      * */
-    private Float NOISE_THRESHOLD = 0.03f;
+    private Float NOISE_THRESHOLD = 0.075f;
 
 //    private float MOVEMENT_PEAK_THRESHOLD_LOW = 1.0f;
 //    private float MOVEMENT_PEAK_THRESHOLD_HIGH = 1.5f;
 
-    private float MOVEMENT_PEAK_THRESHOLD_LOW = 8f;
+    private float MOVEMENT_PEAK_THRESHOLD_LOW = 7f;
     private float MOVEMENT_PEAK_THRESHOLD_HIGH = 12f;
 
     private long SHORT_MOVEMENT_LOW = 200;
@@ -98,6 +98,7 @@ public class MovementProcessor {
      * @return
      */
     public Movement detectMovement(JSONObject accelerationData) {
+        Log.d("RolloverProc:hasRolloverOccurred", "ACC_WINDOW: " + accelerationData.toString());
 
         Movement movement = Movement.NO_MOVEMENT;
 
@@ -145,10 +146,10 @@ public class MovementProcessor {
                 // movement has ended and we can signal it
                 else{
                     currentlyInMovement = false;
-                    movement = getMovementFromDurationAndPeak(lastMovementDuration, lastMovementPeak);
                 }
             }
         }
+        movement = getMovementFromDurationAndPeak(lastMovementDuration, lastMovementPeak);
         Log.d("Movement processor", "Returning movement: " + movement.toString());
         return movement;
     }
