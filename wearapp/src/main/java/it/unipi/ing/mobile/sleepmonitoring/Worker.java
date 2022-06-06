@@ -46,6 +46,7 @@ public class Worker extends Thread {
                     eventObject.put("event", event);
 
                     printWriter.println(eventObject);
+                    printWriter.flush();
                 }
             } catch (JSONException | NoSuchElementException e) {
                 e.printStackTrace();
