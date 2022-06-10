@@ -353,7 +353,7 @@ public class MainActivity extends AppCompatActivity {
                     userImageBitmap=BitmapFactory.decodeStream(in);
                     runOnUiThread(() -> {
                         if(userImageBitmap != null)
-                            userImage.setImageBitmap(Bitmap.createScaledBitmap(userImageBitmap, 200, 200, false));
+                            userImage.setImageBitmap(Bitmap.createScaledBitmap(userImageBitmap, 150, 150, false));
                     });
                 } catch (Exception e) {
                     Log.e("Error Message", e.getMessage());
