@@ -19,13 +19,11 @@ import java.util.List;
 
 public abstract class SensorsManager implements SensorEventListener  {
 
-
     final protected Sensor rotation_vector;
     final protected Sensor accelerometer;
     final protected SensorManager sm;
 
     protected PrintWriter writer;
-
 
     public SensorsManager(Context context){
         sm = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
@@ -42,15 +40,20 @@ public abstract class SensorsManager implements SensorEventListener  {
         accelerometer = sm.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
     }
 
+    /**
+     * register listener functions for sensor data handling
+     * @throws Exception if something goes wrong
+     */
     public void registerListeners() throws Exception {
-//        if(!sm.registerListener(this, rotation_vector, SensorManager.SENSOR_DELAY_NORMAL))
         if(!sm.registerListener(this, rotation_vector, SensorManager.SENSOR_DELAY_GAME))
             throw new Exception("Unable to register to rotation vector sensor");
-//        if(!sm.registerListener(this, accelerometer,SensorManager.SENSOR_DELAY_NORMAL))
         if(!sm.registerListener(this, accelerometer,SensorManager.SENSOR_DELAY_GAME))
             throw new Exception("Unable to register to accelerometer sensor");
     }
 
+    /**
+     * unregister listeners
+     */
     public void unregisterListeners(){
         sm.unregisterListener(this);
     }

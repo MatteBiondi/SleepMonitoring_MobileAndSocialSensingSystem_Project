@@ -16,8 +16,8 @@ import it.unipi.ing.mobile.processinglibrary.DataProcessor;
 public class Worker extends Thread {
     public final String TAG = "Worker";
     final  Scanner inputScanner;
-    private PrintWriter printWriter;
-    private DataProcessor dataProcessor;
+    private final PrintWriter printWriter;
+    private final DataProcessor dataProcessor;
 
     /**
      *
