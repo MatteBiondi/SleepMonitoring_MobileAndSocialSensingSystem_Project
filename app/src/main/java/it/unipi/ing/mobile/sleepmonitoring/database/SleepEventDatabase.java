@@ -90,11 +90,11 @@ public class SleepEventDatabase {
 
     // SLEEP EVENT
 
-    public List<SleepEvent> getEvents(){ // TODO: debug only, remove
+    public List<SleepEvent> getEvents(){ // debug only
         return database.sleep_event_dao().getEvents();
     }
 
-    public List<SleepEvent> getEventsByDate(String date){// TODO: remove
+    public List<SleepEvent> getEventsByDate(String date){// debug only
         return database.sleep_event_dao().getEventsByDate(date);
     }
 
@@ -108,7 +108,7 @@ public class SleepEventDatabase {
 
     // SLEEP SESSION
 
-    public List<SleepSession> getSessions(){ // TODO: debug only, remove
+    public List<SleepSession> getSessions(){ // debug only
         return database.sleep_event_dao().getSessions();
     }
 

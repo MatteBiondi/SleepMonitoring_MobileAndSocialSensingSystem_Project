@@ -1,9 +1,7 @@
 package it.unipi.ing.mobile.sleepmonitoring.sensors;
 
 import android.content.Context;
-import android.hardware.Sensor;
 import android.hardware.SensorEvent;
-import android.hardware.SensorManager;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -46,8 +44,6 @@ public class OnlineSensorsManager extends SensorsManager  {
         writer.close();
     }
 
-    private final DataBatch [] acc_batch= new DataBatch[2];
-    private final DataBatch [] rot_batch= new DataBatch[2];
 
     @Override
     public void onSensorChanged(SensorEvent event) {
@@ -60,20 +56,18 @@ public class OnlineSensorsManager extends SensorsManager  {
         }
     }
 
+    // data batches for overlapping windows
+    private final DataBatch [] acc_batch= new DataBatch[2];
+    private final DataBatch [] rot_batch= new DataBatch[2];
+
     /**
-     *
+     *  build overlapping windows batches for rotation sensor readings
      * @param values rotation vector values
      * @param timestamp timestamp of sensor reading
      */
     protected void rotationHandler(float[] values, long timestamp){
-        //final float[] rotationMatrix = new float[9];
-        //SensorManager.getRotationMatrixFromVector(rotationMatrix, values);
-        //float[] orientationAngle = new float[3];
-        //SensorManager.getOrientation(rotationMatrix, orientationAngle);
         Log.d("rotation_vector", "received values " +
                 new JSONArray(Collections.singletonList(values)));
-        //Log.v("rotation_matrix", "received values " +
-                //new JSONArray(Collections.singletonList(rotationMatrix)));
         try {
             JSONArray data = new JSONArray(Arrays.copyOfRange(values, 0, 3));
             long ms_time=timestamp/1000_000;
@@ -103,7 +97,7 @@ public class OnlineSensorsManager extends SensorsManager  {
     }
 
     /**
-     *
+     *  build overlapping windows batches for rotation sensor readings
      * @param values rotation vector values
      * @param timestamp timestamp of sensor reading
      */

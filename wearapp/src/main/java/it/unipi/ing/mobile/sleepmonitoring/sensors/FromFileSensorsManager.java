@@ -11,8 +11,6 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintWriter;
-
 import java.util.Scanner;
 
 
@@ -22,20 +20,20 @@ import java.util.Scanner;
 public class FromFileSensorsManager extends OnlineSensorsManager{
 
     protected final Scanner reader;
+    public static final String FILE_NAME="/federico_2.json";
 
     public FromFileSensorsManager(Context context,OutputStream outStream ) throws IOException {
         super(context, outStream);
-
+        String directory = context.getFilesDir().getPath();
         this.reader=new Scanner(
-            new File(context.getFilesDir().getPath()+"/federico_2.json"));
-            //new File(context.getFilesDir().getPath()+"/5min_session.json"));
+            new File(directory +FILE_NAME));
     }
+
     @Override
     public void registerListeners() throws Exception {
         super.registerListeners();
         //this.writer=new PrintWriter("/data/data/it.unipi.ing.mobile.sleepmonitoring/files/window.json");
     }
-
 
     @Override
     public void onSensorChanged(SensorEvent event) {
