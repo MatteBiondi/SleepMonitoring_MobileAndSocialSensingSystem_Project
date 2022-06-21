@@ -33,11 +33,6 @@ public class PostureProcessor {
 
     public PostureProcessor(){
 
-        /*
-        * Data taken from "SleepGuard: Capturing Rich Sleep Information Using Smartwatch
-        * Sensing Data" (Chang et al.), fig. 4
-        * */
-        // TODO: 14/05/2022 change values from paper with measurements taken from smartwatch
         Float[] supinePostureTilt = {84.0f, 112.0f, 21.0f};
         Float[] leftPostureTilt = {82.0f, 60.0f, 148.0f};
         Float[] rightPostureTilt = {136.0f, 114.0f, 48.0f};
@@ -53,8 +48,6 @@ public class PostureProcessor {
         shiftedPostureTilts.put(Posture.RIGHT, Util.vectorSum(rightPostureTilt, ANGLE_SHIFT));
         shiftedPostureTilts.put(Posture.PRONE, Util.vectorSum(pronePostureTilt, ANGLE_SHIFT));
 
-
-        // TODO: 15/05/2022 same as above
         Float[] supinePostureOrientation = {90.0f, 90.0f, 90.0f};
         Float[] pronePostureOrientation = {0.0f, 0.0f, 0.0f};
 
@@ -102,7 +95,6 @@ public class PostureProcessor {
         // otherwise we use data from the orientation sensor to discern between prone and supine
         posture = getPostureFromOrientationData(orientationData);
 
-        // TODO: 15/05/2022 check for better way of returning Posture enum
         return posture;
     }
 }
