@@ -53,7 +53,7 @@ public class RolloverProcessor {
             values = rotationData.getJSONArray("values");
 
             for (int i = 0; i < values.length(); i++) {
-                // TODO: 27/05/2022 remove magic number 
+                // multiply by 180 to scale angles from [-1, 1] to [-180, 180]
                 XData.add(180*(float)values.getJSONArray(i).getDouble(0));
                 YData.add(180*(float)values.getJSONArray(i).getDouble(1));
                 ZData.add(180*(float)values.getJSONArray(i).getDouble(2));
